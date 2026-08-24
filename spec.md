@@ -64,7 +64,7 @@ run = {
 ## 6. Gold, path & merchant
 
 - Gold sources: +1/pipe, +2 on near-miss, +10 stage clear, +15 boss kill, chests.
-- **Map** (StS-style, fixed campaign): 16-row map generated at run start (`genMap()`), DOM + SVG. Rows of 1–3 nodes connected by edges; every node reachable. Node types: **STAGE** (60%), **CHEST** (20%), **MERCHANT** (20%); rows 3/7/11 = guaranteed **BOSS gates** (single node); last row = single **FINAL BOSS**.
+- **Map** (StS-style, fixed campaign): 16-row map generated at run start (`genMap()`), DOM + SVG. Rows of 1–3 nodes; every node in the next row is selectable (player always has 1, 2, or 3 options). Node types: **STAGE** (58%), **CHEST** (20%), **MERCHANT** (12%), **ELITE** (12%, only in rows of width ≥ 2); rows 3/7/11 = guaranteed **BOSS gates** (single node); last row = single **FINAL BOSS**.
 - Flow: map → pick node → stop (stage/boss/chest/merchant) → upgrade draft → map. Stage counter advances per stop.
 - Beat the final boss → **VICTORY** screen (saves `save.rl.victories`), PLAY AGAIN restarts.
 - Merchant: "Heal 1 HP — 15g", "Lucky Coin: pay 20g, gain 35g", "Reroll upgrades — 10g", "Leave".
@@ -78,8 +78,10 @@ run = {
   - GAPLORD II (7, 2 phases): `sine` → `chase` — gap tracks your height (purple)
   - GAPLORD III (8, 2 phases): `sine` → `pulse` — gap breathes open/closed (orange)
   - FINAL BOSS (12, 3 phases): `sine` → `chase` → `pulse` (black/gold) — pipes are **spear pipes** (spikes, 2x damage)
+  - ELITE (5 passes, 1 phase, optional map node): `sine` (green) — mini-boss, appears as an **ELITE** node (⚔️) on rows of width ≥ 2
   - Phase change: flash + shake + scream + "PHASE X/Y" popup. Magnet upgrade does NOT affect boss pipes.
 - Survive → boss dead: `+15 gold` + the boss's **signature relic** (GAPLORD→golden, II→heart, III→coin, FINAL→prism; +10 gold if already owned), banner, → draft → map. Final boss → victory screen.
+- Elite (optional node): `+20 gold` + a **random unowned relic** (+15 gold if all owned).
 - Relic pool (id, name, desc):
   - `golden` — Golden Feather: fever lasts 15s
   - `heart` — Heart Pipe: start each stage with +1 HP (max maxHp)
