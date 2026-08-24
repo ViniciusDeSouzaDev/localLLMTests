@@ -389,7 +389,7 @@ const CARDS = [
   { id:'midas',   name:'Midas',      desc:'+1 point per pipe' },
   { id:'shield',  name:'Shield',     desc:'+1 shield charge' },
   { id:'vampire', name:'Vampire',    desc:'Near-miss heals 1 HP (once per stage)' },
-  { id:'magnet',  name:'Magnet',     desc:'Pipes drift toward your height' },
+  { id:'magnet',  name:'Magnet',     desc:'Pipes drift toward your height (stacks)' },
   { id:'greed',   name:'Greed',      desc:'+2 gold per pipe' },
   { id:'chip',    name:'Fever Chip', desc:'Fever threshold -10' },
   { id:'tough',   name:'Tough',      desc:'+1 max HP and heal 1' },
@@ -639,7 +639,10 @@ function startStage(){
   run.pipesInStage = 0;
   run.vampUsed = false;
   if(hasRelic('heart')) run.hp = Math.min(mods().maxHp, run.hp + 1);
-  if(run.boss) popups.push({ x:BIRD_X, y:bird.y-60, txt:run.boss.final ? 'FINAL BATTLE' : run.boss.def.name + ' APPROACHES', life:2, max:2 });
+  if(run.boss){
+    shake = 18; flash = 0.6; AudioFX.scream();
+    popups.push({ x:BIRD_X, y:bird.y-60, txt:run.boss.final ? 'FINAL BATTLE' : run.boss.def.name + ' APPROACHES', life:2, max:2 });
+  }
   state = 'ready';
   refreshRlHud();
 }
@@ -648,7 +651,7 @@ function startStage(){
 const AudioFX = {
   ctx:null, muted:false,
   init(){
-    if(this.ctx) return;
+    if(this.ctx){ if(this.ctx.state === 'suspended') this.ctx.resume(); return; }
     const AC = window.AudioContext || window.webkitAudioContext;
     if(!AC) return;
     this.ctx = new AC();
@@ -688,6 +691,11 @@ const AudioFX = {
   score(){ this.tone({f:784, d:0.08, type:'sine', v:0.45}); this.tone({f:1174.7, d:0.16, type:'sine', v:0.4, at:0.07}); },
   hit(){ this.tone({f:150, d:0.22, type:'square', v:0.5, slide:-90}); this.noise({d:0.18, v:0.5, f:500, q:0.7}); },
   die(){ this.tone({f:500, d:0.6, type:'sawtooth', v:0.3, slide:-380, at:0.15}); },
+  scream(){
+    this.tone({f:1100, d:0.9, type:'sawtooth', v:0.5, slide:-750});
+    this.tone({f:1150, d:0.9, type:'sawtooth', v:0.35, slide:-800, at:0.02});
+    this.noise({d:0.8, v:0.3, f:1800, q:0.5});
+  },
   unlock(){ [523.25,659.25,783.99,1046.5].forEach((f,i)=>this.tone({f, d:0.22, type:'triangle', v:0.35, at:i*0.09})); },
   click(){ this.tone({f:700, d:0.05, type:'square', v:0.12}); },
   /* --- music sequencer --- */
@@ -909,7 +917,7 @@ function pipeSpeed(){
   return base + (mode==='rl' && run ? 12*(run.stage-1) : 0);
 }
 function pipeGap(){
-  if(mode==='rl' && run) return Math.max(90, 165 - (run.stage-1)*9 - score*0.5);
+  if(mode==='rl' && run) return Math.max(105, 170 - (run.stage-1)*7 - score*0.3);
   return Math.max(115, 160 - score*1.5);
 }
 
@@ -994,9 +1002,11 @@ function update(dt){
       const ph2 = ph[idx];
       p.gapY = p.baseY + Math.sin(t*ph2.spd)*ph2.amp;
     }
-    if(hasUpgrade('magnet')) for(const p of pipes){
-      if(p.move) p.base += (bird.y - p.base)*0.5*dt;
-      else p.gapY += (bird.y - p.gapY)*0.5*dt;
+    const mag = mode==='rl' && run ? run.upgrades.filter(u=>u==='magnet').length : 0;
+    if(mag) for(const p of pipes){
+      const rate = Math.min(0.5*mag, 1.5);
+      if(p.move) p.base += (bird.y - p.base)*rate*dt;
+      else p.gapY += (bird.y - p.gapY)*rate*dt;
     }
     while(pipes.length && pipes[0].x < -90) pipes.shift();
 
@@ -1627,6 +1637,7 @@ function primaryAction(){
   else if(state === 'ready' || state === 'play') flap();
   else if(state === 'dead' && overShown) startGame();
 }
+document.addEventListener('pointerdown', () => AudioFX.init(), true);
 canvas.addEventListener('pointerdown', e => { e.preventDefault(); primaryAction(); });
 addEventListener('keydown', e => {
   if(e.code === 'Space' || e.code === 'ArrowUp'){ e.preventDefault(); primaryAction(); }

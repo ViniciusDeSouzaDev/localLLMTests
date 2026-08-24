@@ -40,7 +40,7 @@ run = {
 ## 4. Stages
 
 - Stage = 15 pipes passed (`pipesInStage`), then stage clear.
-- Difficulty: pipe gap shrinks per stage: `gap = max(90, 165 - (stage-1)*9 - score*0.5)`; speed uses existing `pipeSpeed()` plus `+12 * (stage-1)`.
+- Difficulty: pipe gap shrinks per stage: `gap = max(105, 170 - (stage-1)*7 - score*0.3)`; speed uses existing `pipeSpeed()` plus `+12 * (stage-1)`.
 - Stage clear: `+10 gold`, brief "STAGE N CLEAR" banner (1.2s), then → `draft`.
 - Every 3rd stage (3, 6, 9...) is a **BOSS stage** (see §7) — no draft after it; instead a relic reward.
 
@@ -53,7 +53,7 @@ run = {
   - `midas` — Midas: +1 point per pipe
   - `shield` — Shield: +1 shield charge (max 3)
   - `vampire` — Vampire: a near-miss heals 1 HP (once per stage)
-  - `magnet` — Magnet: pipes drift toward the bird's y while approaching
+  - `magnet` — Magnet: pipes drift toward the bird's y while approaching (stacks: +0.5 drift rate per copy, max 1.5)
   - `greed` — Greed: +2 gold per pipe
   - `chip` — Fever Chip: fever threshold -10 (min 10)
   - `tough` — Tough: +1 max HP and heal 1
