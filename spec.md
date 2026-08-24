@@ -52,7 +52,7 @@ run = {
   - `feather` — Feather: gravity -10% (stacks multiplicatively, min 0.5x)
   - `midas` — Midas: +1 point per pipe
   - `shield` — Shield: +1 shield charge (max 3)
-  - `vampire` — Vampire: a near-miss heals 1 HP (once per stage)
+  - `vampire` — Vampire: a near-miss heals 1 HP (once per stage, stacks)
   - `magnet` — Magnet: pipes drift toward the bird's y while approaching (stacks: +0.5 drift rate per copy, max 1.5)
   - `greed` — Greed: +2 gold per pipe
   - `chip` — Fever Chip: fever threshold -10 (min 10)
@@ -76,7 +76,7 @@ run = {
   - GAPLORD (6 passes, 1 phase): `sine` — baseline oscillation (red)
   - GAPLORD II (7, 2 phases): `sine` → `chase` — gap tracks your height (purple)
   - GAPLORD III (8, 2 phases): `sine` → `pulse` — gap breathes open/closed (orange)
-  - FINAL BOSS (12, 3 phases): `sine` → `chase` → `pulse` (black/gold)
+  - FINAL BOSS (12, 3 phases): `sine` → `chase` → `pulse` (black/gold) — pipes are **spear pipes** (spikes, 2x damage)
   - Phase change: flash + shake + scream + "PHASE X/Y" popup. Magnet upgrade does NOT affect boss pipes.
 - Survive → boss dead: `+15 gold` + the boss's **signature relic** (GAPLORD→golden, II→heart, III→coin, FINAL→prism; +10 gold if already owned), banner, → draft → map. Final boss → victory screen.
 - Relic pool (id, name, desc):

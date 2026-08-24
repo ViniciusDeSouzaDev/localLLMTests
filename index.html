@@ -410,7 +410,7 @@ const CARDS = [
   { id:'feather', icon:'🪶', name:'Feather',    desc:'Gravity -10%' },
   { id:'midas',   icon:'✨', name:'Midas',      desc:'+1 point per pipe' },
   { id:'shield',  icon:'🛡️', name:'Shield',     desc:'+1 shield charge' },
-  { id:'vampire', icon:'🧛', name:'Vampire',    desc:'Near-miss heals 1 HP (once per stage)' },
+  { id:'vampire', icon:'🧛', name:'Vampire',    desc:'Near-miss heals 1 HP (once per stage, stacks)' },
   { id:'magnet',  icon:'🧲', name:'Magnet',     desc:'Pipes drift toward your height (stacks)' },
   { id:'greed',   icon:'🪙', name:'Greed',      desc:'+2 gold per pipe' },
   { id:'chip',    icon:'🔥', name:'Fever Chip', desc:'Fever threshold -10' },
@@ -426,7 +426,7 @@ const RELICS = [
 ];
 
 function resetRun(){
-  run = { hp:3, maxHp:3, gold:0, stage:0, pipesInStage:0, totalPipes:0, upgrades:[], relics:[], vampUsed:false, boss:null };
+  run = { hp:3, maxHp:3, gold:0, stage:0, pipesInStage:0, totalPipes:0, upgrades:[], relics:[], vampUsed:0, boss:null };
   stageClearT = 0;
   pendingDraft = null;
 chestReward = null;
@@ -669,6 +669,7 @@ function clickNode(r, i){
 
 function showVictory(){
   state = 'victory';
+  AudioFX.startMusic('victory');
   save.rl.victories = (save.rl.victories || 0) + 1;
   persist();
   $('#victoryStats').textContent = 'Stage ' + run.stage + ' — ' + run.totalPipes + ' pipes — 🪙' + run.gold + '  •  Victory #' + save.rl.victories;
@@ -696,7 +697,7 @@ function startStage(){
   setTheme(randomTheme());
   popups.push({ x:BIRD_X, y:bird.y-80, txt:theme.toUpperCase()+'!', life:1.5, max:1.5 });
   run.pipesInStage = 0;
-  run.vampUsed = false;
+  run.vampUsed = 0;
   if(hasRelic('heart')) run.hp = Math.min(mods().maxHp, run.hp + 1);
   if(run.boss){
     shake = 18; flash = 0.6; AudioFX.scream();
@@ -806,8 +807,11 @@ const AudioFX = {
         mel:[69,72,74,72, 76,74,72,74, 71,74,72,71, 69,71,72,0],
         bas:[48,0,55,0, 50,0,57,0, 43,0,50,0, 45,0,52,0] },
      gameover:{ bpm:72, melType:'sine', melV:0.4, hat:16, melD:0.5,
-        mel:[69,0,0,67, 0,0,64,0, 62,0,0,60, 0,0,57,0],
-        bas:[45,0,0,0, 41,0,0,0, 43,0,0,0, 41,0,0,0] },
+         mel:[69,0,0,67, 0,0,64,0, 62,0,0,60, 0,0,57,0],
+         bas:[45,0,0,0, 41,0,0,0, 43,0,0,0, 41,0,0,0] },
+      victory:{ bpm:150, melType:'square', melV:0.3, hat:2,
+         mel:[76,0,79,0, 81,0,83,0, 84,0,83,81, 79,81,83,84],
+         bas:[48,0,48,0, 50,0,50,0, 52,0,52,0, 55,0,55,0] },
    },
   POOL:['day','night','chill','hype','mystery','sunset','forest','city','storm','dream','ocean','candy','space','jungle','meadow'],
   randomTrack(){ return this.POOL[Math.floor(Math.random()*this.POOL.length)]; },
@@ -1133,7 +1137,7 @@ function update(dt){
     if(mode==='rl' && run.boss){
       if(!pipes.some(p => p.boss)){
         const bg = pipeGap();
-        pipes.push({ x:W+40, gapY:345, baseY:345, gap:bg, baseGap:bg, passed:false, boss:true });
+        pipes.push({ x:W+40, gapY:345, baseY:345, gap:bg, baseGap:bg, passed:false, boss:true, spear:run.boss.final });
       }
     } else if(stageClearT <= 0 && (!last || last.x < W - 240)){
       if(mode==='rl' && run.stage >= 2 && Math.random() < Math.min(0.12 + run.stage*0.04, 0.35)){
@@ -1236,8 +1240,9 @@ function update(dt){
         if(mode==='rl'){
           run.pipesInStage++; run.totalPipes++;
           run.gold += 1 + (hasUpgrade('greed') ? 2 : 0) + (near ? 2 : 0) + (hasRelic('coin') ? 1 : 0);
-          if(near && hasUpgrade('vampire') && !run.vampUsed && run.hp < mods().maxHp){
-            run.vampUsed = true; run.hp++;
+          const vampMax = run.upgrades.filter(x => x === 'vampire').length;
+          if(near && run.vampUsed < vampMax && run.hp < mods().maxHp){
+            run.vampUsed++; run.hp++;
             popups.push({ x:p.x+35, y:p.gapY-26, txt:'+1 HP', life:0.7, max:0.7 });
           }
           refreshRlHud();
