@@ -34,6 +34,38 @@
     font-size:12px; font-weight:800; letter-spacing:1px; color:#ff7b3b;
     text-shadow:0 2px 0 rgba(0,0,0,.4); margin-top:2px; min-height:14px;
   }
+  #rlHud {
+    display:flex; gap:12px; margin-top:4px;
+    font-size:15px; font-weight:900; letter-spacing:2px;
+    color:#ff5d5d; text-shadow:0 2px 0 rgba(0,0,0,.4);
+  }
+  #rlStage { color:#fff; }
+  #rlGold { color:#ffd93b; }
+  #merchantOffers { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
+  #map { overflow-y:auto; justify-content:flex-start; }
+  #map .card { width:100%; max-width:440px; padding:14px 18px; gap:10px; }
+  #mapBox { position:relative; width:100%; height:440px; }
+  #mapBox svg { position:absolute; left:0; top:0; width:100%; height:100%; }
+  .mapNode {
+    position:absolute; width:40px; height:40px; border-radius:50%;
+    font-size:18px; line-height:1; padding:0;
+    background:rgba(0,0,0,.4); border:2px solid rgba(255,255,255,.22);
+    opacity:.5; cursor:default; transition:transform .12s, opacity .12s;
+  }
+  .mapNode.avail { opacity:1; border-color:#ffd93b; cursor:pointer; box-shadow:0 0 14px rgba(255,217,59,.5); }
+  .mapNode.avail:hover { transform:scale(1.18); }
+  .mapNode.visited { opacity:.4; border-color:#7fff7f; }
+  .mapStart {
+    position:absolute; width:40px; height:40px; border-radius:50%;
+    font-size:18px; line-height:1; background:rgba(0,0,0,.4);
+    border:2px solid #4fc3f7; box-shadow:0 0 14px rgba(79,195,247,.5);
+  }
+  #merchantDraft { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+  #merchant { overflow-y:auto; justify-content:flex-start; }
+  #merchant .card { width:100%; max-width:440px; padding:14px 18px; gap:10px; }
+  #merchant .draftCard { pointer-events:none; width:120px; padding:10px 8px; }
+  #merchantOffers .draftCard { pointer-events:auto; }
+  #merchantOffers .draftCard:disabled { opacity:.4; cursor:default; transform:none; }
   #hudBtns { display:flex; gap:8px; pointer-events:auto; }
   .iconBtn {
     width:42px; height:42px; border:none; border-radius:12px; cursor:pointer;
@@ -78,6 +110,16 @@
   .btn.ghost {
     background:rgba(255,255,255,.12); box-shadow:0 4px 0 rgba(0,0,0,.35);
     border:1px solid rgba(255,255,255,.25); font-size:14px; padding:11px 26px;
+  }
+  .modeRow { display:flex; gap:10px; }
+  .modeBtn {
+    padding:10px 22px; font-size:14px;
+    background:rgba(255,255,255,.12); box-shadow:0 4px 0 rgba(0,0,0,.35);
+    border:1px solid rgba(255,255,255,.25); color:rgba(255,255,255,.6);
+  }
+  .modeBtn.active {
+    background:linear-gradient(180deg,#ffd93b,#f2a51e);
+    box-shadow:0 4px 0 #a86e00; border:none; color:#fff;
   }
   .stat { color:#cfd8ff; font-size:15px; font-weight:600; letter-spacing:1px; }
   .stat b { color:#fff; }
@@ -139,6 +181,25 @@
   #tooltip .ttName { color:#ffd93b; font-size:10px; letter-spacing:1px; }
   #shopTop { display:flex; gap:18px; align-items:center; }
 
+  /* ---------- Roguelike: draft / stats ---------- */
+  #rlStats { color:#ffd93b; font-weight:900; letter-spacing:2px; font-size:15px; }
+  #draft .card { width:100%; max-width:560px; }
+  #draftCards { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
+  .draftCard {
+    width:150px; padding:16px 12px; cursor:pointer;
+    display:flex; flex-direction:column; gap:8px; align-items:center;
+    background:rgba(255,255,255,.07); border:2px solid rgba(255,255,255,.15);
+    border-radius:14px; font-family:inherit;
+    transition:transform .12s, border-color .2s, background .2s;
+  }
+  .draftCard:hover { transform:translateY(-3px); border-color:#ffd93b; background:rgba(255,217,59,.12); }
+  .dcName { font-size:14px; font-weight:900; letter-spacing:1px; color:#ffd93b; }
+  .dcDesc { font-size:11px; font-weight:600; color:#cfd8ff; letter-spacing:.5px; }
+  @media (max-width:520px){
+    #draftCards { flex-direction:column; align-items:center; }
+    .draftCard { width:100%; max-width:260px; }
+  }
+
   /* ---------- Toast / pause ---------- */
   #toast {
     position:absolute; top:70px; left:50%; transform:translateX(-50%);
@@ -169,7 +230,7 @@
   <canvas id="game"></canvas>
 
   <div id="hud" class="hidden">
-    <div><div id="score">0</div><div id="powerTag"></div><div id="comboTag"></div></div>
+    <div><div id="score">0</div><div id="powerTag"></div><div id="comboTag"></div><div id="rlHud" class="hidden"><span id="rlHearts"></span><span id="rlGold"></span><span id="rlStage"></span></div></div>
     <div id="hudBtns">
       <button class="iconBtn" id="muteBtn" title="Sound (M)">SND</button>
       <button class="iconBtn" id="pauseBtn" title="Pause (P)">II</button>
@@ -182,6 +243,10 @@
       <canvas id="menuBird" width="140" height="140"></canvas>
       <p class="stat">BEST <b id="menuBest">0</b> &nbsp;•&nbsp; TOTAL <b id="menuTotal">0</b></p>
       <p class="hint" id="menuPower"></p>
+      <div class="modeRow">
+        <button class="btn modeBtn" id="modeClassic">CLASSIC</button>
+        <button class="btn modeBtn" id="modeRl">ROGUELIKE</button>
+      </div>
       <button class="btn" id="playBtn">PLAY</button>
       <button class="btn ghost" id="skinsBtn">SKINS</button>
       <p class="hint">SPACE / CLICK to flap &nbsp;•&nbsp; P pause &nbsp;•&nbsp; M sound</p>
@@ -197,6 +262,7 @@
         <div><span>BEST</span><b id="bestScore">0</b></div>
       </div>
       <div id="newRecord" class="hidden">NEW RECORD!</div>
+      <p id="rlStats" class="hidden"></p>
       <button class="btn" id="retryBtn">PLAY AGAIN</button>
       <button class="btn ghost" id="skinsBtnOver">SKINS</button>
     </div>
@@ -205,11 +271,58 @@
   <div id="shop" class="panel hidden">
     <div class="card" style="max-width:520px">
       <div id="shopTop">
-        <h2>SKINS</h2>
+        <h2 id="shopTitle">SKINS</h2>
         <p class="stat">TOTAL <b id="shopTotal">0</b> PTS</p>
       </div>
       <div id="skinGrid"></div>
       <button class="btn ghost" id="shopClose">CLOSE</button>
+    </div>
+  </div>
+
+  <div id="draft" class="panel hidden">
+    <div class="card">
+      <h2>UPGRADE</h2>
+      <p class="hint">Pick an upgrade</p>
+      <div id="draftCards"></div>
+    </div>
+  </div>
+
+  <div id="map" class="panel hidden">
+    <div class="card">
+      <h2>THE PATH</h2>
+      <p class="hint">Tap a glowing node</p>
+      <div id="mapBox"></div>
+    </div>
+  </div>
+
+  <div id="victory" class="panel hidden">
+    <div class="card">
+      <h2>VICTORY!</h2>
+      <p class="hint" id="victoryStats"></p>
+      <button class="btn" id="victoryBtn">PLAY AGAIN</button>
+    </div>
+  </div>
+
+  <div id="chest" class="panel hidden">
+    <div class="card">
+      <h2>CHEST</h2>
+      <p id="chestReward" class="hint">???</p>
+      <button class="btn" id="chestOpen">OPEN</button>
+    </div>
+  </div>
+
+  <div id="merchant" class="panel hidden">
+    <div class="card">
+      <h2>MERCHANT</h2>
+      <p id="merchantGold" class="hint"></p>
+      <div id="merchantOffers">
+        <button class="draftCard" id="merchHeal"><span class="dcName">Heal 1 HP</span><span class="dcDesc">15g</span></button>
+        <button class="draftCard" id="merchCoin"><span class="dcName">Lucky Coin</span><span class="dcDesc">Pay 20g, gain 35g</span></button>
+        <button class="draftCard" id="merchReroll"><span class="dcName">Reroll Draft</span><span class="dcDesc">10g</span></button>
+      </div>
+      <p class="hint">Next draft — pick one after leaving</p>
+      <div id="merchantDraft"></div>
+      <button class="btn" id="merchLeave">LEAVE</button>
     </div>
   </div>
 
@@ -229,10 +342,11 @@ const TAU = Math.PI*2;
 
 /* ================= save ================= */
 const SAVE_KEY = 'flappyDeluxeSave';
-const defaultSave = { best:0, total:0, unlocked:['classic'], selected:'classic', muted:false };
+const defaultSave = { best:0, total:0, unlocked:['classic'], selected:'classic', muted:false, mode:'classic', rl:{ bestStage:0, bestPipes:0 } };
 let save;
 try { save = Object.assign(defaultSave, JSON.parse(localStorage.getItem(SAVE_KEY)||'{}')); }
 catch(e){ save = Object.assign({}, defaultSave); }
+if(!save.rl) save.rl = { bestStage:0, bestPipes:0 };
 function persist(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(save)); }catch(e){} }
 
 /* ================= skins ================= */
@@ -258,6 +372,276 @@ function powers(){
     speed:  p==='time' ? 0.8 : (p==='prism' ? 0.85 : 1),
     mult:   (p==='midas' || p==='prism') ? 2 : 1,
   };
+}
+
+/* ================= roguelike ================= */
+let mode = save.mode || 'classic';
+let run = null;
+let stageClearT = 0;
+let pendingDraft = null;
+let luckyUsed = false;
+let chestReward = null;
+let chestOpened = false;
+let map = null;
+
+const CARDS = [
+  { id:'feather', name:'Feather',    desc:'Gravity -10%' },
+  { id:'midas',   name:'Midas',      desc:'+1 point per pipe' },
+  { id:'shield',  name:'Shield',     desc:'+1 shield charge' },
+  { id:'vampire', name:'Vampire',    desc:'Near-miss heals 1 HP (once per stage)' },
+  { id:'magnet',  name:'Magnet',     desc:'Pipes drift toward your height' },
+  { id:'greed',   name:'Greed',      desc:'+2 gold per pipe' },
+  { id:'chip',    name:'Fever Chip', desc:'Fever threshold -10' },
+  { id:'tough',   name:'Tough',      desc:'+1 max HP and heal 1' },
+  { id:'slow',    name:'Slow Mo',    desc:'Pipe speed -10%' },
+];
+
+const RELICS = [
+  { id:'golden', name:'Golden Feather', desc:'Fever lasts 15s' },
+  { id:'heart',  name:'Heart Pipe',     desc:'+1 HP at start of each stage' },
+  { id:'coin',   name:'Coin Magnet',    desc:'+1 gold per pipe' },
+  { id:'prism',  name:'Prism Shard',    desc:'Pipes 15% slower' },
+];
+
+function resetRun(){
+  run = { hp:3, maxHp:3, gold:0, stage:0, pipesInStage:0, totalPipes:0, upgrades:[], relics:[], vampUsed:false, boss:null };
+  stageClearT = 0;
+  pendingDraft = null;
+chestReward = null;
+  chestOpened = false;
+  map = null;
+}
+
+function hasUpgrade(id){ return mode==='rl' && run && run.upgrades.includes(id); }
+function hasRelic(id){ return mode==='rl' && run && run.relics.includes(id); }
+
+function mods(){
+  const pw = powers();
+  const m = { grav:pw.grav, speed:pw.speed, mult:pw.mult, bonus:0, shield:pw.shield, feverEvery:30, maxHp:3, radius:pw.radius };
+  if(mode === 'rl' && run){
+    for(const u of run.upgrades){
+      if(u==='feather') m.grav *= 0.9;
+      if(u==='midas') m.bonus += 1;
+      if(u==='shield') m.shield += 1;
+      if(u==='chip') m.feverEvery -= 10;
+      if(u==='slow') m.speed *= 0.9;
+      if(u==='tough') m.maxHp += 1;
+    }
+    for(const r of run.relics){
+      if(r==='prism') m.speed *= 0.85;
+    }
+    m.grav = Math.max(0.5, m.grav);
+    m.speed = Math.max(0.6, m.speed);
+    m.feverEvery = Math.max(10, m.feverEvery);
+  }
+  return m;
+}
+
+function refreshRlHud(){
+  show('#rlHud', mode==='rl' && !!run);
+  if(mode !== 'rl' || !run) return;
+  const maxHp = mods().maxHp;
+  $('#rlHearts').textContent = '♥'.repeat(Math.max(0, run.hp)) + '♡'.repeat(Math.max(0, maxHp - run.hp));
+  $('#rlGold').textContent = '🪙' + run.gold;
+  $('#rlStage').textContent = 'STAGE ' + Math.max(1, run.stage);
+}
+
+function refreshMode(){
+  $('#modeClassic').classList.toggle('active', mode==='classic');
+  $('#modeRl').classList.toggle('active', mode==='rl');
+  const rl = mode==='rl';
+  $('#skinsBtn').textContent = rl ? 'CHARACTERS' : 'SKINS';
+  $('#skinsBtnOver').textContent = rl ? 'CHARACTERS' : 'SKINS';
+  $('#shopTitle').textContent = rl ? 'CHARACTERS' : 'SKINS';
+  refreshStats();
+}
+
+function rollCards(){
+  const pool = CARDS.slice(), picks = [];
+  while(picks.length < 3 && pool.length){
+    picks.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]);
+  }
+  return picks;
+}
+
+function renderCards(grid, cards, clickable){
+  grid.innerHTML = '';
+  for(const c of cards){
+    const el = document.createElement('button');
+    el.className = 'draftCard';
+    el.innerHTML = `<span class="dcName">${c.name}</span><span class="dcDesc">${c.desc}</span>`;
+    if(clickable) el.addEventListener('click', () => pickCard(c.id));
+    else el.disabled = true;
+    grid.appendChild(el);
+  }
+}
+
+function openDraft(cards){
+  state = 'draft';
+  renderCards($('#draftCards'), cards || rollCards(), true);
+  show('#draft', true);
+}
+
+function openMerchant(){
+  state = 'shop';
+  luckyUsed = false;
+  pendingDraft = rollCards();
+  refreshMerchant();
+  show('#merchant', true);
+}
+
+function refreshMerchant(){
+  $('#merchantGold').textContent = '🪙 ' + run.gold;
+  $('#merchHeal').disabled = run.hp >= mods().maxHp || run.gold < 15;
+  $('#merchCoin').disabled = run.gold < 20 || luckyUsed;
+  $('#merchReroll').disabled = run.gold < 10;
+  renderCards($('#merchantDraft'), pendingDraft, false);
+}
+
+function pickCard(id){
+  AudioFX.click();
+  run.upgrades.push(id);
+  if(id === 'tough'){ run.maxHp++; run.hp = Math.min(run.maxHp, run.hp + 1); }
+  if(id === 'shield'){ shield++; }
+  show('#draft', false);
+  refreshRlHud();
+  showMap();
+}
+
+const MAP_ROWS = 16;
+const MAP_WIDTHS = [2,2,3,1,3,2,3,1,3,2,3,1,3,2,2,1];
+const BOSS_ROWS = [3,7,11];
+const BOSSES = [
+  { name:'GAPLORD',      passes:6,  phases:[{amp:120, spd:2.2}] },
+  { name:'GAPLORD II',   passes:7,  phases:[{amp:120, spd:2.6},{amp:150, spd:3.4}] },
+  { name:'GAPLORD III',  passes:8,  phases:[{amp:130, spd:3.0},{amp:165, spd:4.0}] },
+  { name:'FINAL BOSS',   passes:12, phases:[{amp:120, spd:2.4},{amp:150, spd:3.4},{amp:175, spd:4.4}] },
+];
+const NODE_ICONS = { stage:'🎯', boss:'💀', merchant:'🪙', chest:'📦', final:'👑' };
+const NODE_NAMES = { stage:'Stage — pipes & gold', boss:'GAPLORD — +15g + relic', merchant:'Merchant — heal, coins, reroll', chest:'Chest — mystery reward', final:'FINAL BOSS' };
+
+function genMap(){
+  const rows = [];
+  for(let r=0;r<MAP_ROWS;r++){
+    const row = [];
+    for(let i=0;i<MAP_WIDTHS[r];i++){
+      let type;
+      if(r === MAP_ROWS-1) type = 'final';
+      else if(BOSS_ROWS.includes(r)) type = 'boss';
+      else {
+        const roll = Math.random();
+        type = roll < 0.60 ? 'stage' : roll < 0.80 ? 'chest' : 'merchant';
+      }
+      row.push({ type, visited:false });
+    }
+    rows.push(row);
+  }
+  const edges = [];
+  for(let r=0;r<MAP_ROWS-1;r++){
+    const a = rows[r].length, b = rows[r+1].length;
+    for(let j=0;j<b;j++) edges.push({ r, i:Math.floor(Math.random()*a), j });
+    for(let i=0;i<a;i++)
+      if(!edges.some(e => e.r===r && e.i===i)) edges.push({ r, i, j:Math.floor(Math.random()*b) });
+  }
+  return { rows, edges, pos:{ row:-1, idx:0 } };
+}
+
+function mapXY(r, i){
+  const W = 100, H = 440, top = 30, bot = H - 30;
+  return { x:(i+0.5)/MAP_WIDTHS[r]*W, y:bot - r*(bot-top)/(MAP_ROWS-1) };
+}
+
+function showMap(){
+  state = 'map';
+  const box = $('#mapBox');
+  box.innerHTML = '';
+  const nextR = map.pos.row + 1;
+  const avail = map.pos.row === -1
+    ? map.rows[0].map((_, j) => j)
+    : map.edges.filter(e => e.r === map.pos.row && e.i === map.pos.idx).map(e => e.j);
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNS, 'svg');
+  svg.setAttribute('viewBox', '0 0 100 440');
+  svg.setAttribute('preserveAspectRatio', 'none');
+  for(const e of map.edges){
+    const a = mapXY(e.r, e.i), b = mapXY(e.r+1, e.j);
+    const line = document.createElementNS(svgNS, 'line');
+    line.setAttribute('x1', a.x); line.setAttribute('y1', a.y);
+    line.setAttribute('x2', b.x); line.setAttribute('y2', b.y);
+    const active = e.r === map.pos.row && (map.pos.row === -1 || e.i === map.pos.idx);
+    line.setAttribute('stroke', active ? 'rgba(255,217,59,.8)' : 'rgba(255,255,255,.18)');
+    line.setAttribute('stroke-width', active ? 3 : 2);
+    svg.appendChild(line);
+  }
+  box.appendChild(svg);
+  const start = document.createElement('div');
+  start.className = 'mapStart';
+  start.textContent = '🐦';
+  start.style.left = 'calc(50% - 20px)';
+  start.style.top = (440 - 30 - 20) + 'px';
+  box.appendChild(start);
+  for(let r=0;r<MAP_ROWS;r++)
+    for(let i=0;i<map.rows[r].length;i++){
+      const n = map.rows[r][i];
+      const { x, y } = mapXY(r, i);
+      const el = document.createElement('button');
+      el.className = 'mapNode' + (n.visited ? ' visited' : (r === nextR && avail.includes(i) ? ' avail' : ''));
+      el.textContent = NODE_ICONS[n.type];
+      el.title = NODE_NAMES[n.type];
+      el.style.left = `calc(${x}% - 20px)`;
+      el.style.top = (y - 20) + 'px';
+      if(r === nextR && avail.includes(i)) el.addEventListener('click', () => clickNode(r, i));
+      box.appendChild(el);
+    }
+  show('#map', true);
+}
+
+function clickNode(r, i){
+  AudioFX.click();
+  map.rows[r][i].visited = true;
+  map.pos = { row:r, idx:i };
+  run.stage++;
+  show('#map', false);
+  const type = map.rows[r][i].type;
+  if(type === 'stage') startStage();
+  else if(type === 'boss'){ const d = BOSSES[Math.floor(r/4)]; run.boss = { passes:0, max:d.passes, final:false, def:d }; startStage(); }
+  else if(type === 'final'){ const d = BOSSES[3]; run.boss = { passes:0, max:d.passes, final:true, def:d }; startStage(); }
+  else if(type === 'merchant') openMerchant();
+  else openChest();
+}
+
+function showVictory(){
+  state = 'victory';
+  save.rl.victories = (save.rl.victories || 0) + 1;
+  persist();
+  $('#victoryStats').textContent = 'Stage ' + run.stage + ' — ' + run.totalPipes + ' pipes — 🪙' + run.gold + '  •  Victory #' + save.rl.victories;
+  show('#victory', true);
+}
+
+function openChest(){
+  state = 'chest';
+  chestOpened = false;
+  const roll = Math.random();
+  if(roll < 0.4) chestReward = { gold: 15 + Math.floor(Math.random()*11) };
+  else if(roll < 0.75){
+    const missing = RELICS.filter(r => !run.relics.includes(r.id));
+    chestReward = missing.length ? { relic: missing[Math.floor(Math.random()*missing.length)].id } : { gold: 25 };
+  } else chestReward = { hp: 1 };
+  $('#chestReward').textContent = '???';
+  $('#chestOpen').textContent = 'OPEN';
+  show('#chest', true);
+}
+
+function startStage(){
+  pipes = []; particles = []; popups = []; trail = [];
+  bird.y = H*0.45; bird.vy = 0; bird.rot = 0;
+  combo = 0;
+  run.pipesInStage = 0;
+  run.vampUsed = false;
+  if(hasRelic('heart')) run.hp = Math.min(mods().maxHp, run.hp + 1);
+  if(run.boss) popups.push({ x:BIRD_X, y:bird.y-60, txt:run.boss.final ? 'FINAL BATTLE' : run.boss.def.name + ' APPROACHES', life:2, max:2 });
+  state = 'ready';
+  refreshRlHud();
 }
 
 /* ================= audio ================= */
@@ -424,12 +808,22 @@ function reset(){
   bird = { y:H*0.45, vy:0, rot:0, wing:0 };
   pipes = []; particles = []; popups = []; trail = [];
   score = 0; shake = 0; flash = 0;
-  combo = 0; feverT = 0; feverNextAt = 30;
+  combo = 0; feverT = 0;
   const pw = powers();
   shield = pw.shield; revive = pw.revive; invuln = 0; rebornT = 0;
   nextMoverAt = t + rand(10,15);
   nextMusicSwitch = t + rand(15,25);
   deathTimer = 0; overShown = false;
+  if(mode === 'rl'){
+    resetRun();
+    const m = mods();
+    shield = m.shield;
+    feverNextAt = m.feverEvery;
+    refreshRlHud();
+  } else {
+    feverNextAt = 30;
+    show('#rlHud', false);
+  }
   $('#score').textContent = '0';
   refreshPowerTag();
 }
@@ -438,6 +832,7 @@ function startGame(){
   reset();
   state = 'ready';
   show('#menu', false); show('#gameover', false); show('#hud', true);
+  if(mode === 'rl'){ map = genMap(); showMap(); }
   if(AudioFX.ctx) AudioFX.startMusic(AudioFX.randomTrack());
 }
 
@@ -469,6 +864,14 @@ function showGameover(){
   overShown = true;
   const isRecord = score > save.best;
   if(isRecord) save.best = score;
+  if(mode === 'rl' && run){
+    save.rl.bestStage = Math.max(save.rl.bestStage, run.stage);
+    save.rl.bestPipes = Math.max(save.rl.bestPipes, run.totalPipes);
+    $('#rlStats').textContent = 'STAGE ' + run.stage + '/' + MAP_ROWS + '  •  ' + run.totalPipes + ' PIPES  •  🪙' + run.gold;
+    $('#rlStats').classList.remove('hidden');
+  } else {
+    $('#rlStats').classList.add('hidden');
+  }
   persist();
   $('#finalScore').textContent = score;
   $('#bestScore').textContent = save.best;
@@ -501,8 +904,14 @@ function checkUnlocks(){
 }
 
 /* ================= update ================= */
-function pipeSpeed(){ return (140 + Math.min(score,40)*1.5) * (feverT > 0 ? 1.5 : 1); }
-function pipeGap(){ return Math.max(115, 160 - score*1.5); }
+function pipeSpeed(){
+  const base = (140 + Math.min(score,40)*1.5) * (feverT > 0 ? 1.5 : 1);
+  return base + (mode==='rl' && run ? 12*(run.stage-1) : 0);
+}
+function pipeGap(){
+  if(mode==='rl' && run) return Math.max(90, 165 - (run.stage-1)*9 - score*0.5);
+  return Math.max(115, 160 - score*1.5);
+}
 
 function update(dt){
   t += dt;
@@ -529,7 +938,7 @@ function update(dt){
   invuln = Math.max(0, invuln - dt);
   feverT = Math.max(0, feverT - dt);
   refreshComboTag();
-  const pw = powers();
+  const pw = (mode==='rl' && run) ? mods() : powers();
 
   if(state === 'ready'){
     bird.y = H*0.45 + Math.sin(t*3)*9;
@@ -557,9 +966,18 @@ function update(dt){
 
     groundX = (groundX + pipeSpeed()*pw.speed*dt) % 48;
 
+    // stage clear pause (roguelike)
+    if(stageClearT > 0){
+      stageClearT -= dt;
+      if(stageClearT <= 0) openDraft(rollCards());
+    }
+
     // spawn pipes
     const last = pipes[pipes.length-1];
-    if(!last || last.x < W - 240){
+    if(mode==='rl' && run.boss){
+      if(!pipes.some(p => p.boss))
+        pipes.push({ x:W+40, gapY:345, baseY:345, gap:pipeGap(), passed:false, boss:true });
+    } else if(stageClearT <= 0 && (!last || last.x < W - 240)){
       if(t >= nextMoverAt){
         nextMoverAt = t + rand(10,15);
         const amp = rand(28,42), base = rand(150+amp, GROUND_Y-150-amp);
@@ -570,23 +988,78 @@ function update(dt){
 
     for(const p of pipes) p.x -= pipeSpeed()*pw.speed*dt;
     for(const p of pipes) if(p.move) p.gapY = p.base + Math.sin(t*p.spd + p.phase)*p.amp;
+    for(const p of pipes) if(p.boss){
+      const b = run.boss, ph = b.def.phases;
+      const idx = Math.min(ph.length-1, Math.floor(b.passes * ph.length / b.max));
+      const ph2 = ph[idx];
+      p.gapY = p.baseY + Math.sin(t*ph2.spd)*ph2.amp;
+    }
+    if(hasUpgrade('magnet')) for(const p of pipes){
+      if(p.move) p.base += (bird.y - p.base)*0.5*dt;
+      else p.gapY += (bird.y - p.gapY)*0.5*dt;
+    }
     while(pipes.length && pipes[0].x < -90) pipes.shift();
+
+   // stage progression (roguelike)
+    if(mode==='rl' && !run.boss && run.pipesInStage >= 15 && stageClearT <= 0){
+      run.pipesInStage = 0;
+      run.gold += 10;
+      stageClearT = 1.2;
+      flash = 0.4;
+      popups.push({ x:BIRD_X, y:bird.y-50, txt:'STAGE ' + run.stage + '!', life:1.2, max:1.2 });
+      AudioFX.unlock();
+      refreshRlHud();
+    }
 
     // scoring + near-miss combo
     let scored = false;
     for(const p of pipes){
       if(!p.passed && p.x + 70 < BIRD_X && rebornT <= 0){
-        p.passed = true; scored = true;
+        p.passed = true;
+        if(p.boss){
+          run.boss.passes++;
+         if(run.boss.passes >= run.boss.max){
+              const isFinal = run.boss.final;
+              run.boss = null;
+              flash = 0.5;
+              AudioFX.unlock();
+             if(isFinal){
+               showVictory();
+             } else {
+               run.gold += 15;
+               const r = RELICS[Math.floor(Math.random()*RELICS.length)];
+               run.relics.push(r.id);
+               stageClearT = 1.5;
+              popups.push({ x:BIRD_X, y:bird.y-50, txt:'GAPLORD DEFEATED! +15g', life:1.5, max:1.5 });
+              popups.push({ x:BIRD_X, y:bird.y-76, txt:r.name + '!', life:1.5, max:1.5 });
+              refreshRlHud();
+             }
+           } else {
+            popups.push({ x:p.x+35, y:p.gapY, txt:'PASS ' + run.boss.passes + '/' + run.boss.max, life:0.8, max:0.8 });
+            AudioFX.score();
+          }
+          continue;
+        }
+        scored = true;
         const topEdge = p.gapY - p.gap/2, botEdge = p.gapY + p.gap/2;
         const clearance = Math.min(bird.y - topEdge, botEdge - bird.y) - pw.radius;
         const near = clearance < 10;
         combo = near ? combo + 1 : 0;
         const mult = Math.min(combo + 1, 4);
-        const gained = pw.mult * mult * (feverT > 0 ? 2 : 1);
+        const gained = (pw.mult + (pw.bonus||0)) * mult * (feverT > 0 ? 2 : 1);
         score += gained; save.total += gained;
         $('#score').textContent = score;
         AudioFX.score();
         popups.push({ x:p.x+35, y:p.gapY, txt: near ? 'CLOSE! +'+gained : '+'+gained, life:0.7, max:0.7 });
+        if(mode==='rl'){
+          run.pipesInStage++; run.totalPipes++;
+          run.gold += 1 + (hasUpgrade('greed') ? 2 : 0) + (near ? 2 : 0) + (hasRelic('coin') ? 1 : 0);
+          if(near && hasUpgrade('vampire') && !run.vampUsed && run.hp < mods().maxHp){
+            run.vampUsed = true; run.hp++;
+            popups.push({ x:p.x+35, y:p.gapY-26, txt:'+1 HP', life:0.7, max:0.7 });
+          }
+          refreshRlHud();
+        }
         for(let i=0;i<10;i++) particles.push({
           x:p.x+35, y:p.gapY, vx:rand(-90,90), vy:rand(-140,60),
           life:rand(0.3,0.6), max:0.6, size:rand(2,4), color:'#ffd93b'
@@ -595,14 +1068,15 @@ function update(dt){
       }
     }
     if(scored && score >= feverNextAt){
-      feverNextAt += 30;
-      feverT = 10; flash = 0.5;
+      feverNextAt += (pw.feverEvery || 30);
+      feverT = hasRelic('golden') ? 15 : 10; flash = 0.5;
       AudioFX.startMusic('hype');
       popups.push({ x:BIRD_X, y:bird.y-50, txt:'FEVER!', life:1.0, max:1.0 });
     }
     // collision (circle vs rects)
     if(rebornT <= 0 && invuln <= 0){
       for(const p of pipes){
+        if(p.hit) continue;
         const topH = p.gapY - p.gap/2, botY = p.gapY + p.gap/2;
         if(circleRect(BIRD_X, bird.y, pw.radius, p.x, 0, 70, topH) ||
            circleRect(BIRD_X, bird.y, pw.radius, p.x, botY, 70, GROUND_Y-botY)){
@@ -619,6 +1093,18 @@ function update(dt){
             popups.push({ x:BIRD_X, y:bird.y-34, txt:'REBORN', life:1.1, max:1.1 });
             AudioFX.hit(); AudioFX.die();
             refreshPowerTag();
+          } else if(mode === 'rl' && run){
+            run.hp--;
+            if(run.hp <= 0){
+              die();
+            } else {
+              invuln = 2; bird.vy = -250;
+              flash = 0.6; shake = 8;
+              p.hit = true;
+              popups.push({ x:BIRD_X, y:bird.y-34, txt:'-1 HP', life:0.8, max:0.8 });
+              AudioFX.hit();
+              refreshRlHud();
+            }
           } else {
             die();
           }
@@ -776,7 +1262,9 @@ function render(){
   ctx.globalAlpha = 1;
 
   // bird
+  if(invuln > 0) ctx.globalAlpha = Math.sin(t*30) > 0 ? 1 : 0.35;
   drawBird(BIRD_X, bird.y, bird.rot, s, bird.wing, powers().radius/BIRD_R);
+  ctx.globalAlpha = 1;
 
   // popups
   ctx.font = '900 26px "Segoe UI", sans-serif';
@@ -789,6 +1277,21 @@ function render(){
     ctx.fillText(p.txt, p.x, p.y);
   }
   ctx.globalAlpha = 1;
+
+  // GAPLORD boss bar
+  if(mode==='rl' && run && run.boss && (state==='play' || state==='ready')){
+    const bx = W/2 - 110, by = 14, bw = 220, bh = 14;
+    ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(bx-8, by-22, bw+16, 40);
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 13px system-ui'; ctx.textAlign = 'center';
+    const b = run.boss, phN = b.def.phases.length;
+    const phIdx = Math.min(phN-1, Math.floor(b.passes * phN / b.max));
+    ctx.fillText(b.def.name + (phN > 1 ? '  PHASE ' + (phIdx+1) + '/' + phN : ''), W/2, by-6);
+    ctx.fillStyle = '#3a1020'; ctx.fillRect(bx, by, bw, bh);
+    const hpFrac = (run.boss.max - run.boss.passes) / run.boss.max;
+    ctx.fillStyle = '#e23b5a'; ctx.fillRect(bx, by, bw*hpFrac, bh);
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 1;
+    for(let i=1;i<run.boss.max;i++){ ctx.beginPath(); ctx.moveTo(bx+bw*i/run.boss.max, by); ctx.lineTo(bx+bw*i/run.boss.max, by+bh); ctx.stroke(); }
+  }
 
   // hit flash
   if(flash > 0){ ctx.fillStyle = `rgba(255,255,255,${flash*0.7})`; ctx.fillRect(0,0,W,H); }
@@ -809,7 +1312,11 @@ function drawPipe(p, nf){
   const f = lerp(1, 0.45, nf);
   const topH = p.gapY - p.gap/2, botY = p.gapY + p.gap/2;
   let body, dark, light;
-  if(p.move){
+  if(p.boss){
+    body = `rgb(${Math.round(150*f)},${Math.round(45*f)},${Math.round(80*f)})`;
+    dark = `rgb(${Math.round(90*f)},${Math.round(20*f)},${Math.round(50*f)})`;
+    light = `rgb(${Math.round(210*f)},${Math.round(80*f)},${Math.round(120*f)})`;
+  } else if(p.move){
     body = `rgb(${Math.round(235*f)},${Math.round(165*f)},${Math.round(65*f)})`;
     dark = `rgb(${Math.round(165*f)},${Math.round(105*f)},${Math.round(35*f)})`;
     light = `rgb(${Math.round(255*f)},${Math.round(210*f)},${Math.round(115*f)})`;
@@ -822,6 +1329,10 @@ function drawPipe(p, nf){
   pipeRect(p.x, botY, GROUND_Y-botY, body, dark, light, false);
   if(p.move){
     const up = Math.cos(t*p.spd + p.phase) < 0;
+    chevron(p.x+35, topH-13, up);
+    chevron(p.x+35, botY+13, up);
+  } else if(p.boss){
+    const up = Math.cos(t*2.2) < 0;
     chevron(p.x+35, topH-13, up);
     chevron(p.x+35, botY+13, up);
   }
@@ -1010,7 +1521,7 @@ function showToast(msg){
 }
 
 function refreshStats(){
-  $('#menuBest').textContent = save.best;
+  $('#menuBest').textContent = mode==='rl' ? ('S'+save.rl.bestStage+' • '+save.rl.bestPipes+'p') : save.best;
   $('#menuTotal').textContent = save.total;
   $('#shopTotal').textContent = save.total;
   $('#muteBtn').textContent = save.muted ? 'OFF' : 'SND';
@@ -1137,7 +1648,52 @@ function toggleMute(){
 $('#muteBtn').addEventListener('click', () => { AudioFX.init(); toggleMute(); });
 $('#pauseBtn').addEventListener('click', () => { AudioFX.init(); togglePause(); });
 $('#playBtn').addEventListener('click', () => { AudioFX.init(); startGame(); });
-$('#retryBtn').addEventListener('click', () => { AudioFX.init(); startGame(); });
+  $('#retryBtn').addEventListener('click', () => { AudioFX.init(); startGame(); });
+  $('#modeClassic').addEventListener('click', () => { AudioFX.init(); AudioFX.click(); mode = 'classic'; persist(); refreshMode(); });
+  $('#modeRl').addEventListener('click', () => { AudioFX.init(); AudioFX.click(); mode = 'rl'; persist(); refreshMode(); });
+  $('#merchHeal').addEventListener('click', () => {
+    if(run.gold < 15 || run.hp >= mods().maxHp) return;
+    run.gold -= 15; run.hp++;
+    AudioFX.score(); refreshMerchant(); refreshRlHud();
+  });
+  $('#merchCoin').addEventListener('click', () => {
+    if(run.gold < 20 || luckyUsed) return;
+    luckyUsed = true;
+    run.gold += 15;
+    AudioFX.score(); refreshMerchant(); refreshRlHud();
+  });
+  $('#merchReroll').addEventListener('click', () => {
+    if(run.gold < 10) return;
+    run.gold -= 10;
+    pendingDraft = rollCards();
+    AudioFX.click(); refreshMerchant();
+  });
+  $('#merchLeave').addEventListener('click', () => {
+    AudioFX.click();
+    show('#merchant', false);
+    openDraft(pendingDraft);
+  });
+  $('#victoryBtn').addEventListener('click', () => {
+    AudioFX.click();
+    show('#victory', false);
+    startGame();
+  });
+  $('#chestOpen').addEventListener('click', () => {
+    if(!chestOpened){
+      chestOpened = true;
+      const r = chestReward;
+      if(r.gold){ run.gold += r.gold; $('#chestReward').textContent = '+' + r.gold + ' GOLD'; }
+      else if(r.relic){ run.relics.push(r.relic); $('#chestReward').textContent = 'RELIC: ' + RELICS.find(x => x.id === r.relic).name; }
+      else { run.hp = Math.min(mods().maxHp, run.hp + 1); $('#chestReward').textContent = '+1 HP'; }
+      AudioFX.score();
+      refreshRlHud();
+      $('#chestOpen').textContent = 'CONTINUE';
+    } else {
+      AudioFX.click();
+      show('#chest', false);
+      openDraft(rollCards());
+    }
+  });
  $('#skinsBtn').addEventListener('click', () => {
     AudioFX.init();
     AudioFX.click();
@@ -1171,6 +1727,7 @@ function frame(now){
 AudioFX.muted = save.muted;
 buildShop();
 refreshStats();
+refreshMode();
 requestAnimationFrame(frame);
 </script>
 </body>
