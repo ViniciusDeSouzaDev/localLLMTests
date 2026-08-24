@@ -54,7 +54,7 @@ run = {
   - `midas` — Midas: +1 point per pipe
   - `shield` — Shield: +1 shield charge (max 3)
   - `vampire` — Vampire: a near-miss heals 1 HP (once per stage, stacks)
-  - `magnet` — Magnet: pipes drift toward the bird's y while approaching (stacks: +0.5 drift rate per copy, max 1.5)
+  - `magnet` — Magnet: pipes drift toward the bird's y while approaching (stacks: +0.3 drift rate per copy, max 0.9)
   - `greed` — Greed: +2 gold per pipe
   - `chip` — Fever Chip: fever threshold -10 (min 10)
   - `tough` — Tough: +1 max HP and heal 1

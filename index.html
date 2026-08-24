@@ -1177,7 +1177,7 @@ function update(dt){
     const mag = mode==='rl' && run ? run.upgrades.filter(u=>u==='magnet').length : 0;
     if(mag) for(const p of pipes){
       if(p.boss) continue;
-      const rate = Math.min(0.5*mag, 1.5);
+      const rate = Math.min(0.3*mag, 0.9);
       if(p.move) p.base += (bird.y - p.base)*rate*dt;
       else p.gapY += (bird.y - p.gapY)*rate*dt;
     }
@@ -1545,6 +1545,20 @@ function drawPipe(p, nf){
     const up = Math.cos(t*p.spd + p.phase) < 0;
     chevron(p.x+35, topH-13, up);
     chevron(p.x+35, botY+13, up);
+  } else if(p.hammer){
+    const danger = p.baseGap ? 1 - p.gap/p.baseGap : 0;
+    ctx.save();
+    ctx.shadowColor = 'rgba(255,60,40,0.9)';
+    ctx.shadowBlur = 4 + danger*16;
+    ctx.fillStyle = `rgba(255,${Math.round(110-70*danger)},40,${0.5+0.5*danger})`;
+    ctx.fillRect(p.x-4, topH-3, 78, 3);
+    ctx.fillRect(p.x-4, botY, 78, 3);
+    ctx.restore();
+    ctx.fillStyle = `rgba(50,8,8,${0.45+0.55*danger})`;
+    for(let sx = p.x+6; sx + 12 <= p.x+70; sx += 12){
+      ctx.beginPath(); ctx.moveTo(sx, topH); ctx.lineTo(sx+6, topH+10); ctx.lineTo(sx+12, topH); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(sx, botY); ctx.lineTo(sx+6, botY-10); ctx.lineTo(sx+12, botY); ctx.closePath(); ctx.fill();
+    }
   } else if(p.spear){
     ctx.fillStyle = `rgb(${Math.round(230*f)},${Math.round(70*f)},${Math.round(70*f)})`;
     for(let sx = p.x+6; sx + 14 <= p.x+70; sx += 14){
