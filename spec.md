@@ -41,6 +41,7 @@ run = {
 
 - Stage = 15 pipes passed (`pipesInStage`), then stage clear.
 - Difficulty: pipe gap shrinks per stage: `gap = max(105, 170 - (stage-1)*7 - score*0.3)`; speed uses existing `pipeSpeed()` plus `+12 * (stage-1)`.
+ - Pipe types: normal, **Mover** (gold, drifts up/down), **Spear** (steel, bigger gap, 2x damage, stage 2+), **Hammer** (red, gap slams fully shut and opens again, stage 3+).
 - Stage clear: `+10 gold`, brief "STAGE N CLEAR" banner (1.2s), then → `draft`.
 - Every 3rd stage (3, 6, 9...) is a **BOSS stage** (see §7) — no draft after it; instead a relic reward.
 
