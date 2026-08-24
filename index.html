@@ -41,6 +41,8 @@
   }
   #rlStage { color:#fff; }
   #rlGold { color:#ffd93b; }
+  #runItems { display:flex; gap:4px; flex-wrap:wrap; margin-top:4px; max-width:210px; }
+  #runItems .itemIcon { font-size:15px; line-height:1; filter:drop-shadow(0 2px 0 rgba(0,0,0,.4)); }
   #merchantOffers { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
   #map { overflow-y:auto; justify-content:flex-start; }
   #map .card { width:100%; max-width:440px; padding:14px 18px; gap:10px; }
@@ -231,7 +233,7 @@
   <canvas id="game"></canvas>
 
   <div id="hud" class="hidden">
-    <div><div id="score">0</div><div id="powerTag"></div><div id="comboTag"></div><div id="rlHud" class="hidden"><span id="rlHearts"></span><span id="rlGold"></span><span id="rlStage"></span></div></div>
+    <div><div id="score">0</div><div id="powerTag"></div><div id="comboTag"></div><div id="rlHud" class="hidden"><span id="rlHearts"></span><span id="rlGold"></span><span id="rlStage"></span></div><div id="runItems" class="hidden"></div></div>
     <div id="hudBtns">
       <button class="iconBtn" id="muteBtn" title="Sound (M)">SND</button>
       <button class="iconBtn" id="pauseBtn" title="Pause (P)">II</button>
@@ -405,22 +407,22 @@ let chestOpened = false;
 let map = null;
 
 const CARDS = [
-  { id:'feather', name:'Feather',    desc:'Gravity -10%' },
-  { id:'midas',   name:'Midas',      desc:'+1 point per pipe' },
-  { id:'shield',  name:'Shield',     desc:'+1 shield charge' },
-  { id:'vampire', name:'Vampire',    desc:'Near-miss heals 1 HP (once per stage)' },
-  { id:'magnet',  name:'Magnet',     desc:'Pipes drift toward your height (stacks)' },
-  { id:'greed',   name:'Greed',      desc:'+2 gold per pipe' },
-  { id:'chip',    name:'Fever Chip', desc:'Fever threshold -10' },
-  { id:'tough',   name:'Tough',      desc:'+1 max HP and heal 1' },
-  { id:'slow',    name:'Slow Mo',    desc:'Pipe speed -10%' },
+  { id:'feather', icon:'🪶', name:'Feather',    desc:'Gravity -10%' },
+  { id:'midas',   icon:'✨', name:'Midas',      desc:'+1 point per pipe' },
+  { id:'shield',  icon:'🛡️', name:'Shield',     desc:'+1 shield charge' },
+  { id:'vampire', icon:'🧛', name:'Vampire',    desc:'Near-miss heals 1 HP (once per stage)' },
+  { id:'magnet',  icon:'🧲', name:'Magnet',     desc:'Pipes drift toward your height (stacks)' },
+  { id:'greed',   icon:'🪙', name:'Greed',      desc:'+2 gold per pipe' },
+  { id:'chip',    icon:'🔥', name:'Fever Chip', desc:'Fever threshold -10' },
+  { id:'tough',   icon:'💪', name:'Tough',      desc:'+1 max HP and heal 1' },
+  { id:'slow',    icon:'🐌', name:'Slow Mo',    desc:'Pipe speed -10%' },
 ];
 
 const RELICS = [
-  { id:'golden', name:'Golden Feather', desc:'Fever lasts 15s' },
-  { id:'heart',  name:'Heart Pipe',     desc:'+1 HP at start of each stage' },
-  { id:'coin',   name:'Coin Magnet',    desc:'+1 gold per pipe' },
-  { id:'prism',  name:'Prism Shard',    desc:'Pipes 15% slower' },
+  { id:'golden', icon:'🌟', name:'Golden Feather', desc:'Fever lasts 15s' },
+  { id:'heart',  icon:'❤️', name:'Heart Pipe',     desc:'+1 HP at start of each stage' },
+  { id:'coin',   icon:'💰', name:'Coin Magnet',    desc:'+1 gold per pipe' },
+  { id:'prism',  icon:'🔮', name:'Prism Shard',    desc:'Pipes 15% slower' },
 ];
 
 function resetRun(){
@@ -459,11 +461,43 @@ function mods(){
 
 function refreshRlHud(){
   show('#rlHud', mode==='rl' && !!run);
+  show('#runItems', mode==='rl' && !!run);
   if(mode !== 'rl' || !run) return;
   const maxHp = mods().maxHp;
   $('#rlHearts').textContent = '♥'.repeat(Math.max(0, run.hp)) + '♡'.repeat(Math.max(0, maxHp - run.hp));
   $('#rlGold').textContent = '🪙' + run.gold;
   $('#rlStage').textContent = 'STAGE ' + Math.max(1, run.stage);
+  renderRunItems();
+}
+
+function renderRunItems(){
+  const el = $('#runItems');
+  el.innerHTML = '';
+  const add = (icon, name, desc) => {
+    const s = document.createElement('span');
+    s.className = 'itemIcon';
+    s.textContent = icon;
+    if(canHover){
+      s.addEventListener('mouseenter', () => showTip(s, name, desc));
+      s.addEventListener('mouseleave', hideTip);
+    } else {
+      s.addEventListener('touchstart', () => {
+        if(tipCard === s) hideTip();
+        else showTip(s, name, desc);
+      }, { passive:true });
+    }
+    el.appendChild(s);
+  };
+  const counts = {};
+  for(const u of run.upgrades) counts[u] = (counts[u]||0)+1;
+  for(const id in counts){
+    const c = CARDS.find(x => x.id === id);
+    if(c) add(c.icon, c.name + (counts[id] > 1 ? ' ×' + counts[id] : ''), c.desc);
+  }
+  for(const r of run.relics){
+    const rel = RELICS.find(x => x.id === r);
+    if(rel) add(rel.icon, rel.name, rel.desc);
+  }
 }
 
 function refreshMode(){
@@ -489,7 +523,7 @@ function renderCards(grid, cards, clickable){
   for(const c of cards){
     const el = document.createElement('button');
     el.className = 'draftCard';
-    el.innerHTML = `<span class="dcName">${c.name}</span><span class="dcDesc">${c.desc}</span>`;
+    el.innerHTML = `<span class="dcName">${c.icon ? c.icon + ' ' : ''}${c.name}</span><span class="dcDesc">${c.desc}</span>`;
     if(clickable) el.addEventListener('click', () => pickCard(c.id));
     else el.disabled = true;
     grid.appendChild(el);
@@ -1102,7 +1136,9 @@ function update(dt){
         pipes.push({ x:W+40, gapY:345, baseY:345, gap:bg, baseGap:bg, passed:false, boss:true });
       }
     } else if(stageClearT <= 0 && (!last || last.x < W - 240)){
-      if(t >= nextMoverAt){
+      if(mode==='rl' && run.stage >= 2 && Math.random() < Math.min(0.12 + run.stage*0.04, 0.35)){
+        pipes.push({ x:W+40, gapY:rand(150, GROUND_Y-150), gap:pipeGap()+40, passed:false, spear:true });
+      } else if(t >= nextMoverAt){
         nextMoverAt = t + rand(10,15);
         const amp = rand(28,42), base = rand(150+amp, GROUND_Y-150-amp);
         pipes.push({ x:W+40, gapY:base, base, gap:pipeGap(), passed:false, move:true, phase:rand(0,TAU), spd:rand(0.8,1.4), amp });
@@ -1173,7 +1209,7 @@ function update(dt){
                 else run.gold += 10;
                 stageClearT = 1.5;
                popups.push({ x:BIRD_X, y:bird.y-50, txt:def.name + ' DEFEATED! +15g', life:1.5, max:1.5 });
-               popups.push({ x:BIRD_X, y:bird.y-76, txt:r.name + '!', life:1.5, max:1.5 });
+               popups.push({ x:BIRD_X, y:bird.y-76, txt:(r.icon||'') + ' ' + r.name + '!', life:1.5, max:1.5 });
                refreshRlHud();
               }
             } else {
@@ -1240,14 +1276,15 @@ function update(dt){
             AudioFX.hit(); AudioFX.die();
             refreshPowerTag();
           } else if(mode === 'rl' && run){
-            run.hp--;
+            const dmg = p.spear ? 2 : 1;
+            run.hp -= dmg;
             if(run.hp <= 0){
               die();
             } else {
               invuln = 2; bird.vy = -250;
               flash = 0.6; shake = 8;
               p.hit = true;
-              popups.push({ x:BIRD_X, y:bird.y-34, txt:'-1 HP', life:0.8, max:0.8 });
+              popups.push({ x:BIRD_X, y:bird.y-34, txt:'-'+dmg+' HP', life:0.8, max:0.8 });
               AudioFX.hit();
               refreshRlHud();
             }
@@ -1481,6 +1518,10 @@ function drawPipe(p, nf){
     body = `rgb(${Math.round(235*f)},${Math.round(165*f)},${Math.round(65*f)})`;
     dark = `rgb(${Math.round(165*f)},${Math.round(105*f)},${Math.round(35*f)})`;
     light = `rgb(${Math.round(255*f)},${Math.round(210*f)},${Math.round(115*f)})`;
+  } else if(p.spear){
+    body = `rgb(${Math.round(150*f)},${Math.round(160*f)},${Math.round(175*f)})`;
+    dark = `rgb(${Math.round(95*f)},${Math.round(105*f)},${Math.round(125*f)})`;
+    light = `rgb(${Math.round(205*f)},${Math.round(215*f)},${Math.round(230*f)})`;
   } else {
     body = `rgb(${Math.round(80*f)},${Math.round(190*f)},${Math.round(90*f)})`;
     dark = `rgb(${Math.round(50*f)},${Math.round(140*f)},${Math.round(60*f)})`;
@@ -1492,6 +1533,12 @@ function drawPipe(p, nf){
     const up = Math.cos(t*p.spd + p.phase) < 0;
     chevron(p.x+35, topH-13, up);
     chevron(p.x+35, botY+13, up);
+  } else if(p.spear){
+    ctx.fillStyle = `rgb(${Math.round(230*f)},${Math.round(70*f)},${Math.round(70*f)})`;
+    for(let sx = p.x+6; sx + 14 <= p.x+70; sx += 14){
+      ctx.beginPath(); ctx.moveTo(sx, topH); ctx.lineTo(sx+7, topH+13); ctx.lineTo(sx+14, topH); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(sx, botY); ctx.lineTo(sx+7, botY-13); ctx.lineTo(sx+14, botY); ctx.closePath(); ctx.fill();
+    }
   } else if(p.boss){
     const ec = (run.boss && run.boss.def.eye) || '#ff8090';
     ctx.save();
@@ -1747,12 +1794,12 @@ function refreshComboTag(){
 const canHover = matchMedia('(hover:hover)').matches;
 let tipCard = null, suppressClick = false;
 const tooltip = $('#tooltip');
-function showTip(card, s){
+function showTip(card, name, desc){
   tipCard = card;
-  tooltip.innerHTML = `<span class="ttName">${s.name.toUpperCase()}</span><br>${s.power ? s.powerName + ' — ' + s.powerDesc : 'No power'}`;
+  tooltip.innerHTML = `<span class="ttName">${name.toUpperCase()}</span><br>${desc}`;
   const r = card.getBoundingClientRect();
   tooltip.style.left = clamp(r.left + r.width/2, 115, innerWidth-115) + 'px';
-  tooltip.style.top = (r.top - 8) + 'px';
+  tooltip.style.top = (r.top > 120 ? r.top - 8 : r.bottom + 10) + 'px';
   tooltip.classList.add('show');
 }
 function hideTip(){ tooltip.classList.remove('show'); tipCard = null; }
@@ -1777,7 +1824,7 @@ function buildShop(){
     req.textContent = unlocked ? (save.selected===s.id ? 'SELECTED' : 'TAP TO WEAR') : `Unlock at ${s.unlock} pts`;
     card.append(cv, name, pow, req);
     if(canHover){
-      card.addEventListener('mouseenter', () => showTip(card, s));
+      card.addEventListener('mouseenter', () => showTip(card, s.name, s.power ? s.powerName + ' — ' + s.powerDesc : 'No power'));
       card.addEventListener('mouseleave', hideTip);
     } else {
       card.addEventListener('touchstart', () => {
@@ -1856,6 +1903,9 @@ function buildHelp(){
     `<p class="hint">SPACE / CLICK to flap • P pause • M sound • H help</p>` +
     `<h3>UPGRADES</h3>` + list(CARDS) +
     `<h3>RELICS</h3>` + list(RELICS) +
+    `<h3>PIPES</h3>` +
+    `<p class="hint"><b>Mover</b> — gold pipe, drifts up and down</p>` +
+    `<p class="hint"><b>Spear</b> — steel pipe, bigger gap but deals 2x damage (stage 2+)</p>` +
     `<h3>MAP NODES</h3>` + Object.values(NODE_NAMES).map(v=>`<p class="hint">${v}</p>`).join('') +
     `<h3>MERCHANT</h3>` +
     `<p class="hint"><b>Heal 1 HP</b> — 15g</p><p class="hint"><b>Lucky Coin</b> — pay 20g, gain 35g</p><p class="hint"><b>Reroll Draft</b> — 10g</p>` +
@@ -1953,7 +2003,7 @@ $('#playBtn').addEventListener('click', () => { AudioFX.init(); startGame(); });
       chestOpened = true;
       const r = chestReward;
       if(r.gold){ run.gold += r.gold; $('#chestReward').textContent = '+' + r.gold + ' GOLD'; }
-      else if(r.relic){ run.relics.push(r.relic); $('#chestReward').textContent = 'RELIC: ' + RELICS.find(x => x.id === r.relic).name; }
+      else if(r.relic){ run.relics.push(r.relic); const rel = RELICS.find(x => x.id === r.relic); $('#chestReward').textContent = 'RELIC: ' + (rel.icon||'') + ' ' + rel.name; }
       else { run.hp = Math.min(mods().maxHp, run.hp + 1); $('#chestReward').textContent = '+1 HP'; }
       AudioFX.score();
       refreshRlHud();
