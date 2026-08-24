@@ -74,6 +74,10 @@
   }
   .iconBtn:hover { transform:scale(1.08); background:rgba(15,20,35,.8); }
 
+  #help .card { width:100%; max-width:560px; max-height:92vh; overflow-y:auto; text-align:left; }
+  #help h3 { font-size:14px; letter-spacing:2px; color:#ffd93b; margin:8px 0 2px; }
+  #help .hint { text-align:left; }
+
   /* ---------- Panels ---------- */
   .panel {
     position:absolute; inset:0; z-index:10;
@@ -219,10 +223,7 @@
     display:flex; align-items:center; justify-content:center;
     background:rgba(5,8,18,.55); backdrop-filter:blur(4px);
   }
-  #pauseOverlay div {
-    font-size:38px; font-weight:900; letter-spacing:6px; color:#fff;
-    text-shadow:0 4px 0 rgba(0,0,0,.4);
-  }
+  #pauseOverlay .card { padding:22px 28px; gap:12px; }
 </style>
 </head>
 <body>
@@ -249,7 +250,8 @@
       </div>
       <button class="btn" id="playBtn">PLAY</button>
       <button class="btn ghost" id="skinsBtn">SKINS</button>
-      <p class="hint">SPACE / CLICK to flap &nbsp;•&nbsp; P pause &nbsp;•&nbsp; M sound</p>
+      <button class="btn ghost" id="helpBtnMenu">HOW TO PLAY</button>
+      <p class="hint">SPACE / CLICK to flap &nbsp;•&nbsp; P pause &nbsp;•&nbsp; M sound &nbsp;•&nbsp; H help</p>
     </div>
   </div>
 
@@ -326,9 +328,24 @@
     </div>
   </div>
 
+  <div id="help" class="panel hidden">
+    <div class="card">
+      <h2>HOW TO PLAY</h2>
+      <div id="helpBody"></div>
+      <button class="btn" id="helpClose">CLOSE</button>
+    </div>
+  </div>
+
   <div id="tooltip"></div>
   <div id="toast" class="hidden"></div>
-  <div id="pauseOverlay" class="hidden"><div>PAUSED</div></div>
+  <div id="pauseOverlay" class="hidden">
+    <div class="card">
+      <h2>PAUSED</h2>
+      <button class="btn" id="pauseResume">RESUME</button>
+      <button class="btn ghost" id="pauseHelp">HELP</button>
+      <button class="btn ghost" id="pauseMenu">MAIN MENU</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -1696,6 +1713,8 @@ addEventListener('keydown', e => {
   if(e.code === 'Space' || e.code === 'ArrowUp'){ e.preventDefault(); primaryAction(); }
   else if(e.code === 'KeyP') togglePause();
   else if(e.code === 'KeyM') toggleMute();
+  else if(e.code === 'KeyH') openHelp();
+  else if(e.code === 'Escape') closeHelp();
 });
 function togglePause(){
   if(state !== 'play' && state !== 'ready') return;
@@ -1711,6 +1730,55 @@ function toggleMute(){
 }
 $('#muteBtn').addEventListener('click', () => { AudioFX.init(); toggleMute(); });
 $('#pauseBtn').addEventListener('click', () => { AudioFX.init(); togglePause(); });
+function buildHelp(){
+  const list = items => items.map(i=>`<p class="hint"><b>${i.name}</b> — ${i.desc}</p>`).join('');
+  $('#helpBody').innerHTML =
+    `<p class="hint">SPACE / CLICK to flap • P pause • M sound • H help</p>` +
+    `<h3>UPGRADES</h3>` + list(CARDS) +
+    `<h3>RELICS</h3>` + list(RELICS) +
+    `<h3>MAP NODES</h3>` + Object.values(NODE_NAMES).map(v=>`<p class="hint">${v}</p>`).join('') +
+    `<h3>MERCHANT</h3>` +
+    `<p class="hint"><b>Heal 1 HP</b> — 15g</p><p class="hint"><b>Lucky Coin</b> — pay 20g, gain 35g</p><p class="hint"><b>Reroll Draft</b> — 10g</p>` +
+    `<h3>SKIN POWERS</h3>` + SKINS.filter(s=>s.power).map(s=>`<p class="hint"><b>${s.name}</b> — ${s.powerDesc}</p>`).join('') +
+    `<p class="hint">Fever: every 30 pipes, score x2 for 10s. Gold is earned per pipe and lost on death.</p>`;
+}
+let helpOpen = false, helpWasPaused = false;
+function openHelp(){
+  if(helpOpen) return;
+  helpOpen = true;
+  helpWasPaused = paused;
+  if(state==='play'||state==='ready'){ paused = true; show('#pauseOverlay', false); }
+  buildHelp();
+  show('#help', true);
+}
+function closeHelp(){
+  if(!helpOpen) return;
+  helpOpen = false;
+  show('#help', false);
+  if(state==='play'||state==='ready'){
+    paused = helpWasPaused;
+    show('#pauseOverlay', paused);
+    $('#pauseBtn').textContent = paused ? 'GO' : 'II';
+  }
+}
+function toMenu(){
+  closeHelp();
+  paused = false;
+  $('#pauseBtn').textContent = 'II';
+  show('#pauseOverlay', false);
+  show('#hud', false);
+  show('#draft', false); show('#map', false); show('#merchant', false); show('#chest', false); show('#victory', false); show('#gameover', false);
+  if(mode === 'rl') resetRun();
+  state = 'menu';
+  AudioFX.stopMusic();
+  refreshStats();
+  show('#menu', true);
+}
+$('#pauseResume').addEventListener('click', () => { AudioFX.click(); togglePause(); });
+$('#pauseHelp').addEventListener('click', () => { AudioFX.click(); openHelp(); });
+$('#pauseMenu').addEventListener('click', () => { AudioFX.click(); toMenu(); });
+$('#helpBtnMenu').addEventListener('click', () => { AudioFX.init(); AudioFX.click(); openHelp(); });
+$('#helpClose').addEventListener('click', closeHelp);
 $('#playBtn').addEventListener('click', () => { AudioFX.init(); startGame(); });
   $('#retryBtn').addEventListener('click', () => { AudioFX.init(); startGame(); });
   $('#modeClassic').addEventListener('click', () => { AudioFX.init(); AudioFX.click(); mode = 'classic'; persist(); refreshMode(); });
