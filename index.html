@@ -512,10 +512,10 @@ const MAP_ROWS = 16;
 const MAP_WIDTHS = [2,2,3,1,3,2,3,1,3,2,3,1,3,2,2,1];
 const BOSS_ROWS = [3,7,11];
 const BOSSES = [
-  { name:'GAPLORD',      passes:6,  phases:[{amp:120, spd:2.2}] },
-  { name:'GAPLORD II',   passes:7,  phases:[{amp:120, spd:2.6},{amp:150, spd:3.4}] },
-  { name:'GAPLORD III',  passes:8,  phases:[{amp:130, spd:3.0},{amp:165, spd:4.0}] },
-  { name:'FINAL BOSS',   passes:12, phases:[{amp:120, spd:2.4},{amp:150, spd:3.4},{amp:175, spd:4.4}] },
+  { name:'GAPLORD',     passes:6,  relic:'golden', colors:[150,45,80, 90,20,50, 210,80,120], eye:'#ff8090', phases:[{pattern:'sine', amp:120, spd:2.2}] },
+  { name:'GAPLORD II',  passes:7,  relic:'heart',  colors:[120,50,160, 80,30,110, 180,110,220], eye:'#c070ff', phases:[{pattern:'sine', amp:120, spd:2.6},{pattern:'chase', rate:0.9}] },
+  { name:'GAPLORD III', passes:8,  relic:'coin',   colors:[200,90,30, 140,60,20, 240,150,70], eye:'#ffb040', phases:[{pattern:'sine', amp:130, spd:3.0},{pattern:'pulse', spd:3.2}] },
+  { name:'FINAL BOSS',  passes:12, relic:'prism',  colors:[45,45,55, 25,25,35, 90,90,110], eye:'#ffd700', phases:[{pattern:'sine', amp:120, spd:2.4},{pattern:'chase', rate:1.1},{pattern:'pulse', spd:3.6}] },
 ];
 const NODE_ICONS = { stage:'🎯', boss:'💀', merchant:'🪙', chest:'📦', final:'👑' };
 const NODE_NAMES = { stage:'Stage — pipes & gold', boss:'GAPLORD — +15g + relic', merchant:'Merchant — heal, coins, reroll', chest:'Chest — mystery reward', final:'FINAL BOSS' };
@@ -604,8 +604,8 @@ function clickNode(r, i){
   show('#map', false);
   const type = map.rows[r][i].type;
   if(type === 'stage') startStage();
-  else if(type === 'boss'){ const d = BOSSES[Math.floor(r/4)]; run.boss = { passes:0, max:d.passes, final:false, def:d }; startStage(); }
-  else if(type === 'final'){ const d = BOSSES[3]; run.boss = { passes:0, max:d.passes, final:true, def:d }; startStage(); }
+  else if(type === 'boss'){ const d = BOSSES[Math.floor(r/4)]; run.boss = { passes:0, max:d.passes, final:false, phaseIdx:0, def:d }; startStage(); }
+  else if(type === 'final'){ const d = BOSSES[3]; run.boss = { passes:0, max:d.passes, final:true, phaseIdx:0, def:d }; startStage(); }
   else if(type === 'merchant') openMerchant();
   else openChest();
 }
@@ -983,8 +983,10 @@ function update(dt){
     // spawn pipes
     const last = pipes[pipes.length-1];
     if(mode==='rl' && run.boss){
-      if(!pipes.some(p => p.boss))
-        pipes.push({ x:W+40, gapY:345, baseY:345, gap:pipeGap(), passed:false, boss:true });
+      if(!pipes.some(p => p.boss)){
+        const bg = pipeGap();
+        pipes.push({ x:W+40, gapY:345, baseY:345, gap:bg, baseGap:bg, passed:false, boss:true });
+      }
     } else if(stageClearT <= 0 && (!last || last.x < W - 240)){
       if(t >= nextMoverAt){
         nextMoverAt = t + rand(10,15);
@@ -996,14 +998,28 @@ function update(dt){
 
     for(const p of pipes) p.x -= pipeSpeed()*pw.speed*dt;
     for(const p of pipes) if(p.move) p.gapY = p.base + Math.sin(t*p.spd + p.phase)*p.amp;
-    for(const p of pipes) if(p.boss){
+    for(const p of pipes) if(p.boss && run.boss){
       const b = run.boss, ph = b.def.phases;
       const idx = Math.min(ph.length-1, Math.floor(b.passes * ph.length / b.max));
+      if(idx !== b.phaseIdx){
+        b.phaseIdx = idx;
+        flash = 0.5; shake = 12; AudioFX.scream();
+        popups.push({ x:BIRD_X, y:bird.y-60, txt:'PHASE ' + (idx+1) + '/' + ph.length, life:1.2, max:1.2 });
+      }
       const ph2 = ph[idx];
-      p.gapY = p.baseY + Math.sin(t*ph2.spd)*ph2.amp;
+      if(ph2.pattern === 'chase'){
+        p.gapY += (bird.y - p.gapY) * Math.min(1, ph2.rate * dt);
+      } else if(ph2.pattern === 'pulse'){
+        p.pulseT = (p.pulseT || 0) + dt;
+        p.gap = Math.max(70, p.baseGap * (1 + 0.35*Math.sin(p.pulseT*ph2.spd)));
+        p.gapY = p.baseY + Math.sin(t*0.9)*40;
+      } else {
+        p.gapY = p.baseY + Math.sin(t*ph2.spd)*ph2.amp;
+      }
     }
     const mag = mode==='rl' && run ? run.upgrades.filter(u=>u==='magnet').length : 0;
     if(mag) for(const p of pipes){
+      if(p.boss) continue;
       const rate = Math.min(0.5*mag, 1.5);
       if(p.move) p.base += (bird.y - p.base)*rate*dt;
       else p.gapY += (bird.y - p.gapY)*rate*dt;
@@ -1026,25 +1042,27 @@ function update(dt){
     for(const p of pipes){
       if(!p.passed && p.x + 70 < BIRD_X && rebornT <= 0){
         p.passed = true;
-        if(p.boss){
+       if(p.boss){
           run.boss.passes++;
-         if(run.boss.passes >= run.boss.max){
-              const isFinal = run.boss.final;
-              run.boss = null;
-              flash = 0.5;
-              AudioFX.unlock();
-             if(isFinal){
-               showVictory();
-             } else {
-               run.gold += 15;
-               const r = RELICS[Math.floor(Math.random()*RELICS.length)];
-               run.relics.push(r.id);
-               stageClearT = 1.5;
-              popups.push({ x:BIRD_X, y:bird.y-50, txt:'GAPLORD DEFEATED! +15g', life:1.5, max:1.5 });
-              popups.push({ x:BIRD_X, y:bird.y-76, txt:r.name + '!', life:1.5, max:1.5 });
-              refreshRlHud();
-             }
-           } else {
+          const def = run.boss.def;
+          if(run.boss.passes >= run.boss.max){
+               const isFinal = run.boss.final;
+               run.boss = null;
+               flash = 0.5;
+               AudioFX.unlock();
+              if(isFinal){
+                showVictory();
+              } else {
+                run.gold += 15;
+                const r = RELICS.find(x => x.id === def.relic) || RELICS[Math.floor(Math.random()*RELICS.length)];
+                if(!run.relics.includes(r.id)) run.relics.push(r.id);
+                else run.gold += 10;
+                stageClearT = 1.5;
+               popups.push({ x:BIRD_X, y:bird.y-50, txt:def.name + ' DEFEATED! +15g', life:1.5, max:1.5 });
+               popups.push({ x:BIRD_X, y:bird.y-76, txt:r.name + '!', life:1.5, max:1.5 });
+               refreshRlHud();
+              }
+            } else {
             popups.push({ x:p.x+35, y:p.gapY, txt:'PASS ' + run.boss.passes + '/' + run.boss.max, life:0.8, max:0.8 });
             AudioFX.score();
           }
@@ -1323,9 +1341,10 @@ function drawPipe(p, nf){
   const topH = p.gapY - p.gap/2, botY = p.gapY + p.gap/2;
   let body, dark, light;
   if(p.boss){
-    body = `rgb(${Math.round(150*f)},${Math.round(45*f)},${Math.round(80*f)})`;
-    dark = `rgb(${Math.round(90*f)},${Math.round(20*f)},${Math.round(50*f)})`;
-    light = `rgb(${Math.round(210*f)},${Math.round(80*f)},${Math.round(120*f)})`;
+    const c = (run.boss && run.boss.def.colors) ? run.boss.def.colors : [150,45,80, 90,20,50, 210,80,120];
+    body = `rgb(${Math.round(c[0]*f)},${Math.round(c[1]*f)},${Math.round(c[2]*f)})`;
+    dark = `rgb(${Math.round(c[3]*f)},${Math.round(c[4]*f)},${Math.round(c[5]*f)})`;
+    light = `rgb(${Math.round(c[6]*f)},${Math.round(c[7]*f)},${Math.round(c[8]*f)})`;
   } else if(p.move){
     body = `rgb(${Math.round(235*f)},${Math.round(165*f)},${Math.round(65*f)})`;
     dark = `rgb(${Math.round(165*f)},${Math.round(105*f)},${Math.round(35*f)})`;
@@ -1342,9 +1361,13 @@ function drawPipe(p, nf){
     chevron(p.x+35, topH-13, up);
     chevron(p.x+35, botY+13, up);
   } else if(p.boss){
-    const up = Math.cos(t*2.2) < 0;
-    chevron(p.x+35, topH-13, up);
-    chevron(p.x+35, botY+13, up);
+    const ec = (run.boss && run.boss.def.eye) || '#ff8090';
+    ctx.save();
+    ctx.shadowColor = ec; ctx.shadowBlur = 10;
+    ctx.fillStyle = ec;
+    ctx.beginPath(); ctx.arc(p.x+35, topH-10, 5, 0, TAU); ctx.fill();
+    ctx.beginPath(); ctx.arc(p.x+35, botY+10, 5, 0, TAU); ctx.fill();
+    ctx.restore();
   }
 }
 function chevron(x, y, up){

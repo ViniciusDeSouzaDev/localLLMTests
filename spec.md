@@ -72,8 +72,13 @@ run = {
 
 ## 7. Boss & relics
 
-- Boss stops: tall pipe pair with a **moving gap** (sine wave). Four bosses with **multi-phase** patterns (speed/amplitude ramp per phase, shown on the HP bar): GAPLORD (6 passes, 1 phase), GAPLORD II (7, 2 phases), GAPLORD III (8, 2 phases), FINAL BOSS (12, 3 phases). HP bar on top shows name + phase.
-- Survive → boss dead: `+15 gold`, +1 relic from pool, banner, → draft → map. Final boss → victory screen.
+- Boss stops: tall pipe pair with a **moving gap**, each boss has a unique color theme + glowing eye on the gap edges. Four bosses with **multi-phase** patterns (each phase is a different mechanic, shown on the HP bar):
+  - GAPLORD (6 passes, 1 phase): `sine` — baseline oscillation (red)
+  - GAPLORD II (7, 2 phases): `sine` → `chase` — gap tracks your height (purple)
+  - GAPLORD III (8, 2 phases): `sine` → `pulse` — gap breathes open/closed (orange)
+  - FINAL BOSS (12, 3 phases): `sine` → `chase` → `pulse` (black/gold)
+  - Phase change: flash + shake + scream + "PHASE X/Y" popup. Magnet upgrade does NOT affect boss pipes.
+- Survive → boss dead: `+15 gold` + the boss's **signature relic** (GAPLORD→golden, II→heart, III→coin, FINAL→prism; +10 gold if already owned), banner, → draft → map. Final boss → victory screen.
 - Relic pool (id, name, desc):
   - `golden` — Golden Feather: fever lasts 15s
   - `heart` — Heart Pipe: start each stage with +1 HP (max maxHp)
