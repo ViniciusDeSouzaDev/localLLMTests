@@ -1142,8 +1142,9 @@ function update(dt){
     } else if(stageClearT <= 0 && (!last || last.x < W - 240)){
       if(mode==='rl' && run.stage >= 2 && Math.random() < Math.min(0.12 + run.stage*0.04, 0.35)){
         pipes.push({ x:W+40, gapY:rand(150, GROUND_Y-150), gap:pipeGap()+40, passed:false, spear:true });
-      } else if(mode==='rl' && run.stage >= 3 && Math.random() < Math.min(0.08 + run.stage*0.03, 0.25)){
-        pipes.push({ x:W+40, gapY:rand(150, GROUND_Y-150), gap:pipeGap(), baseGap:pipeGap(), passed:false, hammer:true, phase:rand(0,TAU), spd:rand(1.4,2.2) });
+      } else if(mode==='rl' && run.stage >= 3 && Math.random() < Math.min(0.05 + run.stage*0.02, 0.15)){
+        const hg = pipeGap()+40;
+        pipes.push({ x:W+40, gapY:rand(150, GROUND_Y-150), gap:hg, baseGap:hg, passed:false, hammer:true, phase:rand(0,TAU), spd:rand(1.4,2.2) });
       } else if(t >= nextMoverAt){
         nextMoverAt = t + rand(10,15);
         const amp = rand(28,42), base = rand(150+amp, GROUND_Y-150-amp);
@@ -1932,7 +1933,7 @@ function buildHelp(){
     `<h3>PIPES</h3>` +
     `<p class="hint"><b>Mover</b> — gold pipe, drifts up and down</p>` +
     `<p class="hint"><b>Spear</b> — steel pipe, bigger gap but deals 2x damage (stage 2+)</p>` +
-    `<p class="hint"><b>Hammer</b> — red pipe, gap slams shut and opens again (stage 3+)</p>` +
+    `<p class="hint"><b>Hammer</b> — red pipe, bigger gap that slams shut and opens again (stage 3+)</p>` +
     `<h3>MAP NODES</h3>` + Object.values(NODE_NAMES).map(v=>`<p class="hint">${v}</p>`).join('') +
     `<h3>MERCHANT</h3>` +
     `<p class="hint"><b>Heal 1 HP</b> — 15g</p><p class="hint"><b>Lucky Coin</b> — pay 20g, gain 35g</p><p class="hint"><b>Reroll Draft</b> — 10g</p>` +
