@@ -319,6 +319,9 @@
       <p id="merchantGold" class="hint"></p>
       <div id="merchantOffers">
         <button class="draftCard" id="merchHeal"><span class="dcName">Heal 1 HP</span><span class="dcDesc">15g</span></button>
+        <button class="draftCard" id="merchShield"><span class="dcName">Shield</span><span class="dcDesc">+1 shield charge — 25g</span></button>
+        <button class="draftCard" id="merchTough"><span class="dcName">Tough</span><span class="dcDesc">+1 max HP, heal 1 — 30g</span></button>
+        <button class="draftCard" id="merchChip"><span class="dcName">Fever Chip</span><span class="dcDesc">Fever threshold -10 — 25g</span></button>
         <button class="draftCard" id="merchCoin"><span class="dcName">Lucky Coin</span><span class="dcDesc">Pay 20g, gain 35g</span></button>
         <button class="draftCard" id="merchReroll"><span class="dcName">Reroll Draft</span><span class="dcDesc">10g</span></button>
       </div>
@@ -510,6 +513,9 @@ function openMerchant(){
 function refreshMerchant(){
   $('#merchantGold').textContent = '🪙 ' + run.gold;
   $('#merchHeal').disabled = run.hp >= mods().maxHp || run.gold < 15;
+  $('#merchShield').disabled = run.gold < 25;
+  $('#merchTough').disabled = run.gold < 30;
+  $('#merchChip').disabled = run.gold < 25;
   $('#merchCoin').disabled = run.gold < 20 || luckyUsed;
   $('#merchReroll').disabled = run.gold < 10;
   renderCards($('#merchantDraft'), pendingDraft, false);
@@ -535,7 +541,7 @@ const BOSSES = [
   { name:'FINAL BOSS',  passes:12, relic:'prism',  colors:[45,45,55, 25,25,35, 90,90,110], eye:'#ffd700', phases:[{pattern:'sine', amp:120, spd:2.4},{pattern:'chase', rate:1.1},{pattern:'pulse', spd:3.6}] },
 ];
 const NODE_ICONS = { stage:'🎯', boss:'💀', merchant:'🪙', chest:'📦', final:'👑' };
-const NODE_NAMES = { stage:'Stage — pipes & gold', boss:'GAPLORD — +15g + relic', merchant:'Merchant — heal, coins, reroll', chest:'Chest — mystery reward', final:'FINAL BOSS' };
+const NODE_NAMES = { stage:'Stage — pipes & gold', boss:'GAPLORD — +15g + relic', merchant:'Merchant — heal, shield, HP, chip, coins, reroll', chest:'Chest — mystery reward', final:'FINAL BOSS' };
 
 function genMap(){
   const rows = [];
@@ -763,9 +769,12 @@ const AudioFX = {
        mel:[74,74,77,74, 79,77,74,77, 76,76,74,76, 77,77,74,77],
        bas:[50,0,50,0, 48,0,48,0, 43,0,43,0, 47,0,47,0] },
     meadow: { bpm:110, melType:'triangle', melV:0.35, hat:4,
-       mel:[69,72,74,72, 76,74,72,74, 71,74,72,71, 69,71,72,0],
-       bas:[48,0,55,0, 50,0,57,0, 43,0,50,0, 45,0,52,0] },
-  },
+        mel:[69,72,74,72, 76,74,72,74, 71,74,72,71, 69,71,72,0],
+        bas:[48,0,55,0, 50,0,57,0, 43,0,50,0, 45,0,52,0] },
+     gameover:{ bpm:72, melType:'sine', melV:0.4, hat:16, melD:0.5,
+        mel:[69,0,0,67, 0,0,64,0, 62,0,0,60, 0,0,57,0],
+        bas:[45,0,0,0, 41,0,0,0, 43,0,0,0, 41,0,0,0] },
+   },
   POOL:['day','night','chill','hype','mystery','sunset','forest','city','storm','dream','ocean','candy','space','jungle','meadow'],
   randomTrack(){ return this.POOL[Math.floor(Math.random()*this.POOL.length)]; },
   startMusic(mode){
@@ -790,7 +799,7 @@ const AudioFX = {
     const mel = tr.mel[step%16];
     const bas = tr.bas[step%16];
     const at = t - this.ctx.currentTime;
-    if(mel) this.tone({f:M(mel), d:0.16, type:tr.melType, v:tr.melV, at, dest:this.musicGain});
+    if(mel) this.tone({f:M(mel), d:tr.melD||0.16, type:tr.melType, v:tr.melV, at, dest:this.musicGain});
     if(bas) this.tone({f:M(bas), d:0.3,  type:'sine', v:0.5, at, dest:this.musicGain});
     if(step % tr.hat === tr.hat/2) this.noise({d:0.03, v:0.05, f:6000, q:1, at, dest:this.musicGain});
   },
@@ -986,6 +995,7 @@ function showGameover(){
     m.style.background = `radial-gradient(circle at 35% 30%, #fff, ${medal.c} 55%, rgba(0,0,0,.25))`;
   } else { m.textContent = 'NO MEDAL'; m.style.background = 'rgba(255,255,255,.15)'; }
   show('#gameover', true);
+  AudioFX.startMusic('gameover');
   checkUnlocks();
 }
 
@@ -1896,6 +1906,24 @@ $('#playBtn').addEventListener('click', () => { AudioFX.init(); startGame(); });
   $('#merchHeal').addEventListener('click', () => {
     if(run.gold < 15 || run.hp >= mods().maxHp) return;
     run.gold -= 15; run.hp++;
+    AudioFX.score(); refreshMerchant(); refreshRlHud();
+  });
+  $('#merchShield').addEventListener('click', () => {
+    if(run.gold < 25) return;
+    run.gold -= 25;
+    run.upgrades.push('shield'); shield++;
+    AudioFX.score(); refreshMerchant(); refreshRlHud();
+  });
+  $('#merchTough').addEventListener('click', () => {
+    if(run.gold < 30) return;
+    run.gold -= 30;
+    run.upgrades.push('tough'); run.maxHp++; run.hp = Math.min(run.maxHp, run.hp + 1);
+    AudioFX.score(); refreshMerchant(); refreshRlHud();
+  });
+  $('#merchChip').addEventListener('click', () => {
+    if(run.gold < 25) return;
+    run.gold -= 25;
+    run.upgrades.push('chip');
     AudioFX.score(); refreshMerchant(); refreshRlHud();
   });
   $('#merchCoin').addEventListener('click', () => {
