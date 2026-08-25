@@ -425,7 +425,7 @@ const CARDS = [
   { id:'vampire', icon:'🧛', name:'Vampire',    desc:'Near-miss heals 1 HP (once per stage, stacks)' },
   { id:'magnet',  icon:'🧲', name:'Magnet',     desc:'Pipes drift toward your height (stacks)' },
   { id:'greed',   icon:'🪙', name:'Greed',      desc:'+2 gold per pipe' },
-  { id:'chip',    icon:'🔥', name:'Fever Chip', desc:'Fever threshold -10' },
+  { id:'chip',    icon:'🔥', name:'Fever Chip', desc:'Fever triggers 10 pipes sooner' },
   { id:'tough',   icon:'💪', name:'Tough',      desc:'+1 max HP' },
   { id:'slow',    icon:'🐌', name:'Slow Mo',    desc:'Pipe speed -10%' },
   { id:'storm',   icon:'⚡', name:'Storm',      desc:'Fever duration x2', p2:true },
@@ -468,7 +468,7 @@ const UI_STR = {
     ascensionStats:'Path 2 cleared — {n} pipes — 🪙{g}  •  Ascension #{a}',
     menuHint:'SPACE / CLICK to flap &nbsp;•&nbsp; P pause &nbsp;•&nbsp; M sound &nbsp;•&nbsp; H help',
     heal:'Heal 1 HP', healDesc:'15g', shieldOffer:'Shield', shieldDesc:'+1 shield charge — 25g',
-    toughOffer:'Tough', toughDesc:'+1 max HP — 30g', chipOffer:'Fever Chip', chipDesc:'Fever threshold -10 — 25g',
+    toughOffer:'Tough', toughDesc:'+1 max HP — 30g', chipOffer:'Fever Chip', chipDesc:'Fever 10 pipes sooner — 25g',
     coinOffer:'Lucky Coin', coinDesc:'Pay 20g, gain 35g', phoenixOffer:'Phoenix', phoenixDesc:'+1 revive — 40g',
     anchorOffer:'Anchor', anchorDesc:'Base magnet 2 — 35g', rerollOffer:'Reroll Draft', rerollDesc:'10g',
     nextDraft:'Next draft — pick one after leaving',
@@ -492,14 +492,14 @@ const UI_STR = {
     selected:'SELECIONADO', tapToWear:'TOQUE PARA USAR', unlockAt:'Desbloqueie com {n} pts',
     skinUnlocked:'Personagem desbloqueado: {n}!', reachUnlock:'Alcance {n} pontos totais para desbloquear {s}',
     fever:'FEBRE!', combo:'COMBO', shieldReady:'ESCUDO PRONTO', rebornReady:'RENASCER PRONTO',
-    again:'DE NOVO!', phase:'FASE', pass:'PASSADA', plusHp:'+1 PV', minusHp:'-{n} PV', shieldTxt:'ESCUDO', rebornTxt:'RENASCER',
+    again:'DE NOVO!', phase:'FASE', pass:'PASSOU', plusHp:'+1 PV', minusHp:'-{n} PV', shieldTxt:'ESCUDO', rebornTxt:'RENASCER',
     stageExcl:'ETAPA {n}!',
     rlStats:'CAMINHO {p} — ETAPA {s}/{r}  •  {n} CANOS  •  🪙{g}',
     victoryStats:'Etapa {s} — {n} canos — 🪙{g}  •  Vitória #{v}',
     ascensionStats:'Caminho 2 concluído — {n} canos — 🪙{g}  •  Ascensão #{a}',
     menuHint:'ESPAÇO / CLIQUE para voar &nbsp;•&nbsp; P pausa &nbsp;•&nbsp; M som &nbsp;•&nbsp; H ajuda',
     heal:'Curar 1 PV', healDesc:'15g', shieldOffer:'Escudo', shieldDesc:'+1 carga de escudo — 25g',
-    toughOffer:'Resistência', toughDesc:'+1 PV máx. — 30g', chipOffer:'Chip de Febre', chipDesc:'Limite de febre -10 — 25g',
+    toughOffer:'Resistência', toughDesc:'+1 PV máx. — 30g', chipOffer:'Chip de Febre', chipDesc:'Febre 10 canos antes — 25g',
     coinOffer:'Moeda da Sorte', coinDesc:'Pague 20g, ganhe 35g', phoenixOffer:'Fênix', phoenixDesc:'+1 renascimento — 40g',
     anchorOffer:'Âncora', anchorDesc:'Ímã base 2 — 35g', rerollOffer:'Re sortear carta', rerollDesc:'10g',
     nextDraft:'Próxima carta — escolha uma ao sair',
@@ -532,7 +532,7 @@ const DATA_PT = {
     feather:{n:'Penas',d:'Gravidade -10%'}, midas:{n:'Pontuador',d:'+1 ponto por cano'},
     shield:{n:'Escudo',d:'+1 carga de escudo'}, vampire:{n:'Vampiro',d:'Quase-acerto cura 1 PV (1x por etapa, acumulável)'},
     magnet:{n:'Ímã',d:'Canos se aproximam da sua altura (acumulável)'}, greed:{n:'Ganância',d:'+2 ouro por cano'},
-    chip:{n:'Chip de Febre',d:'Limite de febre -10'}, tough:{n:'Resistência',d:'+1 PV máx.'},
+    chip:{n:'Chip de Febre',d:'Febre vem 10 canos antes'}, tough:{n:'Resistência',d:'+1 PV máx.'},
     slow:{n:'Câmera Lenta',d:'Velocidade dos canos -10%'}, storm:{n:'Tempestade',d:'Duração da febre x2'},
     titan:{n:'Titã',d:'+1 PV máx. e +1 escudo'},
   },
@@ -545,6 +545,18 @@ const DATA_PT = {
 };
 const NODE_NAMES_PT = { stage:'Etapa — canos e ouro', boss:'GAPLORD — +15g + relíquia', merchant:'Comerciante — cura, escudo, PV, chip, moedas, re sortear', chest:'Baú — recompensa misteriosa', final:'CHEFE FINAL', elite:'Elite — mini-chefe, +20g + relíquia', labyrinth:'Labirinto — paredes móveis, +25g + relíquia' };
 function nodeNames(){ return lang === 'pt' ? NODE_NAMES_PT : NODE_NAMES; }
+function checkI18n(){
+  const diff = (en, pt, label) => {
+    const onlyEn = Object.keys(en).filter(k => !(k in pt));
+    const onlyPt = Object.keys(pt).filter(k => !(k in en));
+    if(onlyEn.length || onlyPt.length) console.warn(`[i18n] ${label}: EN-only=[${onlyEn}] PT-only=[${onlyPt}]`);
+  };
+  diff(UI_STR.en, UI_STR.pt, 'UI_STR');
+  diff(DATA_ORIG.skins, DATA_PT.skins, 'skins');
+  diff(DATA_ORIG.cards, DATA_PT.cards, 'cards');
+  diff(DATA_ORIG.relics, DATA_PT.relics, 'relics');
+  diff(NODE_NAMES, NODE_NAMES_PT, 'nodes');
+}
 function applyLang(){
   const d = lang === 'pt' ? DATA_PT : DATA_ORIG;
   SKINS.forEach(s => { const t = d.skins[s.id]; if(t){ s.name=t.n; s.powerName=t.p; s.powerDesc=t.d; } });
@@ -620,7 +632,9 @@ function refreshRlHud(){
   show('#runItems', mode==='rl' && !!run);
   if(mode !== 'rl' || !run) return;
   const maxHp = mods().maxHp;
-  $('#rlHearts').textContent = '♥'.repeat(Math.max(0, run.hp)) + '♡'.repeat(Math.max(0, maxHp - run.hp));
+  const heartsEl = $('#rlHearts');
+  heartsEl.textContent = '♥'.repeat(Math.max(0, run.hp)) + '♡'.repeat(Math.max(0, maxHp - run.hp));
+  heartsEl.style.fontSize = maxHp > 9 ? '10px' : maxHp > 6 ? '12px' : '';
   $('#rlGold').textContent = '🪙' + run.gold;
   $('#rlStage').textContent = T('stage') + ' ' + Math.max(1, run.stage);
   renderRunItems();
@@ -2415,6 +2429,7 @@ function frame(now){
 
 /* ================= boot ================= */
 AudioFX.muted = save.muted;
+checkI18n();
 applyLang();
 buildShop();
 refreshStats();
