@@ -199,8 +199,8 @@
     transition:transform .12s, border-color .2s, background .2s;
   }
   .draftCard:hover { transform:translateY(-3px); border-color:#ffd93b; background:rgba(255,217,59,.12); }
-  .dcName { font-size:14px; font-weight:900; letter-spacing:1px; color:#ffd93b; }
-  .dcDesc { font-size:11px; font-weight:600; color:#cfd8ff; letter-spacing:.5px; }
+  .dcName { font-size:14px; font-weight:900; letter-spacing:1px; color:#ffd93b; text-align:center; width:100%; }
+  .dcDesc { font-size:11px; font-weight:600; color:#cfd8ff; letter-spacing:.5px; text-align:center; width:100%; }
   @media (max-width:520px){
     #draftCards { flex-direction:column; align-items:center; }
     .draftCard { width:100%; max-width:260px; }
@@ -301,9 +301,10 @@
 
   <div id="victory" class="panel hidden">
     <div class="card">
-      <h2>VICTORY!</h2>
+      <h2 id="victoryTitle">VICTORY!</h2>
       <p class="hint" id="victoryStats"></p>
-      <button class="btn" id="victoryBtn">PLAY AGAIN</button>
+      <button class="btn" id="continueBtn">CONTINUE → PATH 2</button>
+      <button class="btn ghost" id="victoryBtn">PLAY AGAIN</button>
     </div>
   </div>
 
@@ -325,6 +326,8 @@
         <button class="draftCard" id="merchTough"><span class="dcName">Tough</span><span class="dcDesc">+1 max HP, heal 1 — 30g</span></button>
         <button class="draftCard" id="merchChip"><span class="dcName">Fever Chip</span><span class="dcDesc">Fever threshold -10 — 25g</span></button>
         <button class="draftCard" id="merchCoin"><span class="dcName">Lucky Coin</span><span class="dcDesc">Pay 20g, gain 35g</span></button>
+        <button class="draftCard" id="merchPhoenix"><span class="dcName">Phoenix</span><span class="dcDesc">+1 revive — 40g</span></button>
+        <button class="draftCard" id="merchAnchor"><span class="dcName">Anchor</span><span class="dcDesc">Base magnet 2 — 35g</span></button>
         <button class="draftCard" id="merchReroll"><span class="dcName">Reroll Draft</span><span class="dcDesc">10g</span></button>
       </div>
       <p class="hint">Next draft — pick one after leaving</p>
@@ -381,8 +384,10 @@ const SKINS = [
   { id:'violet',  name:'Violet',  body:'#b388ff', belly:'#f3e9ff', wing:'#8a4fd6', trail:'#d7baff', unlock:100, power:'time', powerName:'Time', powerDesc:'Pipes 20% slower' },
   { id:'golden',  name:'Golden',  body:'#ffd700', belly:'#fffbe0', wing:'#d9a400', trail:'#fff3a0', unlock:200, sparkle:true, power:'midas', powerName:'Midas', powerDesc:'Double points' },
   { id:'phantom', name:'Phantom', body:'#d7e0e6', belly:'#ffffff', wing:'#9fb3bd', trail:'#ffffff', unlock:300, ghost:true, power:'reborn', powerName:'Reborn', powerDesc:'Die, then come back mid-run' },
-  { id:'rainbow', name:'Rainbow', body:null, belly:'#ffffff', wing:null, trail:null, unlock:500, rainbow:true, power:'prism', powerName:'Prism', powerDesc:'Shield + slow pipes + x2 pts' },
   { id:'demon', name:'Demon', body:'#4a1526', belly:'#6b2038', wing:'#2a0a14', trail:'#ff3b3b', unlock:750, demon:true, power:'compact', powerName:'Demon', powerDesc:'Tiny hitbox + starts with Vampire x2' },
+  { id:'cat', name:'Cat', body:'#e8973e', belly:'#fff3e0', wing:'#c46a1e', trail:'#ffd9a0', unlock:1000, power:'hearts', powerName:'Nine Lives', powerDesc:'Starts with 7 HP' },
+  { id:'rainbow', name:'Rainbow', body:null, belly:'#ffffff', wing:null, trail:null, unlock:10000, rainbow:true, power:'prism', powerName:'Prism', powerDesc:'Shield + slow pipes + x2 pts' },
+  { id:'god', name:'God', body:'#fff3c4', belly:'#fffdf2', wing:'#f7c948', trail:'#fff6d6', unlock:100000, god:true, sparkle:true, power:'god', powerName:'God', powerDesc:'Never dies + faster pipes + Magnet x5' },
 ];
 const skinById = id => SKINS.find(s=>s.id===id) || SKINS[0];
 
@@ -391,10 +396,13 @@ function powers(){
   return {
     grav:   p==='feather' ? 0.85 : 1,
     radius: (p==='compact' || p==='prism') ? 11 : BIRD_R,
-    shield: (p==='shield' || p==='prism') ? 1 : 0,
+    shield: p==='god' ? Infinity : ((p==='shield' || p==='prism') ? 1 : 0),
     revive: p==='reborn' ? 1 : 0,
-    speed:  p==='time' ? 0.8 : (p==='prism' ? 0.85 : 1),
+    speed:  p==='god' ? 1.3 : (p==='time' ? 0.8 : (p==='prism' ? 0.85 : 1)),
     mult:   (p==='midas' || p==='prism') ? 2 : 1,
+    maxHp:  p==='hearts' ? 7 : 3,
+    god:    p==='god',
+    magnet: p==='god' ? 5 : 0,
   };
 }
 
@@ -419,6 +427,8 @@ const CARDS = [
   { id:'chip',    icon:'🔥', name:'Fever Chip', desc:'Fever threshold -10' },
   { id:'tough',   icon:'💪', name:'Tough',      desc:'+1 max HP and heal 1' },
   { id:'slow',    icon:'🐌', name:'Slow Mo',    desc:'Pipe speed -10%' },
+  { id:'storm',   icon:'⚡', name:'Storm',      desc:'Fever duration x2', p2:true },
+  { id:'titan',   icon:'🗡️', name:'Titan',      desc:'+1 max HP and +1 shield', p2:true },
 ];
 
 const RELICS = [
@@ -427,9 +437,17 @@ const RELICS = [
   { id:'coin',   icon:'💰', name:'Coin Magnet',    desc:'+1 gold per pipe' },
   { id:'prism',  icon:'🔮', name:'Prism Shard',    desc:'Pipes 15% slower' },
 ];
+const RELICS2 = [
+  { id:'anchor',  icon:'⚓', name:'Anchor',    desc:'Base magnet 2' },
+  { id:'phoenix', icon:'🔥', name:'Phoenix',   desc:'+1 revive' },
+  { id:'void',    icon:'🕳️', name:'Void Core', desc:'Fever every 15 pipes' },
+  { id:'echo',    icon:'📯', name:'Echo',      desc:'Near-miss +3 gold' },
+];
+function relicPool(){ return (run && run.path === 2) ? RELICS2 : RELICS; }
 
 function resetRun(){
-  run = { hp:3, maxHp:3, gold:0, stage:0, pipesInStage:0, totalPipes:0, upgrades:[], relics:[], vampUsed:0, boss:null };
+  const baseHp = powers().maxHp;
+  run = { hp:baseHp, maxHp:baseHp, gold:0, stage:0, pipesInStage:0, totalPipes:0, upgrades:[], relics:[], vampUsed:0, boss:null, path:1 };
   if(skinById(save.selected).id === 'demon') run.upgrades.push('vampire','vampire');
   stageClearT = 0;
   pendingDraft = null;
@@ -443,7 +461,7 @@ function hasRelic(id){ return mode==='rl' && run && run.relics.includes(id); }
 
 function mods(){
   const pw = powers();
-  const m = { grav:pw.grav, speed:pw.speed, mult:pw.mult, bonus:0, shield:pw.shield, feverEvery:30, maxHp:3, radius:pw.radius };
+  const m = { grav:pw.grav, speed:pw.speed, mult:pw.mult, bonus:0, shield:pw.shield, feverEvery:30, maxHp:pw.maxHp, radius:pw.radius };
   if(mode === 'rl' && run){
     for(const u of run.upgrades){
       if(u==='feather') m.grav *= 0.9;
@@ -515,7 +533,7 @@ function refreshMode(){
 }
 
 function rollCards(){
-  const pool = CARDS.slice(), picks = [];
+  const pool = CARDS.filter(c => !c.p2 || (run && run.path === 2)).slice(), picks = [];
   while(picks.length < 3 && pool.length){
     picks.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]);
   }
@@ -561,6 +579,10 @@ function refreshMerchant(){
   $('#merchTough').disabled = run.gold < 30;
   $('#merchChip').disabled = run.gold < 25;
   $('#merchCoin').disabled = run.gold < 20 || luckyUsed;
+  show('#merchPhoenix', run.path === 2);
+  $('#merchPhoenix').disabled = run.gold < 40 || run.relics.includes('phoenix');
+  show('#merchAnchor', run.path === 2);
+  $('#merchAnchor').disabled = run.gold < 35 || run.relics.includes('anchor');
   $('#merchReroll').disabled = run.gold < 10;
   renderCards($('#merchantDraft'), pendingDraft, false);
 }
@@ -572,7 +594,7 @@ function gainUpgrade(id){
 }
 
 function gainRelic(id){
-  const rel = RELICS.find(x=>x.id===id);
+  const rel = RELICS.concat(RELICS2).find(x=>x.id===id);
   if(!rel || run.relics.includes(id)) return false;
   run.relics.push(id);
   showToast(rel.icon + ' ' + rel.name + ' — ' + rel.desc);
@@ -583,54 +605,67 @@ function pickCard(id){
   AudioFX.click();
   gainUpgrade(id);
   if(id === 'tough'){ run.maxHp++; run.hp = Math.min(run.maxHp, run.hp + 1); }
+  if(id === 'titan'){ run.maxHp++; run.hp = Math.min(run.maxHp, run.hp + 1); shield++; }
   if(id === 'shield'){ shield++; }
   show('#draft', false);
   refreshRlHud();
   showMap();
 }
 
-const MAP_ROWS = 16;
-const MAP_WIDTHS = [2,2,3,1,3,2,3,1,3,2,3,1,3,2,2,1];
-const BOSS_ROWS = [3,7,11];
+const PATHS = [
+  null,
+  { rows:16, widths:[2,2,3,1,3,2,3,1,3,2,3,1,3,2,2,1], bossRows:[3,7,11] },
+  { rows:14, widths:[2,2,3,1,3,2,3,1,3,2,3,1,2,1], bossRows:[3,7,11] }
+];
+function pathCfg(){ return PATHS[run.path || 1]; }
 const BOSSES = [
   { name:'GAPLORD',     passes:6,  relic:'golden', colors:[150,45,80, 90,20,50, 210,80,120], eye:'#ff8090', phases:[{pattern:'sine', amp:120, spd:2.2}] },
   { name:'GAPLORD II',  passes:7,  relic:'heart',  colors:[120,50,160, 80,30,110, 180,110,220], eye:'#c070ff', phases:[{pattern:'sine', amp:120, spd:2.6},{pattern:'chase', rate:0.9}] },
   { name:'GAPLORD III', passes:8,  relic:'coin',   colors:[200,90,30, 140,60,20, 240,150,70], eye:'#ffb040', phases:[{pattern:'sine', amp:130, spd:3.0},{pattern:'pulse', spd:3.2}] },
   { name:'FINAL BOSS',  passes:12, relic:'prism',  colors:[45,45,55, 25,25,35, 90,90,110], eye:'#ffd700', phases:[{pattern:'sine', amp:120, spd:2.4},{pattern:'chase', rate:1.1},{pattern:'pulse', spd:3.6}] },
 ];
-const ELITE = { name:'ELITE', passes:5, colors:[30,140,90, 15,90,60, 90,220,150], eye:'#40ff90', phases:[{pattern:'sine', amp:110, spd:2.8}] };
-const NODE_ICONS = { stage:'🎯', boss:'💀', merchant:'🪙', chest:'📦', final:'👑', elite:'⚔️' };
-const NODE_NAMES = { stage:'Stage — pipes & gold', boss:'GAPLORD — +15g + relic', merchant:'Merchant — heal, shield, HP, chip, coins, reroll', chest:'Chest — mystery reward', final:'FINAL BOSS', elite:'Elite — mini-boss, +20g + relic' };
+const ELITE = { name:'ELITE', passes:5, colors:[30,140,90, 15,90,60, 90,222,150], eye:'#40ff90', phases:[{pattern:'sine', amp:110, spd:2.8}] };
+const BOSSES2 = [
+  { name:'GAPLORD IV',   passes:9,  relic:'anchor',   colors:[20,110,140, 10,70,90, 80,200,230], eye:'#40e0ff', phases:[{pattern:'pulse', spd:3.4},{pattern:'sine', amp:140, spd:3.2}] },
+  { name:'GAPLORD V',    passes:10, relic:'phoenix',  colors:[150,30,60, 90,15,35, 230,70,110], eye:'#ff5070', phases:[{pattern:'sine', amp:150, spd:3.4},{pattern:'chase', rate:1.4},{pattern:'pulse', spd:4.0}] },
+  { name:'THE WARDEN',   passes:10, relic:'void',     colors:[110,95,60, 70,60,40, 180,160,110], eye:'#ffe9a0', phases:[{pattern:'pulse', spd:3.8},{pattern:'labyrinth', amp:260, spd:2.6, bspd:1.7},{pattern:'chase', rate:1.6}] },
+  { name:'VOIDLORD',     passes:14, relic:'prism',    colors:[60,30,90, 35,15,55, 130,70,190], eye:'#e0b0ff', phases:[{pattern:'sine', amp:160, spd:3.6},{pattern:'pulse', spd:4.2},{pattern:'labyrinth', amp:280, spd:3.0, bspd:2.0},{pattern:'chase', rate:1.8}] },
+];
+const LABYRINTH = { name:'LABYRINTH', passes:6, colors:[70,90,70, 45,60,45, 140,170,140], eye:'#90ff90', phases:[{pattern:'labyrinth', amp:240, spd:2.6, bspd:1.7}] };
+const NODE_ICONS = { stage:'🎯', boss:'💀', merchant:'🪙', chest:'📦', final:'👑', elite:'⚔️', labyrinth:'🌀' };
+const NODE_NAMES = { stage:'Stage — pipes & gold', boss:'GAPLORD — +15g + relic', merchant:'Merchant — heal, shield, HP, chip, coins, reroll', chest:'Chest — mystery reward', final:'FINAL BOSS', elite:'Elite — mini-boss, +20g + relic', labyrinth:'Labyrinth — shifting walls, +25g + relic' };
 
-function genMap(){
+function genMap(path){
+  const cfg = PATHS[path || 1];
   const rows = [];
-  for(let r=0;r<MAP_ROWS;r++){
+  for(let r=0;r<cfg.rows;r++){
     const row = [];
-    for(let i=0;i<MAP_WIDTHS[r];i++){
+    for(let i=0;i<cfg.widths[r];i++){
       let type;
-      if(r === MAP_ROWS-1) type = 'final';
-      else if(BOSS_ROWS.includes(r)) type = 'boss';
+      if(r === cfg.rows-1) type = 'final';
+      else if(cfg.bossRows.includes(r)) type = 'boss';
       else {
         const roll = Math.random();
-        if(MAP_WIDTHS[r] >= 2 && roll >= 0.88) type = 'elite';
-        else type = roll < 0.58 ? 'stage' : roll < 0.78 ? 'chest' : 'merchant';
+        if(cfg.widths[r] >= 2 && roll >= 0.85) type = (path === 2) ? 'labyrinth' : 'elite';
+        else type = roll < 0.55 ? 'stage' : roll < 0.75 ? 'chest' : 'merchant';
       }
       row.push({ type, visited:false });
     }
     rows.push(row);
   }
   const edges = [];
-  for(let r=0;r<MAP_ROWS-1;r++){
+  for(let r=0;r<cfg.rows-1;r++){
     const a = rows[r].length, b = rows[r+1].length;
     for(let i=0;i<a;i++)
       for(let j=0;j<b;j++) edges.push({ r, i, j });
   }
-  return { rows, edges, pos:{ row:-1, idx:0 } };
+  return { rows, edges, pos:{ row:-1, idx:0 }, cfg, path: path || 1 };
 }
 
 function mapXY(r, i){
   const W = 100, H = 440, top = 30, bot = H - 30;
-  return { x:(i+0.5)/MAP_WIDTHS[r]*W, y:bot - r*(bot-top)/(MAP_ROWS-1) };
+  const cfg = map.cfg;
+  return { x:(i+0.5)/cfg.widths[r]*W, y:bot - r*(bot-top)/(cfg.rows-1) };
 }
 
 function showMap(){
@@ -662,7 +697,7 @@ function showMap(){
   start.style.left = 'calc(50% - 20px)';
   start.style.top = (440 - 30 - 20) + 'px';
   box.appendChild(start);
-  for(let r=0;r<MAP_ROWS;r++)
+  for(let r=0;r<map.cfg.rows;r++)
     for(let i=0;i<map.rows[r].length;i++){
       const n = map.rows[r][i];
       const { x, y } = mapXY(r, i);
@@ -686,9 +721,10 @@ function clickNode(r, i){
   show('#map', false);
   const type = map.rows[r][i].type;
   if(type === 'stage') startStage();
-  else if(type === 'boss'){ const d = BOSSES[Math.floor(r/4)]; run.boss = { passes:0, max:d.passes, final:false, phaseIdx:0, def:d }; startStage(); }
+  else if(type === 'boss'){ const d = (run.path === 2 ? BOSSES2 : BOSSES)[Math.floor(r/4)]; run.boss = { passes:0, max:d.passes, final:false, phaseIdx:0, def:d }; startStage(); }
   else if(type === 'elite'){ run.boss = { passes:0, max:ELITE.passes, final:false, elite:true, phaseIdx:0, def:ELITE }; startStage(); }
-  else if(type === 'final'){ const d = BOSSES[3]; run.boss = { passes:0, max:d.passes, final:true, phaseIdx:0, def:d }; startStage(); }
+  else if(type === 'labyrinth'){ run.boss = { passes:0, max:LABYRINTH.passes, final:false, labyrinth:true, phaseIdx:0, def:LABYRINTH }; startStage(); }
+  else if(type === 'final'){ const d = (run.path === 2 ? BOSSES2[3] : BOSSES[3]); run.boss = { passes:0, max:d.passes, final:true, phaseIdx:0, def:d }; startStage(); }
   else if(type === 'merchant') openMerchant();
   else openChest();
 }
@@ -696,9 +732,17 @@ function clickNode(r, i){
 function showVictory(){
   state = 'victory';
   AudioFX.startMusic('victory');
-  save.rl.victories = (save.rl.victories || 0) + 1;
+  if(run.path === 2){
+    save.rl.ascensions = (save.rl.ascensions || 0) + 1;
+    $('#victoryTitle').textContent = 'ASCENSION!';
+    $('#victoryStats').textContent = 'Path 2 cleared — ' + run.totalPipes + ' pipes — 🪙' + run.gold + '  •  Ascension #' + save.rl.ascensions;
+  } else {
+    save.rl.victories = (save.rl.victories || 0) + 1;
+    $('#victoryTitle').textContent = 'VICTORY!';
+    $('#victoryStats').textContent = 'Stage ' + run.stage + ' — ' + run.totalPipes + ' pipes — 🪙' + run.gold + '  •  Victory #' + save.rl.victories;
+  }
   persist();
-  $('#victoryStats').textContent = 'Stage ' + run.stage + ' — ' + run.totalPipes + ' pipes — 🪙' + run.gold + '  •  Victory #' + save.rl.victories;
+  show('#continueBtn', run.path === 1);
   show('#victory', true);
 }
 
@@ -708,7 +752,7 @@ function openChest(){
   const roll = Math.random();
   if(roll < 0.4) chestReward = { gold: 15 + Math.floor(Math.random()*11) };
   else if(roll < 0.75){
-    const missing = RELICS.filter(r => !run.relics.includes(r.id));
+    const missing = relicPool().filter(r => !run.relics.includes(r.id));
     chestReward = missing.length ? { relic: missing[Math.floor(Math.random()*missing.length)].id } : { gold: 25 };
   } else chestReward = { hp: 1 };
   $('#chestReward').textContent = '???';
@@ -966,6 +1010,7 @@ let shield = 0, revive = 0, invuln = 0, rebornT = 0, nextMoverAt = 0;
 let combo = 0, feverT = 0, feverNextAt = 30;
 let shake = 0, flash = 0;
 let groundX = 0;
+let labyFloorY = GROUND_Y, labyCeilY = -100;
 let deathTimer = 0, overShown = false;
 let nextMusicSwitch = 0;
 
@@ -980,7 +1025,7 @@ function reset(){
   score = 0; shake = 0; flash = 0;
   combo = 0; feverT = 0;
   const pw = powers();
-  shield = pw.shield; revive = pw.revive; invuln = 0; rebornT = 0;
+  shield = pw.shield; revive = pw.revive + (hasRelic('phoenix') ? 1 : 0); invuln = 0; rebornT = 0;
   nextMoverAt = t + rand(10,15);
   nextMusicSwitch = t + rand(20,35);
   deathTimer = 0; overShown = false;
@@ -1004,7 +1049,7 @@ function startGame(){
   setTheme('city'); themeNextAt = 10;
   state = 'ready';
   show('#menu', false); show('#gameover', false); show('#hud', true);
-  if(mode === 'rl'){ map = genMap(); showMap(); }
+  if(mode === 'rl'){ map = genMap(1); showMap(); }
   if(AudioFX.ctx) AudioFX.startMusic(AudioFX.randomTrack());
 }
 
@@ -1039,7 +1084,7 @@ function showGameover(){
   if(mode === 'rl' && run){
     save.rl.bestStage = Math.max(save.rl.bestStage, run.stage);
     save.rl.bestPipes = Math.max(save.rl.bestPipes, run.totalPipes);
-    $('#rlStats').textContent = 'STAGE ' + run.stage + '/' + MAP_ROWS + '  •  ' + run.totalPipes + ' PIPES  •  🪙' + run.gold;
+    $('#rlStats').textContent = 'PATH ' + run.path + ' — STAGE ' + run.stage + '/' + pathCfg().rows + '  •  ' + run.totalPipes + ' PIPES  •  🪙' + run.gold;
     $('#rlStats').classList.remove('hidden');
   } else {
     $('#rlStats').classList.add('hidden');
@@ -1079,10 +1124,14 @@ function checkUnlocks(){
 /* ================= update ================= */
 function pipeSpeed(){
   const base = (140 + Math.min(score,40)*1.5) * (feverT > 0 ? 1.5 : 1);
-  return base + (mode==='rl' && run ? 12*(run.stage-1) : 0);
+  if(mode==='rl' && run) return base + 12*(run.stage-1) + (run.path === 2 ? 30 : 0);
+  return base;
 }
 function pipeGap(){
-  if(mode==='rl' && run) return Math.max(105, 170 - (run.stage-1)*7 - score*0.3);
+  if(mode==='rl' && run){
+    const p2 = run.path === 2;
+    return Math.max(p2 ? 95 : 105, 170 - (run.stage-1)*(p2 ? 9 : 7) - score*0.3);
+  }
   return Math.max(115, 160 - score*1.5);
 }
 
@@ -1191,6 +1240,20 @@ function update(dt){
       }
       if(p.gap > p.baseGap*0.5) p.slammed = false;
     }
+    labyFloorY = GROUND_Y; labyCeilY = -100;
+    if(run && run.boss){
+      const phs = run.boss.def.phases;
+      const pidx = Math.min(phs.length-1, Math.floor(run.boss.passes * phs.length / run.boss.max));
+      const pph = phs[pidx];
+      if(pph.pattern === 'labyrinth'){
+        if(!run.boss.labyOn){ run.boss.labyT = 0; run.boss.labyOn = true; }
+        run.boss.labyT += dt;
+        const s = 0.5 - 0.5*Math.cos(run.boss.labyT * (pph.spd || 2.6));
+        const a = pph.amp || 240;
+        labyFloorY = GROUND_Y - a*s;
+        labyCeilY = a*s;
+      } else run.boss.labyOn = false;
+    }
     for(const p of pipes) if(p.boss && run.boss){
       const b = run.boss, ph = b.def.phases;
       const idx = Math.min(ph.length-1, Math.floor(b.passes * ph.length / b.max));
@@ -1206,11 +1269,15 @@ function update(dt){
         p.pulseT = (p.pulseT || 0) + dt;
         p.gap = Math.max(70, p.baseGap * (1 + 0.35*Math.sin(p.pulseT*ph2.spd)));
         p.gapY = p.baseY + Math.sin(t*0.9)*40;
+      } else if(ph2.pattern === 'labyrinth'){
+        p.pulseT = (p.pulseT || 0) + dt;
+        p.gapY += ((labyCeilY + labyFloorY)/2 - p.gapY) * Math.min(1, dt*2.5);
+        p.gap = Math.max(70, p.baseGap * (1 + 0.3*Math.sin(p.pulseT*(ph2.bspd || 1.7))));
       } else {
         p.gapY = p.baseY + Math.sin(t*ph2.spd)*ph2.amp;
       }
     }
-    const mag = mode==='rl' && run ? run.upgrades.filter(u=>u==='magnet').length : 0;
+    const mag = (mode==='rl' && run ? run.upgrades.filter(u=>u==='magnet').length : 0) + pw.magnet + (hasRelic('anchor') ? 2 : 0);
     if(mag) for(const p of pipes){
       if(p.boss) continue;
       const rate = Math.min(0.3*mag, 0.9);
@@ -1241,21 +1308,23 @@ function update(dt){
           if(run.boss.passes >= run.boss.max){
                 const isFinal = run.boss.final;
                 const isElite = run.boss.elite;
+                const isLaby = run.boss.labyrinth;
                 run.boss = null;
                 flash = 0.5;
                 AudioFX.unlock();
                if(isFinal){
                  showVictory();
                } else {
-                 const gold = isElite ? 20 : 15;
+                 const gold = isLaby ? 25 : isElite ? 20 : 15;
                  run.gold += gold;
                  let r;
-                 if(isElite){
-                    const missing = RELICS.filter(x => !run.relics.includes(x.id));
+                 const pool = isLaby ? RELICS2 : relicPool();
+                 if(isElite || isLaby){
+                    const missing = pool.filter(x => !run.relics.includes(x.id));
                     r = missing.length ? missing[Math.floor(Math.random()*missing.length)] : null;
                     if(r) gainRelic(r.id); else run.gold += 15;
                   } else {
-                    r = RELICS.find(x => x.id === def.relic) || RELICS[Math.floor(Math.random()*RELICS.length)];
+                    r = pool.find(x => x.id === def.relic) || pool[Math.floor(Math.random()*pool.length)];
                     if(!gainRelic(r.id)) run.gold += 10;
                   }
                  stageClearT = 1.5;
@@ -1286,7 +1355,7 @@ function update(dt){
         popups.push({ x:p.x+35, y:p.gapY, txt: near ? 'CLOSE! +'+gained : '+'+gained, life:0.7, max:0.7 });
         if(mode==='rl'){
           run.pipesInStage++; run.totalPipes++;
-          run.gold += 1 + (hasUpgrade('greed') ? 2 : 0) + (near ? 2 : 0) + (hasRelic('coin') ? 1 : 0);
+          run.gold += 1 + 2*run.upgrades.filter(u=>u==='greed').length + (near ? 2 : 0) + (hasRelic('coin') ? 1 : 0) + (near && hasRelic('echo') ? 3 : 0);
           const vampMax = run.upgrades.filter(x => x === 'vampire').length;
           if(near && run.vampUsed < vampMax && run.hp < mods().maxHp){
             run.vampUsed++; run.hp++;
@@ -1302,8 +1371,8 @@ function update(dt){
       }
     }
     if(scored && score >= feverNextAt){
-      feverNextAt += (pw.feverEvery || 30);
-      feverT = hasRelic('golden') ? 15 : 10; flash = 0.5;
+      feverNextAt += hasRelic('void') ? Math.min(15, mods().feverEvery) : mods().feverEvery;
+      feverT = (hasRelic('golden') ? 15 : 10) * (hasUpgrade('storm') ? 2 : 1); flash = 0.5;
       AudioFX.startMusic('hype');
       popups.push({ x:BIRD_X, y:bird.y-50, txt:'FEVER!', life:1.0, max:1.0 });
     }
@@ -1312,8 +1381,9 @@ function update(dt){
       for(const p of pipes){
         if(p.hit) continue;
         const topH = p.gapY - p.gap/2, botY = p.gapY + p.gap/2;
-        if(circleRect(BIRD_X, bird.y, pw.radius, p.x, 0, 70, topH) ||
-           circleRect(BIRD_X, bird.y, pw.radius, p.x, botY, 70, GROUND_Y-botY)){
+        const cTop = Math.max(0, labyCeilY), cBot = Math.min(GROUND_Y, labyFloorY);
+        if(circleRect(BIRD_X, bird.y, pw.radius, p.x, cTop, 70, Math.max(0, topH - cTop)) ||
+           circleRect(BIRD_X, bird.y, pw.radius, p.x, botY, 70, Math.max(0, cBot - botY))){
           if(shield > 0){
             shield--; invuln = 1.5; flash = 0.6;
             pipes.splice(pipes.indexOf(p), 1);
@@ -1347,10 +1417,12 @@ function update(dt){
         }
       }
     }
-    if(bird.y + pw.radius >= GROUND_Y){ bird.y = GROUND_Y - pw.radius; if(rebornT <= 0) die(); }
-    if(bird.y - pw.radius < 0){ bird.y = pw.radius; bird.vy = 0; }
+    if(bird.y + pw.radius >= labyFloorY){ bird.y = labyFloorY - pw.radius; if(pw.god){ invuln = 1.5; bird.vy = -300; } else if(rebornT <= 0) die(); }
+    if(bird.y - pw.radius < labyCeilY){ bird.y = labyCeilY + pw.radius; if(pw.god){ invuln = 1.5; bird.vy = 300; } else if(rebornT <= 0) die(); }
+    else if(bird.y - pw.radius < 0){ bird.y = pw.radius; bird.vy = 0; }
   }
   else if(state === 'dead'){
+    labyFloorY = GROUND_Y; labyCeilY = -100;
     bird.vy = Math.min(700, bird.vy + 1400*pw.grav*dt);
     bird.y += bird.vy*dt;
     bird.rot += (1.4 - bird.rot)*Math.min(1, dt*6);
@@ -1472,6 +1544,7 @@ function render(){
 
   // ground
   drawGround(nf);
+  drawCeiling(nf);
 
   // fireflies (night, city/forest)
   if((theme==='city'||theme==='forest') && nf > 0.4){
@@ -1583,8 +1656,9 @@ function drawPipe(p, nf){
     dark = `rgb(${Math.round(50*f)},${Math.round(140*f)},${Math.round(60*f)})`;
     light = `rgb(${Math.round(140*f)},${Math.round(225*f)},${Math.round(130*f)})`;
   }
-  pipeRect(p.x, 0, topH, body, dark, light, true);
-  pipeRect(p.x, botY, GROUND_Y-botY, body, dark, light, false);
+  const cTop = Math.max(0, labyCeilY), cBot = Math.min(GROUND_Y, labyFloorY);
+  pipeRect(p.x, cTop, Math.max(0, topH - cTop), body, dark, light, true);
+  pipeRect(p.x, botY, Math.max(0, cBot - botY), body, dark, light, false);
   if(p.move){
     const up = Math.cos(t*p.spd + p.phase) < 0;
     chevron(p.x+35, topH-13, up);
@@ -1680,20 +1754,33 @@ function drawSilhouette(s, nf){
 function drawGround(nf){
   const f = lerp(1, 0.5, nf);
   const g = THEMES[theme].ground;
+  const gy = labyFloorY;
   ctx.fillStyle = `rgb(${g[0].map(c=>Math.round(c*f))})`;
-  ctx.fillRect(0, GROUND_Y, W, GROUND_H);
+  ctx.fillRect(0, gy, W, H - gy);
   ctx.fillStyle = `rgb(${g[1].map(c=>Math.round(c*f))})`;
-  ctx.fillRect(0, GROUND_Y, W, 22);
+  ctx.fillRect(0, gy, W, 22);
   // moving stripes
   ctx.fillStyle = `rgba(0,0,0,${0.10 + nf*0.1})`;
   for(let x = -48 + (48 - groundX); x < W; x += 48){
     ctx.beginPath();
-    ctx.moveTo(x, GROUND_Y); ctx.lineTo(x+24, GROUND_Y);
-    ctx.lineTo(x+12, GROUND_Y+22); ctx.lineTo(x-12, GROUND_Y+22);
+    ctx.moveTo(x, gy); ctx.lineTo(x+24, gy);
+    ctx.lineTo(x+12, gy+22); ctx.lineTo(x-12, gy+22);
     ctx.fill();
   }
   ctx.fillStyle = `rgba(0,0,0,${0.15 + nf*0.15})`;
-  ctx.fillRect(0, GROUND_Y+22, W, 4);
+  ctx.fillRect(0, gy+22, W, 4);
+}
+
+function drawCeiling(nf){
+  if(labyCeilY <= 0) return;
+  const f = lerp(1, 0.5, nf);
+  const g = THEMES[theme].ground;
+  ctx.fillStyle = `rgb(${g[0].map(c=>Math.round(c*f))})`;
+  ctx.fillRect(0, 0, W, labyCeilY);
+  ctx.fillStyle = `rgb(${g[1].map(c=>Math.round(c*f))})`;
+  ctx.fillRect(0, labyCeilY - 22, W, 22);
+  ctx.fillStyle = `rgba(0,0,0,${0.15 + nf*0.15})`;
+  ctx.fillRect(0, labyCeilY - 26, W, 4);
 }
 
 function drawGlint(c, x, y, r){
@@ -1747,6 +1834,15 @@ function drawBirdBody(c, s, wing, time, shieldOn){
       const len = 4 + ((time*90 + i*9) % 7);
       c.beginPath(); c.moveTo(-20, -6+i*6); c.lineTo(-20-len, -6+i*6); c.stroke();
     }
+    c.restore();
+  }
+  if(s.id === 'cat'){
+    c.save();
+    c.strokeStyle = s.wing; c.lineWidth = 5; c.lineCap = 'round';
+    c.beginPath();
+    c.moveTo(-15, 3);
+    c.quadraticCurveTo(-28, 4 + Math.sin(time*3)*3, -31, -12 + Math.sin(time*2.5)*4);
+    c.stroke();
     c.restore();
   }
   if(s.id === 'jade' && shieldOn){
@@ -1834,6 +1930,23 @@ function drawBirdBody(c, s, wing, time, shieldOn){
     c.beginPath(); c.moveTo(15, 8); c.lineTo(17, 15); c.lineTo(19, 8); c.closePath(); c.fill();
     c.beginPath(); c.moveTo(20, 8); c.lineTo(22, 14); c.lineTo(24, 8); c.closePath(); c.fill();
   }
+  if(s.id === 'cat'){
+    c.fillStyle = s.wing;
+    c.beginPath(); c.moveTo(-13,-9); c.lineTo(-17,-25); c.lineTo(-3,-14); c.closePath(); c.fill();
+    c.beginPath(); c.moveTo(1,-13); c.lineTo(7,-26); c.lineTo(11,-11); c.closePath(); c.fill();
+    c.fillStyle = '#ffb3c0';
+    c.beginPath(); c.moveTo(-11,-11); c.lineTo(-14,-21); c.lineTo(-5,-13); c.closePath(); c.fill();
+    c.beginPath(); c.moveTo(2,-13); c.lineTo(5,-22); c.lineTo(8,-12); c.closePath(); c.fill();
+    c.strokeStyle = 'rgba(255,255,255,0.85)'; c.lineWidth = 1;
+    c.beginPath();
+    c.moveTo(15,9); c.lineTo(24,7);
+    c.moveTo(15,11); c.lineTo(23,13);
+    c.stroke();
+  }
+  if(s.id === 'god'){
+    c.strokeStyle = '#ffd700'; c.lineWidth = 3;
+    c.beginPath(); c.ellipse(0, -26, 12, 4, 0, 0, Math.PI*2); c.stroke();
+  }
 }
 
 function drawBird(x, y, rot, s, wing, scale=1){
@@ -1843,6 +1956,7 @@ function drawBird(x, y, rot, s, wing, scale=1){
   if(rebornT > 0) ctx.globalAlpha = 0.35 + 0.25*Math.sin(t*25);
   if(s.ghost){ ctx.shadowColor = 'rgba(255,255,255,0.9)'; ctx.shadowBlur = 14; }
   if(s.id === 'demon'){ ctx.shadowColor = 'rgba(255,40,40,0.7)'; ctx.shadowBlur = 12; }
+  if(s.id === 'god'){ ctx.shadowColor = 'rgba(255,215,0,0.8)'; ctx.shadowBlur = 16; }
   drawBirdBody(ctx, s, wing, t, shield > 0);
   ctx.restore();
 }
@@ -2075,6 +2189,18 @@ $('#playBtn').addEventListener('click', () => { AudioFX.init(); startGame(); });
     run.gold += 15;
     AudioFX.score(); refreshMerchant(); refreshRlHud();
   });
+  $('#merchPhoenix').addEventListener('click', () => {
+    if(run.gold < 40 || run.relics.includes('phoenix')) return;
+    run.gold -= 40;
+    gainRelic('phoenix');
+    AudioFX.score(); refreshMerchant(); refreshRlHud();
+  });
+  $('#merchAnchor').addEventListener('click', () => {
+    if(run.gold < 35 || run.relics.includes('anchor')) return;
+    run.gold -= 35;
+    gainRelic('anchor');
+    AudioFX.score(); refreshMerchant(); refreshRlHud();
+  });
   $('#merchReroll').addEventListener('click', () => {
     if(run.gold < 10) return;
     run.gold -= 10;
@@ -2090,6 +2216,13 @@ $('#playBtn').addEventListener('click', () => { AudioFX.init(); startGame(); });
     AudioFX.click();
     show('#victory', false);
     startGame();
+  });
+  $('#continueBtn').addEventListener('click', () => {
+    AudioFX.click();
+    show('#victory', false);
+    run.path = 2;
+    map = genMap(2);
+    showMap();
   });
   $('#chestOpen').addEventListener('click', () => {
     if(!chestOpened){
