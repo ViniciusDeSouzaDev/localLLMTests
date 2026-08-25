@@ -364,11 +364,12 @@ const TAU = Math.PI*2;
 
 /* ================= save ================= */
 const SAVE_KEY = 'flappyDeluxeSave';
-const defaultSave = { best:0, total:0, unlocked:['classic'], selected:'classic', muted:false, mode:'classic', rl:{ bestStage:0, bestPipes:0 } };
+const defaultSave = { best:0, total:0, unlocked:['classic'], selected:'classic', muted:false, mode:'rl', modeChosen:false, rl:{ bestStage:0, bestPipes:0 } };
 let save;
 try { save = Object.assign(defaultSave, JSON.parse(localStorage.getItem(SAVE_KEY)||'{}')); }
 catch(e){ save = Object.assign({}, defaultSave); }
 if(!save.rl) save.rl = { bestStage:0, bestPipes:0 };
+if(!save.modeChosen) save.mode = 'rl';
 function persist(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(save)); }catch(e){} }
 
 /* ================= skins ================= */
@@ -381,6 +382,7 @@ const SKINS = [
   { id:'golden',  name:'Golden',  body:'#ffd700', belly:'#fffbe0', wing:'#d9a400', trail:'#fff3a0', unlock:200, sparkle:true, power:'midas', powerName:'Midas', powerDesc:'Double points' },
   { id:'phantom', name:'Phantom', body:'#d7e0e6', belly:'#ffffff', wing:'#9fb3bd', trail:'#ffffff', unlock:300, ghost:true, power:'reborn', powerName:'Reborn', powerDesc:'Die, then come back mid-run' },
   { id:'rainbow', name:'Rainbow', body:null, belly:'#ffffff', wing:null, trail:null, unlock:500, rainbow:true, power:'prism', powerName:'Prism', powerDesc:'Shield + slow pipes + x2 pts' },
+  { id:'demon', name:'Demon', body:'#4a1526', belly:'#6b2038', wing:'#2a0a14', trail:'#ff3b3b', unlock:750, demon:true, power:'compact', powerName:'Demon', powerDesc:'Tiny hitbox + starts with Vampire x2' },
 ];
 const skinById = id => SKINS.find(s=>s.id===id) || SKINS[0];
 
@@ -397,7 +399,7 @@ function powers(){
 }
 
 /* ================= roguelike ================= */
-let mode = save.mode || 'classic';
+let mode = save.mode || 'rl';
 let run = null;
 let stageClearT = 0;
 let pendingDraft = null;
@@ -427,6 +429,7 @@ const RELICS = [
 
 function resetRun(){
   run = { hp:3, maxHp:3, gold:0, stage:0, pipesInStage:0, totalPipes:0, upgrades:[], relics:[], vampUsed:0, boss:null };
+  if(skinById(save.selected).id === 'demon') run.upgrades.push('vampire','vampire');
   stageClearT = 0;
   pendingDraft = null;
 chestReward = null;
@@ -555,9 +558,23 @@ function refreshMerchant(){
   renderCards($('#merchantDraft'), pendingDraft, false);
 }
 
+function gainUpgrade(id){
+  const first = !run.upgrades.includes(id);
+  run.upgrades.push(id);
+  if(first){ const c = CARDS.find(x=>x.id===id); if(c) showToast(c.icon + ' ' + c.name + ' — ' + c.desc); }
+}
+
+function gainRelic(id){
+  const rel = RELICS.find(x=>x.id===id);
+  if(!rel || run.relics.includes(id)) return false;
+  run.relics.push(id);
+  showToast(rel.icon + ' ' + rel.name + ' — ' + rel.desc);
+  return true;
+}
+
 function pickCard(id){
   AudioFX.click();
-  run.upgrades.push(id);
+  gainUpgrade(id);
   if(id === 'tough'){ run.maxHp++; run.hp = Math.min(run.maxHp, run.hp + 1); }
   if(id === 'shield'){ shield++; }
   show('#draft', false);
@@ -1227,13 +1244,13 @@ function update(dt){
                  run.gold += gold;
                  let r;
                  if(isElite){
-                   const missing = RELICS.filter(x => !run.relics.includes(x.id));
-                   r = missing.length ? missing[Math.floor(Math.random()*missing.length)] : null;
-                   if(r) run.relics.push(r.id); else run.gold += 15;
-                 } else {
-                   r = RELICS.find(x => x.id === def.relic) || RELICS[Math.floor(Math.random()*RELICS.length)];
-                   if(!run.relics.includes(r.id)) run.relics.push(r.id); else run.gold += 10;
-                 }
+                    const missing = RELICS.filter(x => !run.relics.includes(x.id));
+                    r = missing.length ? missing[Math.floor(Math.random()*missing.length)] : null;
+                    if(r) gainRelic(r.id); else run.gold += 15;
+                  } else {
+                    r = RELICS.find(x => x.id === def.relic) || RELICS[Math.floor(Math.random()*RELICS.length)];
+                    if(!gainRelic(r.id)) run.gold += 10;
+                  }
                  stageClearT = 1.5;
                 popups.push({ x:BIRD_X, y:bird.y-50, txt:def.name + ' DEFEATED! +' + gold + 'g', life:1.5, max:1.5 });
                 popups.push({ x:BIRD_X, y:bird.y-76, txt: r ? (r.icon||'') + ' ' + r.name + '!' : '+15 gold', life:1.5, max:1.5 });
@@ -1741,14 +1758,27 @@ function drawBirdBody(c, s, wing, time, shieldOn){
   c.save();
   c.translate(-6, 0); c.rotate(-0.4 + wing*1.1);
   c.fillStyle = wingC;
-  c.beginPath(); c.ellipse(0, -4, 10, 6.5, 0, 0, TAU); c.fill();
+  if(s.id === 'demon'){
+    c.beginPath();
+    c.moveTo(0, -3);
+    c.quadraticCurveTo(-8, -16, -17, -11);
+    c.quadraticCurveTo(-11, -6, -13, -2);
+    c.quadraticCurveTo(-8, -2, -9, 2);
+    c.quadraticCurveTo(-4, 2, -4, 7);
+    c.quadraticCurveTo(0, 4, 0, -3);
+    c.closePath(); c.fill();
+  } else {
+    c.beginPath(); c.ellipse(0, -4, 10, 6.5, 0, 0, TAU); c.fill();
+  }
   c.restore();
   // eye
   c.shadowBlur = 0;
-  c.fillStyle = '#fff';
+  if(s.id === 'demon'){ c.shadowColor = 'rgba(255,40,40,0.9)'; c.shadowBlur = 8; }
+  c.fillStyle = s.id === 'demon' ? '#ff5050' : '#fff';
   c.beginPath(); c.arc(8, -5, 6, 0, TAU); c.fill();
-  c.fillStyle = s.id === 'phantom' ? 'rgba(40,60,80,0.9)' : '#222';
+  c.fillStyle = s.id === 'phantom' ? 'rgba(40,60,80,0.9)' : (s.id === 'demon' ? '#2a0000' : '#222');
   c.beginPath(); c.arc(10, -5, 2.8, 0, TAU); c.fill();
+  c.shadowBlur = 0;
   // beak
   c.fillStyle = '#ff9d3b';
   c.beginPath();
@@ -1789,6 +1819,14 @@ function drawBirdBody(c, s, wing, time, shieldOn){
   if(s.id === 'phantom'){
     drawGlint(c, Math.sin(time*3)*6, -19, 2.5);
   }
+  if(s.id === 'demon'){
+    c.fillStyle = s.wing;
+    c.beginPath(); c.moveTo(-6, -11); c.lineTo(-11, -22); c.lineTo(-1, -14); c.closePath(); c.fill();
+    c.beginPath(); c.moveTo(3, -13); c.lineTo(8, -24); c.lineTo(10, -12); c.closePath(); c.fill();
+    c.fillStyle = '#fff';
+    c.beginPath(); c.moveTo(15, 8); c.lineTo(17, 15); c.lineTo(19, 8); c.closePath(); c.fill();
+    c.beginPath(); c.moveTo(20, 8); c.lineTo(22, 14); c.lineTo(24, 8); c.closePath(); c.fill();
+  }
 }
 
 function drawBird(x, y, rot, s, wing, scale=1){
@@ -1797,6 +1835,7 @@ function drawBird(x, y, rot, s, wing, scale=1){
   if(s.ghost) ctx.globalAlpha = 0.7;
   if(rebornT > 0) ctx.globalAlpha = 0.35 + 0.25*Math.sin(t*25);
   if(s.ghost){ ctx.shadowColor = 'rgba(255,255,255,0.9)'; ctx.shadowBlur = 14; }
+  if(s.id === 'demon'){ ctx.shadowColor = 'rgba(255,40,40,0.7)'; ctx.shadowBlur = 12; }
   drawBirdBody(ctx, s, wing, t, shield > 0);
   ctx.restore();
 }
@@ -1998,8 +2037,8 @@ $('#helpBtnMenu').addEventListener('click', () => { AudioFX.init(); AudioFX.clic
 $('#helpClose').addEventListener('click', closeHelp);
 $('#playBtn').addEventListener('click', () => { AudioFX.init(); startGame(); });
   $('#retryBtn').addEventListener('click', () => { AudioFX.init(); startGame(); });
-  $('#modeClassic').addEventListener('click', () => { AudioFX.init(); AudioFX.click(); mode = 'classic'; persist(); refreshMode(); });
-  $('#modeRl').addEventListener('click', () => { AudioFX.init(); AudioFX.click(); mode = 'rl'; persist(); refreshMode(); });
+  $('#modeClassic').addEventListener('click', () => { AudioFX.init(); AudioFX.click(); mode = 'classic'; save.modeChosen = true; persist(); refreshMode(); });
+  $('#modeRl').addEventListener('click', () => { AudioFX.init(); AudioFX.click(); mode = 'rl'; save.modeChosen = true; persist(); refreshMode(); });
   $('#merchHeal').addEventListener('click', () => {
     if(run.gold < 15 || run.hp >= mods().maxHp) return;
     run.gold -= 15; run.hp++;
@@ -2008,19 +2047,19 @@ $('#playBtn').addEventListener('click', () => { AudioFX.init(); startGame(); });
   $('#merchShield').addEventListener('click', () => {
     if(run.gold < 25) return;
     run.gold -= 25;
-    run.upgrades.push('shield'); shield++;
+    gainUpgrade('shield'); shield++;
     AudioFX.score(); refreshMerchant(); refreshRlHud();
   });
   $('#merchTough').addEventListener('click', () => {
     if(run.gold < 30) return;
     run.gold -= 30;
-    run.upgrades.push('tough'); run.maxHp++; run.hp = Math.min(run.maxHp, run.hp + 1);
+    gainUpgrade('tough'); run.maxHp++; run.hp = Math.min(run.maxHp, run.hp + 1);
     AudioFX.score(); refreshMerchant(); refreshRlHud();
   });
   $('#merchChip').addEventListener('click', () => {
     if(run.gold < 25) return;
     run.gold -= 25;
-    run.upgrades.push('chip');
+    gainUpgrade('chip');
     AudioFX.score(); refreshMerchant(); refreshRlHud();
   });
   $('#merchCoin').addEventListener('click', () => {
@@ -2050,7 +2089,7 @@ $('#playBtn').addEventListener('click', () => { AudioFX.init(); startGame(); });
       chestOpened = true;
       const r = chestReward;
       if(r.gold){ run.gold += r.gold; $('#chestReward').textContent = '+' + r.gold + ' GOLD'; }
-      else if(r.relic){ run.relics.push(r.relic); const rel = RELICS.find(x => x.id === r.relic); $('#chestReward').textContent = 'RELIC: ' + (rel.icon||'') + ' ' + rel.name; }
+      else if(r.relic){ const rel = RELICS.find(x => x.id === r.relic); gainRelic(r.relic); $('#chestReward').textContent = 'RELIC: ' + (rel.icon||'') + ' ' + rel.name; }
       else { run.hp = Math.min(mods().maxHp, run.hp + 1); $('#chestReward').textContent = '+1 HP'; }
       AudioFX.score();
       refreshRlHud();
