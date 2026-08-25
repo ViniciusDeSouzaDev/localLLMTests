@@ -426,7 +426,7 @@ const CARDS = [
   { id:'magnet',  icon:'🧲', name:'Magnet',     desc:'Pipes drift toward your height (stacks)' },
   { id:'greed',   icon:'🪙', name:'Greed',      desc:'+2 gold per pipe' },
   { id:'chip',    icon:'🔥', name:'Fever Chip', desc:'Fever threshold -10' },
-  { id:'tough',   icon:'💪', name:'Tough',      desc:'+1 max HP and heal 1' },
+  { id:'tough',   icon:'💪', name:'Tough',      desc:'+1 max HP' },
   { id:'slow',    icon:'🐌', name:'Slow Mo',    desc:'Pipe speed -10%' },
   { id:'storm',   icon:'⚡', name:'Storm',      desc:'Fever duration x2', p2:true },
   { id:'titan',   icon:'🗡️', name:'Titan',      desc:'+1 max HP and +1 shield', p2:true },
@@ -468,7 +468,7 @@ const UI_STR = {
     ascensionStats:'Path 2 cleared — {n} pipes — 🪙{g}  •  Ascension #{a}',
     menuHint:'SPACE / CLICK to flap &nbsp;•&nbsp; P pause &nbsp;•&nbsp; M sound &nbsp;•&nbsp; H help',
     heal:'Heal 1 HP', healDesc:'15g', shieldOffer:'Shield', shieldDesc:'+1 shield charge — 25g',
-    toughOffer:'Tough', toughDesc:'+1 max HP, heal 1 — 30g', chipOffer:'Fever Chip', chipDesc:'Fever threshold -10 — 25g',
+    toughOffer:'Tough', toughDesc:'+1 max HP — 30g', chipOffer:'Fever Chip', chipDesc:'Fever threshold -10 — 25g',
     coinOffer:'Lucky Coin', coinDesc:'Pay 20g, gain 35g', phoenixOffer:'Phoenix', phoenixDesc:'+1 revive — 40g',
     anchorOffer:'Anchor', anchorDesc:'Base magnet 2 — 35g', rerollOffer:'Reroll Draft', rerollDesc:'10g',
     nextDraft:'Next draft — pick one after leaving',
@@ -499,7 +499,7 @@ const UI_STR = {
     ascensionStats:'Caminho 2 concluído — {n} canos — 🪙{g}  •  Ascensão #{a}',
     menuHint:'ESPAÇO / CLIQUE para voar &nbsp;•&nbsp; P pausa &nbsp;•&nbsp; M som &nbsp;•&nbsp; H ajuda',
     heal:'Curar 1 PV', healDesc:'15g', shieldOffer:'Escudo', shieldDesc:'+1 carga de escudo — 25g',
-    toughOffer:'Resistência', toughDesc:'+1 PV máx., cura 1 — 30g', chipOffer:'Chip de Febre', chipDesc:'Limite de febre -10 — 25g',
+    toughOffer:'Resistência', toughDesc:'+1 PV máx. — 30g', chipOffer:'Chip de Febre', chipDesc:'Limite de febre -10 — 25g',
     coinOffer:'Moeda da Sorte', coinDesc:'Pague 20g, ganhe 35g', phoenixOffer:'Fênix', phoenixDesc:'+1 renascimento — 40g',
     anchorOffer:'Âncora', anchorDesc:'Ímã base 2 — 35g', rerollOffer:'Re sortear carta', rerollDesc:'10g',
     nextDraft:'Próxima carta — escolha uma ao sair',
@@ -532,7 +532,7 @@ const DATA_PT = {
     feather:{n:'Penas',d:'Gravidade -10%'}, midas:{n:'Pontuador',d:'+1 ponto por cano'},
     shield:{n:'Escudo',d:'+1 carga de escudo'}, vampire:{n:'Vampiro',d:'Quase-acerto cura 1 PV (1x por etapa, acumulável)'},
     magnet:{n:'Ímã',d:'Canos se aproximam da sua altura (acumulável)'}, greed:{n:'Ganância',d:'+2 ouro por cano'},
-    chip:{n:'Chip de Febre',d:'Limite de febre -10'}, tough:{n:'Resistência',d:'+1 PV máx. e cura 1'},
+    chip:{n:'Chip de Febre',d:'Limite de febre -10'}, tough:{n:'Resistência',d:'+1 PV máx.'},
     slow:{n:'Câmera Lenta',d:'Velocidade dos canos -10%'}, storm:{n:'Tempestade',d:'Duração da febre x2'},
     titan:{n:'Titã',d:'+1 PV máx. e +1 escudo'},
   },
@@ -738,7 +738,7 @@ function gainRelic(id){
 function pickCard(id){
   AudioFX.click();
   gainUpgrade(id);
-  if(id === 'tough'){ run.maxHp++; run.hp = Math.min(run.maxHp, run.hp + 1); }
+  if(id === 'tough'){ run.maxHp++; }
   if(id === 'titan'){ run.maxHp++; run.hp = Math.min(run.maxHp, run.hp + 1); shield++; }
   if(id === 'shield'){ shield++; }
   show('#draft', false);
@@ -975,9 +975,15 @@ const AudioFX = {
     chill:  { bpm:104, melType:'sine', melV:0.4, hat:4,
       mel:[64,0,0,67, 71,0,69,0, 67,0,0,64, 62,0,0,0],
       bas:[48,0,55,0, 45,0,52,0, 43,0,50,0, 41,0,48,0] },
-    hype:   { bpm:160, melType:'square', melV:0.28, hat:2,
-      mel:[76,76,79,76, 81,79,76,74, 76,76,79,76, 83,81,79,76],
-      bas:[48,48,55,48, 57,57,55,48, 51,51,55,51, 53,53,55,53] },
+   hype:   { bpm:160, melType:'square', melV:0.28, hat:2,
+       mel:[76,76,79,76, 81,79,76,74, 76,76,79,76, 83,81,79,76],
+       bas:[48,48,55,48, 57,57,55,48, 51,51,55,51, 53,53,55,53] },
+    inferno:{ bpm:170, melType:'square', melV:0.26, hat:2,
+       mel:[76,79,76,81, 83,81,79,76, 76,79,76,81, 84,83,81,79],
+       bas:[48,48,48,48, 55,55,55,55, 51,51,51,51, 53,53,53,53] },
+    rush:   { bpm:168, melType:'square', melV:0.24, hat:2,
+       mel:[74,77,79,77, 74,77,79,81, 74,77,79,77, 76,79,81,79],
+       bas:[50,50,50,50, 48,48,48,48, 47,47,47,47, 48,48,48,48] },
     mystery:{ bpm:112, melType:'triangle', melV:0.4, hat:4,
       mel:[69,0,72,0, 74,0,72,0, 71,0,74,0, 72,0,71,0],
       bas:[45,0,52,0, 50,0,52,0, 43,0,50,0, 45,0,52,0] },
@@ -1019,7 +1025,9 @@ const AudioFX = {
          bas:[48,0,48,0, 50,0,50,0, 52,0,52,0, 55,0,55,0] },
    },
   POOL:['day','night','chill','hype','mystery','sunset','forest','city','storm','dream','ocean','candy','space','jungle','meadow'],
-  randomTrack(){ return this.POOL[Math.floor(Math.random()*this.POOL.length)]; },
+   FEVER_POOL:['hype','inferno','rush','candy','jungle'],
+   randomTrack(){ return this.POOL[Math.floor(Math.random()*this.POOL.length)]; },
+   randomFever(){ return this.FEVER_POOL[Math.floor(Math.random()*this.FEVER_POOL.length)]; },
   startMusic(mode){
     this.stopMusic();
     if(!this.ctx) return;
@@ -1507,7 +1515,7 @@ function update(dt){
     if(scored && score >= feverNextAt){
       feverNextAt += hasRelic('void') ? Math.min(15, mods().feverEvery) : mods().feverEvery;
       feverT = (hasRelic('golden') ? 15 : 10) * (hasUpgrade('storm') ? 2 : 1); flash = 0.5;
-      AudioFX.startMusic('hype');
+      AudioFX.startMusic(AudioFX.randomFever());
       popups.push({ x:BIRD_X, y:bird.y-50, txt:T('fever'), life:1.0, max:1.0 });
     }
     // collision (circle vs rects)
@@ -1565,11 +1573,12 @@ function update(dt){
     if(deathTimer > 0.7 && !overShown) showGameover();
   }
 
-  // music varies during the run (held by fever)
-  if((state==='ready'||state==='play') && feverT <= 0 && t >= nextMusicSwitch){
-    nextMusicSwitch = t + rand(25,40);
-    let next = AudioFX.randomTrack();
-    while(next === AudioFX.mode) next = AudioFX.randomTrack();
+  // music varies during the run (faster switches during fever, from the fever pool)
+  if((state==='ready'||state==='play') && t >= nextMusicSwitch){
+    const pool = feverT > 0 ? AudioFX.FEVER_POOL : AudioFX.POOL;
+    nextMusicSwitch = t + (feverT > 0 ? rand(6,10) : rand(25,40));
+    let next = pool[Math.floor(Math.random()*pool.length)];
+    while(next === AudioFX.mode) next = pool[Math.floor(Math.random()*pool.length)];
     AudioFX.startMusic(next);
   }
  }
@@ -2309,7 +2318,7 @@ $('#playBtn').addEventListener('click', () => { AudioFX.init(); startGame(); });
   $('#merchTough').addEventListener('click', () => {
     if(run.gold < 30) return;
     run.gold -= 30;
-    gainUpgrade('tough'); run.maxHp++; run.hp = Math.min(run.maxHp, run.hp + 1);
+    gainUpgrade('tough'); run.maxHp++;
     AudioFX.score(); refreshMerchant(); refreshRlHud();
   });
   $('#merchChip').addEventListener('click', () => {
