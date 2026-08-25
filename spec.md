@@ -67,7 +67,7 @@ run = {
 - **Map** (StS-style, fixed campaign): 16-row map generated at run start (`genMap()`), DOM + SVG. Rows of 1–3 nodes; every node in the next row is selectable (player always has 1, 2, or 3 options). Node types: **STAGE** (58%), **CHEST** (20%), **MERCHANT** (12%), **ELITE** (12%, only in rows of width ≥ 2); rows 3/7/11 = guaranteed **BOSS gates** (single node); last row = single **FINAL BOSS**.
 - Flow: map → pick node → stop (stage/boss/chest/merchant) → upgrade draft → map. Stage counter advances per stop.
 - Beat the final boss → **VICTORY** screen (saves `save.rl.victories`), PLAY AGAIN restarts.
-- Merchant: "Heal 1 HP — 15g", "Lucky Coin: pay 20g, gain 35g", "Reroll upgrades — 10g", "Leave".
+- Merchant: offers **3 random items** per visit from the pool (Heal 15g, Shield 25g, Tough 30g, Fever Chip 25g, Lucky Coin 20g, Reroll 10g; Path 2 adds Phoenix 40g, Anchor 35g) + "Leave".
 - Chest: +15–25g / relic (if not all owned) / +1 HP.
 - Gold is run-only (lost on death).
 

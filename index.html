@@ -530,7 +530,7 @@ const DATA_PT = {
   },
   cards: {
     feather:{n:'Penas',d:'Gravidade -10%'}, midas:{n:'Pontuador',d:'+1 ponto por cano'},
-    shield:{n:'Escudo',d:'+1 carga de escudo'}, vampire:{n:'Vampiro',d:'Quase-acerto cura 1 PV (1x por etapa, acumulável)'},
+    shield:{n:'Escudo',d:'+1 carga de escudo'}, vampire:{n:'Vampiro',d:'Pertinho cura 1 PV (1x por etapa, acumulável)'},
     magnet:{n:'Ímã',d:'Canos se aproximam da sua altura (acumulável)'}, greed:{n:'Ganância',d:'+2 ouro por cano'},
     chip:{n:'Chip de Febre',d:'Febre vem 10 canos antes'}, tough:{n:'Resistência',d:'+1 PV máx.'},
     slow:{n:'Câmera Lenta',d:'Velocidade dos canos -10%'}, storm:{n:'Tempestade',d:'Duração da febre x2'},
@@ -540,7 +540,7 @@ const DATA_PT = {
     golden:{n:'Pena Dourada',d:'A febre dura 15s'}, heart:{n:'Cano de Coração',d:'+1 PV no início de cada etapa'},
     coin:{n:'Ímã de Moedas',d:'+1 ouro por cano'}, prism:{n:'Fragmento de Prisma',d:'Canos 15% mais lentos'},
     anchor:{n:'Âncora',d:'Ímã base 2'}, phoenix:{n:'Fênix',d:'+1 renascimento'},
-    void:{n:'Núcleo do Vazio',d:'Febre a cada 15 canos'}, echo:{n:'Eco',d:'Quase-acerto +3 ouro'},
+    void:{n:'Núcleo do Vazio',d:'Febre a cada 15 canos'}, echo:{n:'Eco',d:'Pertinho +3 ouro'},
   },
 };
 const NODE_NAMES_PT = { stage:'Etapa — canos e ouro', boss:'GAPLORD — +15g + relíquia', merchant:'Comerciante — cura, escudo, PV, chip, moedas, re sortear', chest:'Baú — recompensa misteriosa', final:'CHEFE FINAL', elite:'Elite — mini-chefe, +20g + relíquia', labyrinth:'Labirinto — paredes móveis, +25g + relíquia' };
@@ -712,10 +712,13 @@ function openDraft(cards){
   show('#draft', true);
 }
 
+let merchOffers = [];
 function openMerchant(){
   state = 'shop';
   luckyUsed = false;
   pendingDraft = rollCards();
+  const pool = ['heal','shield','tough','chip','coin','reroll'].concat(run.path === 2 ? ['phoenix','anchor'] : []);
+  merchOffers = pool.sort(() => Math.random() - 0.5).slice(0, 3);
   refreshMerchant();
   show('#merchant', true);
 }
@@ -727,10 +730,16 @@ function refreshMerchant(){
   $('#merchTough').disabled = run.gold < 30;
   $('#merchChip').disabled = run.gold < 25;
   $('#merchCoin').disabled = run.gold < 20 || luckyUsed;
-  show('#merchPhoenix', run.path === 2);
+  show('#merchHeal', merchOffers.includes('heal'));
+  show('#merchShield', merchOffers.includes('shield'));
+  show('#merchTough', merchOffers.includes('tough'));
+  show('#merchChip', merchOffers.includes('chip'));
+  show('#merchCoin', merchOffers.includes('coin'));
+  show('#merchPhoenix', merchOffers.includes('phoenix'));
   $('#merchPhoenix').disabled = run.gold < 40 || run.relics.includes('phoenix');
-  show('#merchAnchor', run.path === 2);
+  show('#merchAnchor', merchOffers.includes('anchor'));
   $('#merchAnchor').disabled = run.gold < 35 || run.relics.includes('anchor');
+  show('#merchReroll', merchOffers.includes('reroll'));
   $('#merchReroll').disabled = run.gold < 10;
   renderCards($('#merchantDraft'), pendingDraft, false);
 }
@@ -1497,7 +1506,7 @@ function update(dt){
         scored = true;
         const topEdge = p.gapY - p.gap/2, botEdge = p.gapY + p.gap/2;
         const clearance = Math.min(bird.y - topEdge, botEdge - bird.y) - pw.radius;
-        const near = clearance < 10;
+        const near = clearance < 14;
         combo = near ? combo + 1 : 0;
         const mult = Math.min(combo + 1, 4);
         const gained = (pw.mult + (pw.bonus||0)) * mult * (feverT > 0 ? 2 : 1);
