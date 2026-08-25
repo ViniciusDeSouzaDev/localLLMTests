@@ -109,12 +109,18 @@
   #revealIcon { font-size:56px; }
   #revealTitle { font-size:30px; font-weight:900; letter-spacing:2px; }
   #revealDesc { font-size:15px; opacity:.85; max-width:300px; }
+  #revealBtn { pointer-events:auto; margin-top:6px; }
   @keyframes revealPop {
     0% { transform:scale(.3) rotate(-6deg); opacity:0; }
     18% { transform:scale(1.12) rotate(2deg); opacity:1; }
     30% { transform:scale(1) rotate(0); }
     78% { transform:scale(1); opacity:1; }
     100% { transform:scale(1.06); opacity:0; }
+  }
+  @keyframes revealHold {
+    0% { transform:scale(.3) rotate(-6deg); opacity:0; }
+    18% { transform:scale(1.12) rotate(2deg); opacity:1; }
+    30% { transform:scale(1) rotate(0); opacity:1; }
   }
 
   h1 {
@@ -344,6 +350,7 @@
       <div id="revealIcon"></div>
       <div id="revealTitle"></div>
       <div id="revealDesc"></div>
+      <button class="btn" id="revealBtn">INCREDIBLE!</button>
     </div>
   </div>
 
@@ -486,7 +493,7 @@ const UI_STR = {
     best:'BEST', total:'TOTAL', pts:'PTS', close:'CLOSE', closeCall:'CLOSE!', gameover:'GAME OVER', score:'SCORE',
     newRecord:'NEW RECORD!', playAgain:'PLAY AGAIN', upgrade:'UPGRADE', pickUpgrade:'Pick an upgrade',
     thePath:'THE PATH', tapNode:'Tap a glowing node', victory:'VICTORY!', ascension:'ASCENSION!',
-    continueP2:'CONTINUE → PATH 2', chest:'CHEST', open:'OPEN', merchant:'MERCHANT', leave:'LEAVE',
+    continueP2:'CONTINUE → PATH 2', chest:'CHEST', open:'OPEN', merchant:'MERCHANT', leave:'LEAVE', incredible:'INCREDIBLE!',
     paused:'PAUSED', resume:'RESUME', help:'HELP', mainMenu:'MAIN MENU', noMedal:'NO MEDAL',
     diamond:'DIAMOND', platinum:'PLATINUM', gold:'GOLD', silver:'SILVER', bronze:'BRONZE',
     stage:'STAGE', power:'POWER', none:'NONE', noPower:'NO POWER', noPowerDesc:'No power',
@@ -517,7 +524,7 @@ const UI_STR = {
     best:'RECORDE', total:'TOTAL', pts:'PTS', close:'FECHAR', closeCall:'PERTINHO!', gameover:'FIM DE JOGO', score:'PONTOS',
     newRecord:'NOVO RECORDE!', playAgain:'JOGAR DE NOVO', upgrade:'MELHORAMENTO', pickUpgrade:'Escolha uma melhoria',
     thePath:'O CAMINHO', tapNode:'Toque em um nó brilhante', victory:'VITÓRIA!', ascension:'ASCENSÃO!',
-    continueP2:'CONTINUAR → CAMINHO 2', chest:'BAÚ', open:'ABRIR', merchant:'COMERCIANTE', leave:'SAIR',
+    continueP2:'CONTINUAR → CAMINHO 2', chest:'BAÚ', open:'ABRIR', merchant:'COMERCIANTE', leave:'SAIR', incredible:'INCRÍVEL!',
     paused:'PAUSADO', resume:'CONTINUAR', help:'AJUDA', mainMenu:'MENU PRINCIPAL', noMedal:'SEM MEDALHA',
     diamond:'DIAMANTE', platinum:'PLATINA', gold:'OURO', silver:'PRATA', bronze:'BRONZE',
     stage:'ETAPA', power:'PODER', none:'NENHUM', noPower:'SEM PODER', noPowerDesc:'Sem poder',
@@ -605,7 +612,7 @@ function applyLang(){
   set('#draftTitle', T('upgrade')); set('#draftHint', T('pickUpgrade'));
   set('#mapTitle', T('thePath')); set('#mapHint', T('tapNode'));
   set('#continueBtn', T('continueP2')); set('#victoryBtn', T('playAgain'));
-  set('#chestTitle', T('chest')); set('#chestOpen', T('open'));
+  set('#chestTitle', T('chest')); set('#chestOpen', T('open')); set('#revealBtn', T('incredible'));
   set('#merchTitle', T('merchant'));
   set('#merchHeal .dcName', T('heal')); set('#merchHeal .dcDesc', T('healDesc'));
   set('#merchShield .dcName', T('shieldOffer')); set('#merchShield .dcDesc', T('shieldDesc'));
@@ -961,18 +968,31 @@ function clickNode(r, i){
   else openChest();
 }
 
+let revealPaused = false;
 function showReveal(icon, title, desc, legendary){
   const card = $('#revealCard');
   card.classList.toggle('legendary', !!legendary);
   $('#revealIcon').textContent = icon;
   $('#revealTitle').textContent = title;
   $('#revealDesc').textContent = desc;
+  show('#revealBtn', !!legendary);
   card.style.animation = 'none';
   void card.offsetWidth;
-  card.style.animation = '';
+  card.style.animation = legendary ? 'revealHold .6s cubic-bezier(.2,1.4,.4,1) forwards' : '';
   show('#reveal', true);
   clearTimeout(showReveal._t);
-  showReveal._t = setTimeout(() => show('#reveal', false), 2400);
+  if(legendary){
+    revealPaused = state === 'play' && !paused;
+    if(revealPaused) paused = true;
+    showReveal._t = setTimeout(closeReveal, 15000);
+  } else {
+    showReveal._t = setTimeout(() => show('#reveal', false), 2400);
+  }
+}
+function closeReveal(){
+  clearTimeout(showReveal._t);
+  show('#reveal', false);
+  if(revealPaused){ paused = false; revealPaused = false; }
 }
 
 function showVictory(){
@@ -2402,7 +2422,7 @@ function toggleMute(){
 $('#muteBtn').addEventListener('click', () => { AudioFX.init(); toggleMute(); });
 $('#pauseBtn').addEventListener('click', () => { AudioFX.init(); togglePause(); });
 function buildHelp(){
-  const list = items => items.map(i=>`<p class="hint"><b>${i.name}</b> — ${i.desc}</p>`).join('');
+  const list = items => items.map(i=>`<p class="hint">${i.icon ? i.icon + ' ' : ''}<b>${i.name}</b> — ${i.desc}</p>`).join('');
   $('#helpBody').innerHTML =
     `<p class="hint">${T('menuHint')}</p>` +
     `<h3>${T('upgrades')}</h3>` + list(CARDS) +
@@ -2455,6 +2475,7 @@ $('#pauseMenu').addEventListener('click', () => { AudioFX.click(); toMenu(); });
 $('#helpBtnMenu').addEventListener('click', () => { AudioFX.init(); AudioFX.click(); openHelp(); });
 $('#langBtn').addEventListener('click', () => { AudioFX.init(); AudioFX.click(); lang = lang === 'en' ? 'pt' : 'en'; save.lang = lang; persist(); applyLang(); buildShop(); });
 $('#helpClose').addEventListener('click', closeHelp);
+ $('#revealBtn').addEventListener('click', () => { AudioFX.click(); closeReveal(); });
 $('#playBtn').addEventListener('click', () => { AudioFX.init(); startGame(); });
   $('#retryBtn').addEventListener('click', () => { AudioFX.init(); startGame(); });
   $('#modeClassic').addEventListener('click', () => { AudioFX.init(); AudioFX.click(); mode = 'classic'; save.modeChosen = true; persist(); refreshMode(); });
