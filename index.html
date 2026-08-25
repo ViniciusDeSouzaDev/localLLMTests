@@ -403,6 +403,7 @@ let mode = save.mode || 'rl';
 let run = null;
 let stageClearT = 0;
 let pendingDraft = null;
+let draftGuardT = 0;
 let luckyUsed = false;
 let chestReward = null;
 let chestOpened = false;
@@ -527,7 +528,12 @@ function renderCards(grid, cards, clickable){
     const el = document.createElement('button');
     el.className = 'draftCard';
     el.innerHTML = `<span class="dcName">${c.icon ? c.icon + ' ' : ''}${c.name}</span><span class="dcDesc">${c.desc}</span>`;
-    if(clickable) el.addEventListener('click', () => pickCard(c.id));
+    if(clickable) el.addEventListener('click', () => {
+      const now = performance.now();
+      if(now - draftGuardT < 400){ draftGuardT = now; return; }
+      draftGuardT = now;
+      pickCard(c.id);
+    });
     else el.disabled = true;
     grid.appendChild(el);
   }
@@ -535,6 +541,7 @@ function renderCards(grid, cards, clickable){
 
 function openDraft(cards){
   state = 'draft';
+  draftGuardT = performance.now();
   renderCards($('#draftCards'), cards || rollCards(), true);
   show('#draft', true);
 }
