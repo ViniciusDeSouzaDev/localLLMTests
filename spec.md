@@ -63,7 +63,7 @@ run = {
 
 ## 6. Gold, path & merchant
 
-- Gold sources: +1/pipe, +2 on near-miss, +10 stage clear, +15 boss kill, chests.
+- Gold sources: +1/pipe, +2 on near-miss, +10 stage clear, boss kills (see §7), chests.
 - **Map** (StS-style, fixed campaign): 16-row map generated at run start (`genMap()`), DOM + SVG. Rows of 1–3 nodes; every node in the next row is selectable (player always has 1, 2, or 3 options). Node types: **STAGE** (58%), **CHEST** (20%), **MERCHANT** (12%), **ELITE** (12%, only in rows of width ≥ 2); rows 3/7/11 = guaranteed **BOSS gates** (single node); last row = single **FINAL BOSS**.
 - Flow: map → pick node → stop (stage/boss/chest/merchant) → upgrade draft → map. Stage counter advances per stop.
 - Beat the final boss → **VICTORY** screen (saves `save.rl.victories`), PLAY AGAIN restarts.
@@ -80,14 +80,26 @@ run = {
   - FINAL BOSS (12, 3 phases): `sine` → `chase` → `pulse` (black/gold) — pipes are **spear pipes** (spikes, 2x damage)
   - ELITE (5 passes, 1 phase, optional map node): `sine` (green) — mini-boss, appears as an **ELITE** node (⚔️) on rows of width ≥ 2
   - Phase change: flash + shake + scream + "PHASE X/Y" popup. Magnet upgrade does NOT affect boss pipes.
-- Survive → boss dead: `+15 gold` + the boss's **signature relic** (GAPLORD→golden, II→heart, III→coin, FINAL→prism; +10 gold if already owned), banner, → draft → map. Final boss → victory screen.
+- Survive → boss dead: **80% gold** (25–45g) / **20% LEGENDARY** (random from the 3-legend pool, no duplicates; dramatic reveal overlay + sound). Elite/Labyrinth bosses keep their relic rewards instead. Final boss → victory screen.
 - Elite (optional node): `+20 gold` + a **random unowned relic** (+15 gold if all owned).
+- Labyrinth (Path 2): `+25 gold` + a **random unowned Path 2 relic**.
 - Relic pool (id, name, desc):
   - `golden` — Golden Feather: fever lasts 15s
   - `heart` — Heart Pipe: start each stage with +1 HP (max maxHp)
   - `coin` — Coin Magnet: +1 gold per pipe (same as greed but free)
   - `prism` — Prism Shard: pipes 15% slower
 - Relics apply via `runMods()` too.
+
+## 7b. Legendaries (boss drops)
+
+- Regular boss kills roll **80% gold (25–45g) / 20% legendary** from a pool of 3 (no duplicates per run). Elite/Labyrinth bosses give their relic instead.
+- Dramatic reveal: full-screen card overlay (`#reveal`, 2.4s pop animation, gold glow for legendaries) + `AudioFX.reveal()` / `AudioFX.legendary()` arpeggio.
+- Pool:
+  - `bloodpact` — Blood Pact 🩸: every near-miss (14px) heals +2 HP and costs 5 gold, once per stage.
+  - `phaseshift` — Phase Shift 🌀: every 20 pipes passed you gain 3s of invulnerability.
+  - `favor` — Merchant's Favor 🤝: merchant items cost 50% less (reroll is free).
+- State: `run.legends[]`, `run.bloodUsed` (reset per stage), `run.phaseCount` (reset per stage).
+- Shown in the HUD item row with tooltips (EN/PT via `legendInfo()`).
 
 ## 8. Characters (skins = characters)
 
