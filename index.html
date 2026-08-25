@@ -381,19 +381,21 @@ const SKINS = [
   { id:'classic', name:'Classic', body:'#ffd93b', belly:'#fff6cf', wing:'#f2a51e', trail:'#ffe98a', unlock:0, power:null, powerName:'', powerDesc:'No power' },
   { id:'crimson', name:'Crimson', body:'#ff5d5d', belly:'#ffd9d9', wing:'#d63b3b', trail:'#ff9a9a', unlock:10, power:'feather', powerName:'Feather', powerDesc:'Lighter gravity' },
   { id:'azure',   name:'Azure',   body:'#4fc3f7', belly:'#e8f9ff', wing:'#1e93d6', trail:'#9fe0ff', unlock:25, power:'compact', powerName:'Compact', powerDesc:'Smaller hitbox' },
-  { id:'jade',    name:'Jade',    body:'#5fe07a', belly:'#eaffd9', wing:'#2aa84e', trail:'#a2f5b0', unlock:50, power:'shield', powerName:'Shield', powerDesc:'Survive 1 hit per run' },
+  { id:'jade',    name:'Jade',    body:'#5fe07a', belly:'#eaffd9', wing:'#2aa84e', trail:'#a2f5b0', unlock:50, power:'shield', powerName:'Shield', powerDesc:'4 HP + survive 1 hit per run' },
   { id:'violet',  name:'Violet',  body:'#b388ff', belly:'#f3e9ff', wing:'#8a4fd6', trail:'#d7baff', unlock:100, power:'time', powerName:'Time', powerDesc:'Pipes 20% slower' },
   { id:'golden',  name:'Golden',  body:'#ffd700', belly:'#fffbe0', wing:'#d9a400', trail:'#fff3a0', unlock:200, sparkle:true, power:'midas', powerName:'Midas', powerDesc:'Double points' },
-  { id:'phantom', name:'Phantom', body:'#d7e0e6', belly:'#ffffff', wing:'#9fb3bd', trail:'#ffffff', unlock:300, ghost:true, power:'reborn', powerName:'Reborn', powerDesc:'Die, then come back mid-run' },
-  { id:'demon', name:'Demon', body:'#4a1526', belly:'#6b2038', wing:'#2a0a14', trail:'#ff3b3b', unlock:750, demon:true, power:'compact', powerName:'Demon', powerDesc:'Tiny hitbox + starts with Vampire x2' },
+  { id:'phantom', name:'Phantom', body:'#d7e0e6', belly:'#ffffff', wing:'#9fb3bd', trail:'#ffffff', unlock:300, ghost:true, power:'reborn', powerName:'Reborn', powerDesc:'5 HP + revive once mid-run' },
+  { id:'demon', name:'Demon', body:'#4a1526', belly:'#6b2038', wing:'#2a0a14', trail:'#ff3b3b', unlock:750, demon:true, power:'compact', powerName:'Demon', powerDesc:'1 HP + tiny hitbox + starts with Vampire x2' },
   { id:'cat', name:'Cat', body:'#e8973e', belly:'#fff3e0', wing:'#c46a1e', trail:'#ffd9a0', unlock:1000, power:'hearts', powerName:'Seven Lives', powerDesc:'Starts with 7 HP' },
-  { id:'rainbow', name:'Rainbow', body:null, belly:'#ffffff', wing:null, trail:null, unlock:10000, rainbow:true, power:'prism', powerName:'Prism', powerDesc:'Shield + slow pipes + x2 pts' },
+  { id:'rainbow', name:'Rainbow', body:null, belly:'#ffffff', wing:null, trail:null, unlock:10000, rainbow:true, power:'prism', powerName:'Prism', powerDesc:'5 HP + shield + slow pipes + x2 pts' },
   { id:'god', name:'God', body:'#fff3c4', belly:'#fffdf2', wing:'#f7c948', trail:'#fff6d6', unlock:100000, god:true, sparkle:true, power:'god', powerName:'God', powerDesc:'Never dies + faster pipes + Magnet x5' },
 ];
 const skinById = id => SKINS.find(s=>s.id===id) || SKINS[0];
 
+const SKIN_HP = { classic:3, crimson:3, azure:3, jade:4, violet:3, golden:3, phantom:5, demon:1, cat:7, rainbow:5, god:99 };
 function powers(){
-  const p = skinById(save.selected).power;
+  const s = skinById(save.selected);
+  const p = s.power;
   return {
     grav:   p==='feather' ? 0.85 : 1,
     radius: (p==='compact' || p==='prism') ? 11 : BIRD_R,
@@ -401,7 +403,7 @@ function powers(){
     revive: p==='reborn' ? 1 : 0,
     speed:  p==='god' ? 1.3 : (p==='time' ? 0.8 : (p==='prism' ? 0.85 : 1)),
     mult:   (p==='midas' || p==='prism') ? 2 : 1,
-    maxHp:  p==='hearts' ? 7 : 3,
+    maxHp:  SKIN_HP[s.id] || 3,
     god:    p==='god',
     magnet: p==='god' ? 5 : 0,
   };
@@ -520,12 +522,12 @@ CARDS.forEach(c => DATA_ORIG.cards[c.id] = { n:c.name, d:c.desc });
 const DATA_PT = {
   skins: {
     classic:{n:'Clássico',p:'',d:'Sem poder'}, crimson:{n:'Carmesim',p:'Penas',d:'Gravidade mais leve'},
-    azure:{n:'Azul',p:'Compacto',d:'Hitbox menor'}, jade:{n:'Jade',p:'Escudo',d:'Sobrevive a 1 dano por corrida'},
+    azure:{n:'Azul',p:'Compacto',d:'Hitbox menor'}, jade:{n:'Jade',p:'Escudo',d:'4 PV + sobrevive a 1 dano por corrida'},
     violet:{n:'Violeta',p:'Tempo',d:'Canos 20% mais lentos'},    golden:{n:'Dourado',p:'Pontuador',d:'Pontos em dobro'},
-    phantom:{n:'Fantasma',p:'Renascido',d:'Morre e volta no meio da corrida'},
-    demon:{n:'Demoníaco',p:'Demoníaco',d:'Hitbox minúscula + começa com Vampiro x2'},
+    phantom:{n:'Fantasma',p:'Renascido',d:'5 PV + revive uma vez na corrida'},
+    demon:{n:'Demoníaco',p:'Demoníaco',d:'1 PV + hitbox minúscula + começa com Vampiro x2'},
     cat:{n:'Gato',p:'Sete Vidas',d:'Começa com 7 PV'},
-    rainbow:{n:'Arcíris',p:'Prisma',d:'Escudo + canos lentos + x2 pts'},
+    rainbow:{n:'Arcíris',p:'Prisma',d:'5 PV + escudo + canos lentos + x2 pts'},
     god:{n:'Deus',p:'Deus',d:'Nunca morre + canos mais rápidos + Ímã x5'},
   },
   cards: {
@@ -633,8 +635,13 @@ function refreshRlHud(){
   if(mode !== 'rl' || !run) return;
   const maxHp = mods().maxHp;
   const heartsEl = $('#rlHearts');
-  heartsEl.textContent = '♥'.repeat(Math.max(0, run.hp)) + '♡'.repeat(Math.max(0, maxHp - run.hp));
-  heartsEl.style.fontSize = maxHp > 9 ? '10px' : maxHp > 6 ? '12px' : '';
+  if(maxHp > 12){
+    heartsEl.textContent = '♥ ' + Math.max(0, run.hp) + '/' + maxHp;
+    heartsEl.style.fontSize = '';
+  } else {
+    heartsEl.textContent = '♥'.repeat(Math.max(0, run.hp)) + '♡'.repeat(Math.max(0, maxHp - run.hp));
+    heartsEl.style.fontSize = maxHp > 9 ? '10px' : maxHp > 6 ? '12px' : '';
+  }
   $('#rlGold').textContent = '🪙' + run.gold;
   $('#rlStage').textContent = T('stage') + ' ' + Math.max(1, run.stage);
   renderRunItems();
