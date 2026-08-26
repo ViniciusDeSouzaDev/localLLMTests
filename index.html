@@ -840,19 +840,36 @@ const PATHS = [
 ];
 function pathCfg(){ return PATHS[run.path || 1]; }
 const BOSSES = [
-  { name:'GAPLORD',     passes:6,  relic:'golden', colors:[150,45,80, 90,20,50, 210,80,120], eye:'#ff8090', phases:[{pattern:'sine', amp:120, spd:2.2}] },
-  { name:'GAPLORD II',  passes:7,  relic:'heart',  colors:[120,50,160, 80,30,110, 180,110,220], eye:'#c070ff', phases:[{pattern:'sine', amp:120, spd:2.6},{pattern:'chase', rate:0.9}] },
-  { name:'GAPLORD III', passes:8,  relic:'coin',   colors:[200,90,30, 140,60,20, 240,150,70], eye:'#ffb040', phases:[{pattern:'sine', amp:130, spd:3.0},{pattern:'pulse', spd:3.2}] },
-  { name:'FINAL BOSS',  passes:12, relic:'prism',  colors:[45,45,55, 25,25,35, 90,90,110], eye:'#ffd700', phases:[{pattern:'sine', amp:120, spd:2.4},{pattern:'chase', rate:1.1},{pattern:'pulse', spd:3.6}] },
+  [ { name:'GAPLORD',      passes:6,  relic:'golden', colors:[150,45,80, 90,20,50, 210,80,120], eye:'#ff8090', phases:[{pattern:'sine', amp:120, spd:2.2}] },
+    { name:'PIPESNAKE',    passes:5,  relic:'golden', colors:[40,120,50, 20,80,30, 110,200,110], eye:'#70ff90', phases:[{pattern:'zigzag', amp:100, spd:2.4}] } ],
+  [ { name:'GAPLORD II',   passes:7,  relic:'heart',  colors:[120,50,160, 80,30,110, 180,110,220], eye:'#c070ff', phases:[{pattern:'sine', amp:120, spd:2.6},{pattern:'chase', rate:0.9}] },
+    { name:'MIDNIGHT',     passes:7,  relic:'heart',  colors:[30,50,90, 15,30,60, 70,110,170], eye:'#70a0ff', phases:[{pattern:'squeeze', spd:2.4},{pattern:'sine', amp:110, spd:2.4}] } ],
+  [ { name:'GAPLORD III',  passes:8,  relic:'coin',   colors:[200,90,30, 140,60,20, 240,150,70], eye:'#ffb040', phases:[{pattern:'sine', amp:130, spd:3.0},{pattern:'pulse', spd:3.2}] },
+    { name:'STORMFEATHER', passes:8,  relic:'coin',   colors:[20,110,130, 10,70,90, 90,210,230], eye:'#60e0ff', phases:[{pattern:'zigzag', amp:120, spd:3.2},{pattern:'hunt', rate:1.2, amp:90}] } ],
+  [ { name:'FINAL BOSS',   passes:12, relic:'prism',  colors:[45,45,55, 25,25,35, 90,90,110], eye:'#ffd700', phases:[{pattern:'sine', amp:120, spd:2.4},{pattern:'chase', rate:1.1},{pattern:'pulse', spd:3.6}] },
+    { name:'THE ENDLESS',  passes:14, relic:'prism',  colors:[70,20,30, 40,10,20, 150,50,70], eye:'#ff4050', phases:[{pattern:'squeeze', spd:3.0},{pattern:'hunt', rate:1.4, amp:100},{pattern:'labyrinth', amp:260, spd:2.8, bspd:1.9}] } ],
 ];
-const ELITE = { name:'ELITE', passes:5, colors:[30,140,90, 15,90,60, 90,222,150], eye:'#40ff90', phases:[{pattern:'sine', amp:110, spd:2.8}] };
+const ELITES = [
+  { name:'ELITE',   passes:5, colors:[30,140,90, 15,90,60, 90,222,150], eye:'#40ff90', phases:[{pattern:'sine', amp:110, spd:2.8}] },
+  { name:'BRUISER', passes:7, colors:[140,60,40, 90,35,25, 200,110,80], eye:'#ff9070', phases:[{pattern:'sine', amp:90, spd:1.8}] },
+  { name:'DART',    passes:3, colors:[160,140,30, 110,95,20, 230,200,70], eye:'#ffe060', phases:[{pattern:'zigzag', amp:120, spd:4.0}] },
+  { name:'PHANTOM', passes:5, colors:[90,60,140, 55,35,95, 150,110,210], eye:'#c090ff', phases:[{pattern:'squeeze', spd:3.0}] },
+];
 const BOSSES2 = [
-  { name:'GAPLORD IV',   passes:9,  relic:'anchor',   colors:[20,110,140, 10,70,90, 80,200,230], eye:'#40e0ff', phases:[{pattern:'pulse', spd:3.4},{pattern:'sine', amp:140, spd:3.2}] },
-  { name:'GAPLORD V',    passes:10, relic:'phoenix',  colors:[150,30,60, 90,15,35, 230,70,110], eye:'#ff5070', phases:[{pattern:'sine', amp:150, spd:3.4},{pattern:'chase', rate:1.4},{pattern:'pulse', spd:4.0}] },
-  { name:'THE WARDEN',   passes:10, relic:'void',     colors:[110,95,60, 70,60,40, 180,160,110], eye:'#ffe9a0', phases:[{pattern:'pulse', spd:3.8},{pattern:'labyrinth', amp:260, spd:2.6, bspd:1.7},{pattern:'chase', rate:1.6}] },
-  { name:'VOIDLORD',     passes:14, relic:'prism',    colors:[60,30,90, 35,15,55, 130,70,190], eye:'#e0b0ff', phases:[{pattern:'sine', amp:160, spd:3.6},{pattern:'pulse', spd:4.2},{pattern:'labyrinth', amp:280, spd:3.0, bspd:2.0},{pattern:'chase', rate:1.8}] },
+  [ { name:'GAPLORD IV',   passes:9,  relic:'anchor',  colors:[20,110,140, 10,70,90, 80,200,230], eye:'#40e0ff', phases:[{pattern:'pulse', spd:3.4},{pattern:'sine', amp:140, spd:3.2}] },
+    { name:'TIDEWRAITH',   passes:9,  relic:'anchor',  colors:[15,80,110, 8,50,75, 60,170,200], eye:'#50d0e0', phases:[{pattern:'zigzag', amp:130, spd:3.0},{pattern:'pulse', spd:3.6}] } ],
+  [ { name:'GAPLORD V',    passes:10, relic:'phoenix', colors:[150,30,60, 90,15,35, 230,70,110], eye:'#ff5070', phases:[{pattern:'sine', amp:150, spd:3.4},{pattern:'chase', rate:1.4},{pattern:'pulse', spd:4.0}] },
+    { name:'EMBERLORD',    passes:10, relic:'phoenix', colors:[170,70,20, 110,45,15, 240,130,50], eye:'#ff9040', phases:[{pattern:'squeeze', spd:3.6},{pattern:'hunt', rate:1.4, amp:100}] } ],
+  [ { name:'THE WARDEN',   passes:10, relic:'void',    colors:[110,95,60, 70,60,40, 180,160,110], eye:'#ffe9a0', phases:[{pattern:'pulse', spd:3.8},{pattern:'labyrinth', amp:260, spd:2.6, bspd:1.7},{pattern:'chase', rate:1.6}] },
+    { name:'NULLKNIGHT',   passes:10, relic:'void',    colors:[70,70,85, 45,45,55, 130,130,150], eye:'#b0b0d0', phases:[{pattern:'hunt', rate:1.5, amp:100},{pattern:'labyrinth', amp:260, spd:2.8, bspd:1.9}] } ],
+  [ { name:'VOIDLORD',     passes:14, relic:'prism',   colors:[60,30,90, 35,15,55, 130,70,190], eye:'#e0b0ff', phases:[{pattern:'sine', amp:160, spd:3.6},{pattern:'pulse', spd:4.2},{pattern:'labyrinth', amp:280, spd:3.0, bspd:2.0},{pattern:'chase', rate:1.8}] },
+    { name:'OMEGA GAPLORD',passes:16, relic:'prism',   colors:[200,190,160, 140,130,100, 250,240,210], eye:'#fff8d0', phases:[{pattern:'squeeze', spd:4.0},{pattern:'labyrinth', amp:280, spd:3.2, bspd:2.2},{pattern:'hunt', rate:1.8, amp:110}] } ],
 ];
-const LABYRINTH = { name:'LABYRINTH', passes:6, colors:[70,90,70, 45,60,45, 140,170,140], eye:'#90ff90', phases:[{pattern:'labyrinth', amp:240, spd:2.6, bspd:1.7}] };
+const LABYRINTHS = [
+  { name:'LABYRINTH', passes:6, colors:[70,90,70, 45,60,45, 140,170,140], eye:'#90ff90', phases:[{pattern:'labyrinth', amp:240, spd:2.6, bspd:1.7}] },
+  { name:'CRAWL',     passes:8, colors:[60,80,50, 40,55,35, 120,150,100], eye:'#a0d080', phases:[{pattern:'labyrinth', amp:200, spd:2.2, bspd:1.4}] },
+  { name:'GALE',      passes:5, colors:[80,95,110, 50,60,75, 150,175,200], eye:'#a0d0ff', phases:[{pattern:'labyrinth', amp:260, spd:3.2, bspd:2.2}] },
+];
 const NODE_ICONS = { stage:'🎯', boss:'💀', merchant:'🪙', chest:'📦', final:'👑', elite:'⚔️', labyrinth:'🌀' };
 const NODE_NAMES = { stage:'Stage — pipes & gold', boss:'Boss — big gold or LEGENDARY', merchant:'Merchant — heal, shield, HP, chip, coins, reroll', chest:'Chest — mystery reward', final:'FINAL BOSS', elite:'Elite — mini-boss, +20g + relic', labyrinth:'Labyrinth — shifting walls, +25g + relic' };
 const LEGENDS = [
@@ -874,6 +891,10 @@ function hasLegend(id){ return !!(run && run.legends && run.legends.includes(id)
 
 function genMap(path){
   const cfg = PATHS[path || 1];
+  const pool = (path === 2 ? BOSSES2 : BOSSES);
+  const elitePool = [...ELITES].sort(() => Math.random() - 0.5);
+  const labyPool = [...LABYRINTHS].sort(() => Math.random() - 0.5);
+  let eI = 0, lI = 0;
   const rows = [];
   for(let r=0;r<cfg.rows;r++){
     const row = [];
@@ -890,6 +911,12 @@ function genMap(path){
     }
     if(cfg.bossRows.includes(r) && !row.some(n => n.type === 'boss'))
       row[Math.floor(Math.random()*row.length)].type = 'boss';
+    for(const n of row){
+      if(n.type === 'boss') n.def = pool[Math.floor(r/4)][Math.floor(Math.random()*2)];
+      else if(n.type === 'final') n.def = pool[3][Math.floor(Math.random()*2)];
+      else if(n.type === 'elite') n.def = elitePool[eI++ % elitePool.length];
+      else if(n.type === 'labyrinth') n.def = labyPool[lI++ % labyPool.length];
+    }
     rows.push(row);
   }
   const edges = [];
@@ -943,7 +970,7 @@ function showMap(){
       const el = document.createElement('button');
       el.className = 'mapNode' + (n.visited ? ' visited' : (r === nextR && avail.includes(i) ? ' avail' : ''));
       el.textContent = NODE_ICONS[n.type];
-      el.title = nodeNames()[n.type];
+      el.title = n.def ? n.def.name : nodeNames()[n.type];
       el.style.left = `calc(${x}% - 20px)`;
       el.style.top = (y - 20) + 'px';
       if(r === nextR && avail.includes(i)) el.addEventListener('click', () => clickNode(r, i));
@@ -960,10 +987,10 @@ function clickNode(r, i){
   show('#map', false);
   const type = map.rows[r][i].type;
   if(type === 'stage') startStage();
-  else if(type === 'boss'){ const d = (run.path === 2 ? BOSSES2 : BOSSES)[Math.floor(r/4)]; run.boss = { passes:0, max:d.passes, final:false, phaseIdx:0, def:d }; startStage(); }
-  else if(type === 'elite'){ run.boss = { passes:0, max:ELITE.passes, final:false, elite:true, phaseIdx:0, def:ELITE }; startStage(); }
-  else if(type === 'labyrinth'){ run.boss = { passes:0, max:LABYRINTH.passes, final:false, labyrinth:true, phaseIdx:0, def:LABYRINTH }; startStage(); }
-  else if(type === 'final'){ const d = (run.path === 2 ? BOSSES2[3] : BOSSES[3]); run.boss = { passes:0, max:d.passes, final:true, phaseIdx:0, def:d }; startStage(); }
+  else if(type === 'boss'){ const d = map.rows[r][i].def; run.boss = { passes:0, max:d.passes, final:false, phaseIdx:0, def:d }; startStage(); }
+  else if(type === 'elite'){ const d = map.rows[r][i].def; run.boss = { passes:0, max:d.passes, final:false, elite:true, phaseIdx:0, def:d }; startStage(); }
+  else if(type === 'labyrinth'){ const d = map.rows[r][i].def; run.boss = { passes:0, max:d.passes, final:false, labyrinth:true, phaseIdx:0, def:d }; startStage(); }
+  else if(type === 'final'){ const d = map.rows[r][i].def; run.boss = { passes:0, max:d.passes, final:true, phaseIdx:0, def:d }; startStage(); }
   else if(type === 'merchant') openMerchant();
   else openChest();
 }
@@ -1548,12 +1575,26 @@ function update(dt){
       const idx = Math.min(ph.length-1, Math.floor(b.passes * ph.length / b.max));
       if(idx !== b.phaseIdx){
         b.phaseIdx = idx;
+        p.gap = p.baseGap; p.pulseT = 0;
         flash = 0.5; shake = 12; AudioFX.scream();
         popups.push({ x:BIRD_X, y:bird.y-60, txt:T('phase') + ' ' + (idx+1) + '/' + ph.length, life:1.2, max:1.2 });
       }
       const ph2 = ph[idx];
       if(ph2.pattern === 'chase'){
         p.gapY += (bird.y - p.gapY) * Math.min(1, ph2.rate * dt);
+      } else if(ph2.pattern === 'squeeze'){
+        p.pulseT = (p.pulseT || 0) + dt;
+        const s = 0.5 - 0.5*Math.cos(p.pulseT * ph2.spd);
+        p.gap = Math.max(60, p.baseGap * (1 - 0.45*s));
+        p.gapY = p.baseY + Math.sin(t*0.7)*30;
+      } else if(ph2.pattern === 'zigzag'){
+        p.pulseT = (p.pulseT || 0) + dt;
+        p.gapY = p.baseY + (Math.asin(Math.sin(p.pulseT*ph2.spd)) * (2/Math.PI)) * (ph2.amp || 110);
+      } else if(ph2.pattern === 'hunt'){
+        p.pulseT = (p.pulseT || 0) + dt;
+        p.gapY += (bird.y - p.gapY) * Math.min(1, (ph2.rate || 1.2) * dt);
+        p.gapY += Math.sin(p.pulseT * (ph2.rate || 1.2) * 3) * (ph2.amp || 90) * dt;
+        p.gapY = Math.max(70, Math.min(GROUND_Y - 70, p.gapY));
       } else if(ph2.pattern === 'pulse'){
         p.pulseT = (p.pulseT || 0) + dt;
         p.gap = Math.max(70, p.baseGap * (1 + 0.35*Math.sin(p.pulseT*ph2.spd)));
