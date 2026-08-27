@@ -25,8 +25,8 @@ const SKINS = [
   { id:'violet',  name:'Violet',  body:'#b388ff', belly:'#f3e9ff', wing:'#8a4fd6', trail:'#d7baff', unlock:500, power:'time', powerName:'Time', powerDesc:'Pipes 20% slower' },
   { id:'golden',  name:'Golden',  body:'#ffd700', belly:'#fffbe0', wing:'#d9a400', trail:'#fff3a0', unlock:1000, sparkle:true, power:'midas', powerName:'Midas', powerDesc:'Double points' },
   { id:'phantom', name:'Phantom', body:'#d7e0e6', belly:'#ffffff', wing:'#9fb3bd', trail:'#ffffff', unlock:1500, ghost:true, power:'reborn', powerName:'Reborn', powerDesc:'5 HP + revive once mid-run' },
-  { id:'demon', name:'Demon', body:'#4a1526', belly:'#6b2038', wing:'#2a0a14', trail:'#ff3b3b', unlock:3750, demon:true, power:'compact', powerName:'Demon', powerDesc:'1 HP + tiny hitbox + starts with Vampire x2' },
-  { id:'cat', name:'Cat', body:'#e8973e', belly:'#fff3e0', wing:'#c46a1e', trail:'#ffd9a0', unlock:5000, power:'hearts', powerName:'Seven Lives', powerDesc:'Starts with 7 HP' },
+  { id:'demon', name:'Demon', body:'#4a1526', belly:'#6b2038', wing:'#2a0a14', trail:'#ff3b3b', unlock:3000, demon:true, power:'compact', powerName:'Demon', powerDesc:'1 HP + tiny hitbox + starts with Vampire x2' },
+  { id:'cat', name:'Cat', body:'#e8973e', belly:'#fff3e0', wing:'#c46a1e', trail:'#ffd9a0', unlock:7500, power:'hearts', powerName:'Seven Lives', powerDesc:'Starts with 7 HP' },
   { id:'rainbow', name:'Rainbow', body:null, belly:'#ffffff', wing:null, trail:null, unlock:15000, rainbow:true, power:'prism', powerName:'Prism', powerDesc:'5 HP + shield + slow pipes + x2 pts' },
   { id:'god', name:'God', body:'#fff3c4', belly:'#fffdf2', wing:'#f7c948', trail:'#fff6d6', unlock:100000, god:true, sparkle:true, power:'god', powerName:'God', powerDesc:'Never dies + faster pipes + Magnet x5' },
 ];
