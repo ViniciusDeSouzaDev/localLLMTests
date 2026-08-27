@@ -14,8 +14,7 @@ function showToast(msg){
 function refreshStats(){
   $('#menuBest').textContent = mode==='rl' ? ('S'+save.rl.bestStage+' • '+save.rl.bestPipes+'p') : save.best;
   $('#menuTotal').textContent = save.total;
-  $('#shopTotal').textContent = save.total;
-  $('#muteBtn').textContent = save.muted ? 'OFF' : 'SND';
+   $('#muteBtn').textContent = save.muted ? 'OFF' : 'SND';
   const s = skinById(save.selected);
   $('#menuPower').textContent = T('power') + ': ' + (s.power ? s.powerName + ' — ' + s.powerDesc : T('none'));
 }

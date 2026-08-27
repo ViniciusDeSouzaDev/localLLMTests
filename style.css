@@ -198,8 +198,8 @@
 
   /* ---------- Shop ---------- */
   #shop { background:rgba(5,8,18,.72); backdrop-filter:blur(6px); overflow-y:auto; justify-content:flex-start; }
-   #shop .card { width:100%; max-width:520px; margin:auto 0; }
-   #skinGrid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; max-height:min(52vh,420px); overflow-y:auto; }
+   #shop .card { width:100%; max-width:none; margin:auto 0; }
+   #skinGrid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
    .skinCard {
      padding:10px 8px; border-radius:14px; cursor:pointer;
     background:rgba(255,255,255,.07); border:2px solid rgba(255,255,255,.12);
@@ -209,14 +209,14 @@
   .skinCard:hover { transform:translateY(-3px); }
   .skinCard.selected { border-color:#ffd93b; background:rgba(255,217,59,.12); }
   .skinCard.locked { opacity:.55; }
-  .skinCard canvas { border-radius:10px; background:rgba(0,0,0,.25); width:80px; height:80px; }
+  .skinCard canvas { border-radius:10px; background:rgba(0,0,0,.25); width:100%; max-width:80px; height:auto; aspect-ratio:1; }
    @media (max-width:520px){
      #shop { padding:14px; gap:10px; }
      #shop .card { padding:16px 14px; gap:10px; }
      #shopTop { gap:10px; }
      #shopTop h2 { font-size:20px; }
      #skinGrid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
-     .skinCard canvas { width:64px; height:64px; }
+     .skinCard canvas { max-width:64px; }
      .skinName { font-size:11px; }
    }
   .skinName { font-size:12px; font-weight:800; color:#fff; letter-spacing:.5px; }

@@ -54,7 +54,7 @@ function applyLang(){
    set('#lblBest', T('best')); set('#lblTotal', T('total'));
   set('#goTitle', T('gameover')); set('#lblScore', T('score')); set('#lblBest2', T('best'));
   set('#newRecord', T('newRecord')); set('#retryBtn', T('playAgain')); set('#skinsBtnOver', T('skins'));
-  set('#shopTitle', T('skins')); set('#lblTotal2', T('total')); set('#lblPts', T('pts')); set('#shopClose', T('close'));
+  set('#shopTitle', T('skins')); set('#shopClose', T('close'));
   set('#draftTitle', T('upgrade')); set('#draftHint', T('pickUpgrade'));
   set('#mapTitle', T('thePath')); set('#mapHint', T('tapNode'));
   set('#continueBtn', T('continueP2')); set('#victoryBtn', T('playAgain'));
