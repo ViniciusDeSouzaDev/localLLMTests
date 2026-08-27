@@ -93,7 +93,7 @@ let trail = [];
 let score = 0;
 let shield = 0, revive = 0, invuln = 0, rebornT = 0, rollT = 0, rollSpin = 0, nextMoverAt = 0;
 let combo = 0, feverT = 0, feverNextAt = 30;
-let shake = 0, flash = 0;
+let shake = 0, flash = 0, bossIntroT0 = -99;
 let groundX = 0;
 let labyFloorY = GROUND_Y, labyCeilY = -100;
 let deathTimer = 0, overShown = false;
@@ -462,8 +462,21 @@ function update(dt){
                 const isElite = run.boss.elite;
                 const isLaby = run.boss.labyrinth;
                 run.boss = null;
-                flash = 0.5;
+                flash = isFinal ? 1 : 0.5;
                 AudioFX.unlock();
+                {
+                  const sc = def.colors;
+                  const cols = [`rgb(${sc[0]},${sc[1]},${sc[2]})`, `rgb(${sc[3]},${sc[4]},${sc[5]})`, `rgb(${sc[6]},${sc[7]},${sc[8]})`];
+                  const tH = p.gapY - p.gap/2, bY = p.gapY + p.gap/2;
+                  for(let i=0;i<(isFinal?40:24);i++){
+                    const top = Math.random() < 0.5;
+                    particles.push({
+                      x:rand(p.x, p.x+70), y: top ? rand(0, Math.max(1,tH)) : rand(bY, GROUND_Y),
+                      vx:rand(-160,160), vy: top ? rand(-60,140) : rand(-220,0),
+                      life:rand(0.6,1.2), max:1.2, size:rand(2,5), color:cols[Math.floor(Math.random()*3)]
+                    });
+                  }
+                }
                if(isFinal){
                   showVictory();
                 } else if(isElite || isLaby){

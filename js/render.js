@@ -104,7 +104,7 @@ function render(){
     const fphs = run.boss.def.phases;
     const fidx = Math.min(fphs.length-1, Math.floor(run.boss.passes * fphs.length / run.boss.max));
     fogOn = !!fphs[fidx].fog;
-  }
+  } else { bossPrev = null; bossParts.length = 0; }
   for(const p of pipes){
     if(run && run.boss && p.blinking) ctx.globalAlpha = 0.4 + 0.6*Math.abs(Math.sin(t*25));
     else if(fogOn && p.x > BIRD_X + 300) ctx.globalAlpha = 0.25;
@@ -191,6 +191,15 @@ function render(){
   // fever tint
   if(feverT > 0){ ctx.fillStyle = `rgba(255,90,0,${0.12 + 0.08*Math.sin(t*12)})`; ctx.fillRect(0,0,W,H); }
 
+  // boss intro darkening
+  if(run && run.boss){
+    const intro = clamp(1.5 - (t - bossIntroT0), 0, 1.5);
+    if(intro > 0){
+      ctx.fillStyle = `rgba(0,0,0,${intro/1.5*0.35})`;
+      ctx.fillRect(0,0,W,H);
+    }
+  }
+
   // vignette
   const vg = ctx.createRadialGradient(W/2, H/2, H*0.35, W/2, H/2, H*0.75);
   vg.addColorStop(0,'rgba(0,0,0,0)');
@@ -254,13 +263,8 @@ function drawPipe(p, nf){
       ctx.beginPath(); ctx.moveTo(sx, botY); ctx.lineTo(sx+7, botY-13); ctx.lineTo(sx+14, botY); ctx.closePath(); ctx.fill();
     }
   } else if(p.boss){
-    const ec = (run.boss && run.boss.def.eye) || '#ff8090';
-    ctx.save();
-    ctx.shadowColor = ec; ctx.shadowBlur = 10;
-    ctx.fillStyle = ec;
-    ctx.beginPath(); ctx.arc(p.x+35, topH-10, 5, 0, TAU); ctx.fill();
-    ctx.beginPath(); ctx.arc(p.x+35, botY+10, 5, 0, TAU); ctx.fill();
-    ctx.restore();
+    drawBossFace(p, topH, botY);
+    bossAura(p, topH, botY);
   }
   if(p.ghostY != null){
     const gy = p.ghostY, gg = p.gap;
@@ -274,6 +278,126 @@ function drawPipe(p, nf){
     ctx.strokeRect(p.x-4, gy - gg/2, 78, gg);
     ctx.restore();
   }
+}
+let bossPrev = null;
+function drawBossFace(p, topH, botY){
+  const b = run.boss, def = b.def;
+  const glow = 1 - clamp(1.5 - (t - bossIntroT0), 0, 1.5)/1.5;
+  ctx.save();
+  ctx.globalAlpha *= glow;
+  const ec = def.eye || '#ff8090';
+  const moving = bossPrev ? Math.abs(p.gapY - bossPrev.y) + Math.abs(p.gap - bossPrev.g) : 0;
+  bossPrev = { y:p.gapY, g:p.gap };
+  const roar = flash > 0.3;
+  const m = Math.min(1, moving * 0.15 + (roar ? 0.6 : 0));
+  const col = roar ? '#ffffff' : ec;
+  bossFace(p.x, topH - 11, 1, col, m, b);
+  bossFace(p.x, botY + 11, -1, col, m, b);
+  if(b.final){
+    const ex = p.x+35, ey = topH-13;
+    ctx.save();
+    ctx.shadowColor = col; ctx.shadowBlur = 10;
+    ctx.fillStyle = col;
+    ctx.beginPath(); ctx.arc(ex, ey, 4, 0, TAU); ctx.fill();
+    ctx.restore();
+    ctx.fillStyle = 'rgba(0,0,0,0.7)';
+    ctx.beginPath();
+    ctx.arc(ex + clamp((BIRD_X-ex)*0.03, -1.5, 1.5), ey + clamp((bird.y-ey)*0.03, -1.5, 1.5), 1.6, 0, TAU);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+function bossFace(x, ey, mdir, col, m, b){
+  const bp = (t + x*0.017) % 3.4;
+  const bl = bp < 0.14 ? Math.sin(bp/0.14*Math.PI) : 0;
+  const eh = 5 * (1 - 0.9*bl);
+  if(b.labyrinth){
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fillRect(x+16, ey-9, 38, 18);
+  }
+  ctx.save();
+  ctx.shadowColor = col; ctx.shadowBlur = 10;
+  ctx.fillStyle = col;
+  for(const dx of [-8, 8]){
+    ctx.beginPath(); ctx.ellipse(x+35+dx, ey, 5, Math.max(0.8, eh), 0, 0, TAU); ctx.fill();
+  }
+  ctx.restore();
+  if(b.elite){
+    ctx.strokeStyle = col; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(x+29, ey-8); ctx.lineTo(x+32, ey-4); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x+41, ey-8); ctx.lineTo(x+38, ey-4); ctx.stroke();
+  }
+  ctx.fillStyle = 'rgba(0,0,0,0.75)';
+  for(const dx of [-8, 8]){
+    const ex = x+35+dx;
+    ctx.beginPath();
+    ctx.ellipse(ex + clamp((BIRD_X-ex)*0.03, -2.2, 2.2), ey + clamp((bird.y-ey)*0.03, -2.2, 2.2), 2.2, Math.max(0.6, eh*0.45), 0, 0, TAU);
+    ctx.fill();
+  }
+  ctx.fillStyle = 'rgba(0,0,0,0.6)';
+  ctx.beginPath();
+  ctx.ellipse(x+35, ey + mdir*8, 7, 1.5 + 5*m, 0, 0, TAU);
+  ctx.fill();
+}
+const BOSS_AURAS = {
+  'EMBERLORD':'ember', 'GAPLORD III':'ember',
+  'STORMFEATHER':'bolt',
+  'TIDEWRAITH':'bubble', 'GAPLORD IV':'bubble',
+  'VOIDLORD':'ring', 'NULLKNIGHT':'ring', 'THE ENDLESS':'ring',
+  'OMEGA GAPLORD':'spark', 'GAPLORD':'spark'
+};
+let bossParts = [];
+function bossAura(p, topH, botY){
+  const b = run.boss; if(!b) return;
+  const kind = BOSS_AURAS[b.def.name] || 'glow';
+  if(kind !== 'glow' && bossParts.length < 40 && Math.random() < (kind === 'ring' ? 0.06 : 0.2)){
+    const top = Math.random() < 0.5;
+    bossParts.push({ t0:t, x:rand(p.x+5, p.x+65), y:top ? topH : botY, d:top ? 1 : -1, kind, s:rand(0.6, 1.4) });
+  }
+  if(kind === 'glow'){
+    const a = 0.08 + 0.06*Math.sin(t*3);
+    ctx.fillStyle = `rgba(255,255,255,${a})`;
+    ctx.fillRect(p.x, topH-14, 70, 14);
+    ctx.fillRect(p.x, botY, 70, 14);
+  }
+  let n = 0;
+  for(let i=0;i<bossParts.length;i++){
+    const q = bossParts[i];
+    const age = t - q.t0;
+    if(age > 1.2) continue;
+    if(q.kind === 'ring'){
+      ctx.strokeStyle = `rgba(20,0,40,${(1-age/1.2)*0.5})`;
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(q.x, q.y, age*90*q.s, 0, TAU); ctx.stroke();
+    } else if(q.kind === 'bolt'){
+      const a = 1 - age/0.18;
+      if(a > 0){
+        ctx.strokeStyle = `rgba(200,240,255,${a*0.8})`;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        let bx = q.x, by = q.y;
+        ctx.moveTo(bx, by);
+        for(let k=0;k<3;k++){ bx += rand(-5,5); by += q.d*rand(5,9); ctx.lineTo(bx, by); }
+        ctx.stroke();
+      }
+    } else if(q.kind === 'ember'){
+      const a = 1 - age;
+      const ex = q.x + Math.sin(age*6 + q.s*7)*6;
+      ctx.fillStyle = `rgba(255,${Math.round(120+80*a)},40,${a*0.8})`;
+      ctx.beginPath(); ctx.arc(ex, q.y - age*50*q.s, 2.5*q.s*a + 0.5, 0, TAU); ctx.fill();
+    } else if(q.kind === 'bubble'){
+      const a = 1 - age/1.2;
+      ctx.strokeStyle = `rgba(180,230,255,${a*0.7})`;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(q.x + Math.sin(age*4 + q.s*9)*5, q.y - age*35*q.s, 2 + 3*q.s, 0, TAU); ctx.stroke();
+    } else {
+      const a = (1 - age/0.9) * (0.5 + 0.5*Math.sin(age*20 + q.s*10));
+      ctx.fillStyle = `rgba(255,230,120,${a})`;
+      ctx.fillRect(q.x-1, q.y - age*20*q.s - 1, 2, 2);
+    }
+    bossParts[n++] = q;
+  }
+  bossParts.length = n;
 }
 function chevron(x, y, up){
   ctx.fillStyle = 'rgba(255,255,255,0.8)';

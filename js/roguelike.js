@@ -483,6 +483,7 @@ function startStage(){
   run.phaseCount = 0;
   if(hasRelic('heart')) run.hp = Math.min(mods().maxHp, run.hp + 1);
   if(run.boss){
+    bossIntroT0 = t;
     shake = 18; flash = 0.6; AudioFX.scream();
     popups.push({ x:BIRD_X, y:bird.y-60, txt:run.boss.final ? 'FINAL BATTLE' : run.boss.def.name + ' APPROACHES', life:2, max:2 });
   }
