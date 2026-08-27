@@ -845,35 +845,35 @@ const PATHS = [
 ];
 function pathCfg(){ return PATHS[run.path || 1]; }
 const BOSSES = [
-  [ { name:'GAPLORD',      passes:6,  relic:'golden', colors:[150,45,80, 90,20,50, 210,80,120], eye:'#ff8090', phases:[{pattern:'sine', amp:120, spd:2.2}] },
-    { name:'PIPESNAKE',    passes:5,  relic:'golden', colors:[40,120,50, 20,80,30, 110,200,110], eye:'#70ff90', phases:[{pattern:'zigzag', amp:100, spd:2.4}] } ],
- [ { name:'GAPLORD II',   passes:7, relic:'heart',  colors:[120,50,160, 80,30,110, 180,110,220], eye:'#c070ff', phases:[{pattern:'sine', amp:120, spd:2.6},{pattern:'mirror', rate:1.0}] },
-    { name:'MIDNIGHT',     passes:7, relic:'heart',  colors:[30,50,90, 15,30,60, 70,110,170], eye:'#70a0ff', phases:[{pattern:'squeeze', spd:2.4},{pattern:'step', spd:1.4, tele:0.4}] } ],
-  [ { name:'GAPLORD III',  passes:8,  relic:'coin',   colors:[200,90,30, 140,60,20, 240,150,70], eye:'#ffb040', phases:[{pattern:'sine', amp:130, spd:3.0},{pattern:'pulse', spd:3.2}] },
-    { name:'STORMFEATHER', passes:8,  relic:'coin',   colors:[20,110,130, 10,70,90, 90,210,230], eye:'#60e0ff', phases:[{pattern:'zigzag', amp:120, spd:3.2},{pattern:'hunt', rate:1.2, amp:90}] } ],
-  [ { name:'FINAL BOSS',   passes:12, relic:'prism',  colors:[45,45,55, 25,25,35, 90,90,110], eye:'#ffd700', phases:[{pattern:'sine', amp:120, spd:2.4},{pattern:'mirror', rate:1.1},{pattern:'pulse', spd:3.6}] },
-    { name:'THE ENDLESS',  passes:14, relic:'prism',  colors:[70,20,30, 40,10,20, 150,50,70], eye:'#ff4050', phases:[{pattern:'squeeze', spd:3.0},{pattern:'hunt', rate:1.4, amp:100},{pattern:'labyrinth', amp:260, spd:2.8, bspd:1.9, fog:true}] } ],
+  [ { name:'GAPLORD',      passes:7,  relic:'golden', colors:[150,45,80, 90,20,50, 210,80,120], eye:'#ff8090', phases:[{pattern:'sine', amp:120, spd:2.2}] },
+    { name:'PIPESNAKE',    passes:6,  relic:'golden', colors:[40,120,50, 20,80,30, 110,200,110], eye:'#70ff90', phases:[{pattern:'zigzag', amp:100, spd:2.4}] } ],
+ [ { name:'GAPLORD II',   passes:8, relic:'heart',  colors:[120,50,160, 80,30,110, 180,110,220], eye:'#c070ff', phases:[{pattern:'sine', amp:120, spd:2.6},{pattern:'mirror', rate:1.0}] },
+    { name:'MIDNIGHT',     passes:8, relic:'heart',  colors:[30,50,90, 15,30,60, 70,110,170], eye:'#70a0ff', phases:[{pattern:'squeeze', spd:2.4},{pattern:'step', spd:1.4, tele:0.4}] } ],
+  [ { name:'GAPLORD III',  passes:10,  relic:'coin',   colors:[200,90,30, 140,60,20, 240,150,70], eye:'#ffb040', phases:[{pattern:'sine', amp:130, spd:3.0},{pattern:'pulse', spd:3.2}] },
+    { name:'STORMFEATHER', passes:10,  relic:'coin',   colors:[20,110,130, 10,70,90, 90,210,230], eye:'#60e0ff', phases:[{pattern:'zigzag', amp:120, spd:3.2},{pattern:'hunt', rate:1.2, amp:90}] } ],
+  [ { name:'FINAL BOSS',   passes:14, relic:'prism',  colors:[45,45,55, 25,25,35, 90,90,110], eye:'#ffd700', phases:[{pattern:'sine', amp:120, spd:2.4},{pattern:'mirror', rate:1.1},{pattern:'pulse', spd:3.6}] },
+    { name:'THE ENDLESS',  passes:17, relic:'prism',  colors:[70,20,30, 40,10,20, 150,50,70], eye:'#ff4050', phases:[{pattern:'squeeze', spd:3.0},{pattern:'hunt', rate:1.4, amp:100},{pattern:'labyrinth', amp:260, spd:2.8, bspd:1.9, fog:true}] } ],
 ];
 const ELITES = [
-  { name:'ELITE',   passes:5, colors:[30,140,90, 15,90,60, 90,222,150], eye:'#40ff90', phases:[{pattern:'drift', spd:70}] },
-  { name:'BRUISER', passes:7, colors:[140,60,40, 90,35,25, 200,110,80], eye:'#ff9070', phases:[{pattern:'shrink', rate:0.08}] },
-  { name:'DART',    passes:3, colors:[160,140,30, 110,95,20, 230,200,70], eye:'#ffe060', phases:[{pattern:'step', spd:1.2, tele:0.35}] },
-  { name:'PHANTOM', passes:5, colors:[90,60,140, 55,35,95, 150,110,210], eye:'#c090ff', phases:[{pattern:'blink', spd:1.0, tele:0.3}] },
+  { name:'ELITE',   passes:6, colors:[30,140,90, 15,90,60, 90,222,150], eye:'#40ff90', phases:[{pattern:'drift', spd:70}] },
+  { name:'BRUISER', passes:8, colors:[140,60,40, 90,35,25, 200,110,80], eye:'#ff9070', phases:[{pattern:'shrink', rate:0.08}] },
+  { name:'DART',    passes:4, colors:[160,140,30, 110,95,20, 230,200,70], eye:'#ffe060', phases:[{pattern:'step', spd:1.2, tele:0.35}] },
+  { name:'PHANTOM', passes:6, colors:[90,60,140, 55,35,95, 150,110,210], eye:'#c090ff', phases:[{pattern:'blink', spd:1.0, tele:0.3}] },
 ];
 const BOSSES2 = [
-  [ { name:'GAPLORD IV',   passes:9,  relic:'anchor',  colors:[20,110,140, 10,70,90, 80,200,230], eye:'#40e0ff', phases:[{pattern:'pulse', spd:3.4},{pattern:'drift', spd:80}] },
-    { name:'TIDEWRAITH',   passes:9,  relic:'anchor',  colors:[15,80,110, 8,50,75, 60,170,200], eye:'#50d0e0', phases:[{pattern:'zigzag', amp:130, spd:3.0},{pattern:'blink', spd:1.1, tele:0.35}] } ],
-  [ { name:'GAPLORD V',    passes:10, relic:'phoenix', colors:[150,30,60, 90,15,35, 230,70,110], eye:'#ff5070', phases:[{pattern:'sine', amp:150, spd:3.4},{pattern:'mirror', rate:1.4},{pattern:'pulse', spd:4.0}] },
-    { name:'EMBERLORD',    passes:10, relic:'phoenix', colors:[170,70,20, 110,45,15, 240,130,50], eye:'#ff9040', phases:[{pattern:'squeeze', spd:3.6},{pattern:'hunt', rate:1.4, amp:100}] } ],
-  [ { name:'THE WARDEN',   passes:10, relic:'void',    colors:[110,95,60, 70,60,40, 180,160,110], eye:'#ffe9a0', phases:[{pattern:'pulse', spd:3.8},{pattern:'labyrinth', amp:260, spd:2.6, bspd:1.7},{pattern:'mirror', rate:1.6}] },
-    { name:'NULLKNIGHT',   passes:10, relic:'void',    colors:[70,70,85, 45,45,55, 130,130,150], eye:'#b0b0d0', phases:[{pattern:'hunt', rate:1.5, amp:100},{pattern:'labyrinth', amp:260, spd:2.8, bspd:1.9}] } ],
-  [ { name:'VOIDLORD',     passes:14, relic:'prism',   colors:[60,30,90, 35,15,55, 130,70,190], eye:'#e0b0ff', phases:[{pattern:'sine', amp:160, spd:3.6},{pattern:'wind', g:1.2},{pattern:'labyrinth', amp:280, spd:3.0, bspd:2.0},{pattern:'chase', rate:1.8}] },
-    { name:'OMEGA GAPLORD',passes:16, relic:'prism',   colors:[200,190,160, 140,130,100, 250,240,210], eye:'#fff8d0', phases:[{pattern:'squeeze', spd:4.0},{pattern:'labyrinth', amp:280, spd:3.2, bspd:2.2},{pattern:'hunt', rate:1.8, amp:110},{pattern:'wind', g:0.8, fog:true}] } ],
+  [ { name:'GAPLORD IV',   passes:11,  relic:'anchor',  colors:[20,110,140, 10,70,90, 80,200,230], eye:'#40e0ff', phases:[{pattern:'pulse', spd:3.4},{pattern:'drift', spd:80}] },
+    { name:'TIDEWRAITH',   passes:11,  relic:'anchor',  colors:[15,80,110, 8,50,75, 60,170,200], eye:'#50d0e0', phases:[{pattern:'zigzag', amp:130, spd:3.0},{pattern:'blink', spd:1.1, tele:0.35}] } ],
+  [ { name:'GAPLORD V',    passes:12, relic:'phoenix', colors:[150,30,60, 90,15,35, 230,70,110], eye:'#ff5070', phases:[{pattern:'sine', amp:150, spd:3.4},{pattern:'mirror', rate:1.4},{pattern:'pulse', spd:4.0}] },
+    { name:'EMBERLORD',    passes:12, relic:'phoenix', colors:[170,70,20, 110,45,15, 240,130,50], eye:'#ff9040', phases:[{pattern:'squeeze', spd:3.6},{pattern:'hunt', rate:1.4, amp:100}] } ],
+  [ { name:'THE WARDEN',   passes:12, relic:'void',    colors:[110,95,60, 70,60,40, 180,160,110], eye:'#ffe9a0', phases:[{pattern:'pulse', spd:3.8},{pattern:'labyrinth', amp:260, spd:2.6, bspd:1.7},{pattern:'mirror', rate:1.6}] },
+    { name:'NULLKNIGHT',   passes:12, relic:'void',    colors:[70,70,85, 45,45,55, 130,130,150], eye:'#b0b0d0', phases:[{pattern:'hunt', rate:1.5, amp:100},{pattern:'labyrinth', amp:260, spd:2.8, bspd:1.9}] } ],
+  [ { name:'VOIDLORD',     passes:17, relic:'prism',   colors:[60,30,90, 35,15,55, 130,70,190], eye:'#e0b0ff', phases:[{pattern:'sine', amp:160, spd:3.6},{pattern:'wind', g:1.2},{pattern:'labyrinth', amp:280, spd:3.0, bspd:2.0},{pattern:'chase', rate:1.8}] },
+    { name:'OMEGA GAPLORD',passes:19, relic:'prism',   colors:[200,190,160, 140,130,100, 250,240,210], eye:'#fff8d0', phases:[{pattern:'squeeze', spd:4.0},{pattern:'labyrinth', amp:280, spd:3.2, bspd:2.2},{pattern:'hunt', rate:1.8, amp:110},{pattern:'wind', g:0.8, fog:true}] } ],
 ];
 const LABYRINTHS = [
-  { name:'LABYRINTH', passes:6, colors:[70,90,70, 45,60,45, 140,170,140], eye:'#90ff90', phases:[{pattern:'labyrinth', amp:240, spd:2.6, bspd:1.7}] },
-  { name:'CRAWL',     passes:8, colors:[60,80,50, 40,55,35, 120,150,100], eye:'#a0d080', phases:[{pattern:'labyrinth', amp:200, spd:2.2, bspd:1.4}] },
-  { name:'GALE',      passes:5, colors:[80,95,110, 50,60,75, 150,175,200], eye:'#a0d0ff', phases:[{pattern:'labyrinth', amp:260, spd:3.2, bspd:2.2}] },
+  { name:'LABYRINTH', passes:7, colors:[70,90,70, 45,60,45, 140,170,140], eye:'#90ff90', phases:[{pattern:'labyrinth', amp:240, spd:2.6, bspd:1.7}] },
+  { name:'CRAWL',     passes:10, colors:[60,80,50, 40,55,35, 120,150,100], eye:'#a0d080', phases:[{pattern:'labyrinth', amp:200, spd:2.2, bspd:1.4}] },
+  { name:'GALE',      passes:6, colors:[80,95,110, 50,60,75, 150,175,200], eye:'#a0d0ff', phases:[{pattern:'labyrinth', amp:260, spd:3.2, bspd:2.2}] },
 ];
 const NODE_ICONS = { stage:'🎯', boss:'💀', merchant:'🪙', chest:'📦', final:'👑', elite:'⚔️', labyrinth:'🌀' };
 const NODE_NAMES = { stage:'Stage — pipes & gold', boss:'Boss — big gold or LEGENDARY', merchant:'Merchant — heal, shield, HP, chip, coins, reroll', chest:'Chest — mystery reward', final:'FINAL BOSS', elite:'Elite — mini-boss, +20g + relic', labyrinth:'Labyrinth — shifting walls, +25g + relic' };
@@ -1655,7 +1655,7 @@ function update(dt){
     while(pipes.length && pipes[0].x < -90) pipes.shift();
 
    // stage progression (roguelike)
-    if(mode==='rl' && !run.boss && run.pipesInStage >= 15 && stageClearT <= 0){
+    if(mode==='rl' && !run.boss && run.pipesInStage >= 18 && stageClearT <= 0){
       run.pipesInStage = 0;
       run.gold += 10;
       stageClearT = 1.2;
