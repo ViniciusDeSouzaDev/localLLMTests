@@ -19,15 +19,15 @@ function persist(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(save)); }
 /* ================= skins ================= */
 const SKINS = [
   { id:'classic', name:'Classic', body:'#ffd93b', belly:'#fff6cf', wing:'#f2a51e', trail:'#ffe98a', unlock:0, power:null, powerName:'', powerDesc:'No power' },
-  { id:'crimson', name:'Crimson', body:'#ff5d5d', belly:'#ffd9d9', wing:'#d63b3b', trail:'#ff9a9a', unlock:10, power:'feather', powerName:'Feather', powerDesc:'Lighter gravity' },
-  { id:'azure',   name:'Azure',   body:'#4fc3f7', belly:'#e8f9ff', wing:'#1e93d6', trail:'#9fe0ff', unlock:25, power:'compact', powerName:'Compact', powerDesc:'Smaller hitbox' },
-  { id:'jade',    name:'Jade',    body:'#5fe07a', belly:'#eaffd9', wing:'#2aa84e', trail:'#a2f5b0', unlock:50, power:'shield', powerName:'Shield', powerDesc:'4 HP + survive 1 hit per run' },
-  { id:'violet',  name:'Violet',  body:'#b388ff', belly:'#f3e9ff', wing:'#8a4fd6', trail:'#d7baff', unlock:100, power:'time', powerName:'Time', powerDesc:'Pipes 20% slower' },
-  { id:'golden',  name:'Golden',  body:'#ffd700', belly:'#fffbe0', wing:'#d9a400', trail:'#fff3a0', unlock:200, sparkle:true, power:'midas', powerName:'Midas', powerDesc:'Double points' },
-  { id:'phantom', name:'Phantom', body:'#d7e0e6', belly:'#ffffff', wing:'#9fb3bd', trail:'#ffffff', unlock:300, ghost:true, power:'reborn', powerName:'Reborn', powerDesc:'5 HP + revive once mid-run' },
-  { id:'demon', name:'Demon', body:'#4a1526', belly:'#6b2038', wing:'#2a0a14', trail:'#ff3b3b', unlock:750, demon:true, power:'compact', powerName:'Demon', powerDesc:'1 HP + tiny hitbox + starts with Vampire x2' },
-  { id:'cat', name:'Cat', body:'#e8973e', belly:'#fff3e0', wing:'#c46a1e', trail:'#ffd9a0', unlock:1000, power:'hearts', powerName:'Seven Lives', powerDesc:'Starts with 7 HP' },
-  { id:'rainbow', name:'Rainbow', body:null, belly:'#ffffff', wing:null, trail:null, unlock:10000, rainbow:true, power:'prism', powerName:'Prism', powerDesc:'5 HP + shield + slow pipes + x2 pts' },
+  { id:'crimson', name:'Crimson', body:'#ff5d5d', belly:'#ffd9d9', wing:'#d63b3b', trail:'#ff9a9a', unlock:50, power:'feather', powerName:'Feather', powerDesc:'Lighter gravity' },
+  { id:'azure',   name:'Azure',   body:'#4fc3f7', belly:'#e8f9ff', wing:'#1e93d6', trail:'#9fe0ff', unlock:125, power:'compact', powerName:'Compact', powerDesc:'Smaller hitbox' },
+  { id:'jade',    name:'Jade',    body:'#5fe07a', belly:'#eaffd9', wing:'#2aa84e', trail:'#a2f5b0', unlock:250, power:'shield', powerName:'Shield', powerDesc:'4 HP + survive 1 hit per run' },
+  { id:'violet',  name:'Violet',  body:'#b388ff', belly:'#f3e9ff', wing:'#8a4fd6', trail:'#d7baff', unlock:500, power:'time', powerName:'Time', powerDesc:'Pipes 20% slower' },
+  { id:'golden',  name:'Golden',  body:'#ffd700', belly:'#fffbe0', wing:'#d9a400', trail:'#fff3a0', unlock:1000, sparkle:true, power:'midas', powerName:'Midas', powerDesc:'Double points' },
+  { id:'phantom', name:'Phantom', body:'#d7e0e6', belly:'#ffffff', wing:'#9fb3bd', trail:'#ffffff', unlock:1500, ghost:true, power:'reborn', powerName:'Reborn', powerDesc:'5 HP + revive once mid-run' },
+  { id:'demon', name:'Demon', body:'#4a1526', belly:'#6b2038', wing:'#2a0a14', trail:'#ff3b3b', unlock:3750, demon:true, power:'compact', powerName:'Demon', powerDesc:'1 HP + tiny hitbox + starts with Vampire x2' },
+  { id:'cat', name:'Cat', body:'#e8973e', belly:'#fff3e0', wing:'#c46a1e', trail:'#ffd9a0', unlock:5000, power:'hearts', powerName:'Seven Lives', powerDesc:'Starts with 7 HP' },
+  { id:'rainbow', name:'Rainbow', body:null, belly:'#ffffff', wing:null, trail:null, unlock:15000, rainbow:true, power:'prism', powerName:'Prism', powerDesc:'5 HP + shield + slow pipes + x2 pts' },
   { id:'god', name:'God', body:'#fff3c4', belly:'#fffdf2', wing:'#f7c948', trail:'#fff6d6', unlock:100000, god:true, sparkle:true, power:'god', powerName:'God', powerDesc:'Never dies + faster pipes + Magnet x5' },
 ];
 const skinById = id => SKINS.find(s=>s.id===id) || SKINS[0];
