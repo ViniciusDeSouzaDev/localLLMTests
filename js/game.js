@@ -357,12 +357,13 @@ function update(dt){
       const idx = Math.min(ph.length-1, Math.floor(b.passes * ph.length / b.max));
       if(idx !== b.phaseIdx){
         b.phaseIdx = idx;
-        p.gap = p.baseGap; p.pulseT = 0;
+        p.gap = p.baseGap; p.pulseT = 0; p.blinkTo = null;
         flash = 0.5; shake = 12; AudioFX.scream();
         popups.push({ x:BIRD_X, y:bird.y-60, txt:T('phase') + ' ' + (idx+1) + '/' + ph.length, life:1.2, max:1.2 });
       }
       const ph2 = ph[idx];
       p.blinking = false;
+      p.ghostY = null;
       if(ph2.pattern === 'chase'){
         p.gapY += (bird.y - p.gapY) * Math.min(1, ph2.rate * dt);
       } else if(ph2.pattern === 'squeeze'){
@@ -390,6 +391,7 @@ function update(dt){
         const srem = siv - p.stepT;
         if(srem < st){ const k = 1 - srem/st; p.gapY = p.stepFrom + (p.stepTo - p.stepFrom)*k + Math.sin(t*30)*5*(1-k); }
         else p.gapY = p.stepFrom;
+        p.ghostY = srem < st ? p.stepTo : null;
       } else if(ph2.pattern === 'mirror'){
         const mty = Math.max(70, Math.min(GROUND_Y - 70, GROUND_Y - bird.y));
         p.gapY += (mty - p.gapY) * Math.min(1, (ph2.rate || 1.0) * dt * 2);
@@ -401,8 +403,10 @@ function update(dt){
         if(p.blinkT == null) p.blinkT = 0;
         p.blinkT += dt;
         const biv = ph2.spd || 1.2, bt = ph2.tele || 0.35;
-        if(p.blinkT >= biv){ p.blinkT = 0; p.gapY = rand(70, GROUND_Y-70); }
+        if(p.blinkT >= biv){ p.blinkT = 0; p.gapY = p.blinkTo != null ? p.blinkTo : rand(70, GROUND_Y-70); p.blinkTo = null; }
         p.blinking = p.blinkT > biv - bt;
+        if(p.blinking && p.blinkTo == null) p.blinkTo = rand(70, GROUND_Y-70);
+        p.ghostY = p.blinkTo;
       } else if(ph2.pattern === 'drift'){
         if(p.driftDir == null) p.driftDir = Math.random() < 0.5 ? 1 : -1;
         p.gapY += p.driftDir * (ph2.spd || 60) * dt;

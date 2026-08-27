@@ -262,6 +262,18 @@ function drawPipe(p, nf){
     ctx.beginPath(); ctx.arc(p.x+35, botY+10, 5, 0, TAU); ctx.fill();
     ctx.restore();
   }
+  if(p.ghostY != null){
+    const gy = p.ghostY, gg = p.gap;
+    ctx.save();
+    ctx.globalAlpha = 0.45 + 0.25*Math.sin(t*16);
+    ctx.fillStyle = 'rgba(255,255,255,0.22)';
+    ctx.fillRect(p.x, gy - gg/2, 70, gg);
+    ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([7,5]);
+    ctx.strokeRect(p.x-4, gy - gg/2, 78, gg);
+    ctx.restore();
+  }
 }
 function chevron(x, y, up){
   ctx.fillStyle = 'rgba(255,255,255,0.8)';
