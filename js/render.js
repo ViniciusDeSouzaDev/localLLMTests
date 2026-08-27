@@ -256,15 +256,22 @@ function drawPipe(p, nf){
       ctx.beginPath(); ctx.moveTo(sx, topH); ctx.lineTo(sx+6, topH+10); ctx.lineTo(sx+12, topH); ctx.closePath(); ctx.fill();
       ctx.beginPath(); ctx.moveTo(sx, botY); ctx.lineTo(sx+6, botY-10); ctx.lineTo(sx+12, botY); ctx.closePath(); ctx.fill();
     }
+  } else if(p.boss){
+    drawBossFace(p, topH, botY);
+    bossAura(p, topH, botY);
+    if(p.spear){
+      ctx.fillStyle = `rgb(${Math.round(230*f)},${Math.round(70*f)},${Math.round(70*f)})`;
+      for(let sx = p.x+6; sx + 14 <= p.x+70; sx += 14){
+        ctx.beginPath(); ctx.moveTo(sx, topH); ctx.lineTo(sx+7, topH+13); ctx.lineTo(sx+14, topH); ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(sx, botY); ctx.lineTo(sx+7, botY-13); ctx.lineTo(sx+14, botY); ctx.closePath(); ctx.fill();
+      }
+    }
   } else if(p.spear){
     ctx.fillStyle = `rgb(${Math.round(230*f)},${Math.round(70*f)},${Math.round(70*f)})`;
     for(let sx = p.x+6; sx + 14 <= p.x+70; sx += 14){
       ctx.beginPath(); ctx.moveTo(sx, topH); ctx.lineTo(sx+7, topH+13); ctx.lineTo(sx+14, topH); ctx.closePath(); ctx.fill();
       ctx.beginPath(); ctx.moveTo(sx, botY); ctx.lineTo(sx+7, botY-13); ctx.lineTo(sx+14, botY); ctx.closePath(); ctx.fill();
     }
-  } else if(p.boss){
-    drawBossFace(p, topH, botY);
-    bossAura(p, topH, botY);
   }
   if(p.ghostY != null){
     const gy = p.ghostY, gg = p.gap;
