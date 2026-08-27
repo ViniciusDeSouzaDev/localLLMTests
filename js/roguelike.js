@@ -316,14 +316,42 @@ function showMap(){
   const svg = document.createElementNS(svgNS, 'svg');
   svg.setAttribute('viewBox', '0 0 100 440');
   svg.setAttribute('preserveAspectRatio', 'none');
+  const defs = document.createElementNS(svgNS, 'defs');
+  const glow = document.createElementNS(svgNS, 'filter');
+  glow.setAttribute('id', 'mapGlow');
+  glow.setAttribute('x', '-50%'); glow.setAttribute('y', '-50%');
+  glow.setAttribute('width', '200%'); glow.setAttribute('height', '200%');
+  const gb = document.createElementNS(svgNS, 'feGaussianBlur');
+  gb.setAttribute('stdDeviation', '1.2'); gb.setAttribute('result', 'b');
+  const merge = document.createElementNS(svgNS, 'feMerge');
+  const m1 = document.createElementNS(svgNS, 'feMergeNode'); m1.setAttribute('in', 'b');
+  const m2 = document.createElementNS(svgNS, 'feMergeNode'); m2.setAttribute('in', 'SourceGraphic');
+  merge.appendChild(m1); merge.appendChild(m2); glow.appendChild(gb); glow.appendChild(merge);
+  defs.appendChild(glow); svg.appendChild(defs);
+  let edgeIdx = 0, nodeIdx = 0;
   for(const e of map.edges){
     const a = mapXY(e.r, e.i), b = mapXY(e.r+1, e.j);
     const line = document.createElementNS(svgNS, 'line');
     line.setAttribute('x1', a.x); line.setAttribute('y1', a.y);
     line.setAttribute('x2', b.x); line.setAttribute('y2', b.y);
     const active = e.r === map.pos.row && (map.pos.row === -1 || e.i === map.pos.idx);
-    line.setAttribute('stroke', active ? 'rgba(255,217,59,.8)' : 'rgba(255,255,255,.18)');
-    line.setAttribute('stroke-width', active ? 3 : 2);
+    if(active){
+      line.setAttribute('class', 'mapEdge active');
+      line.setAttribute('stroke', '#ffd93b');
+      line.setAttribute('stroke-width', '3');
+      line.setAttribute('filter', 'url(#mapGlow)');
+      const dash = document.createElementNS(svgNS, 'line');
+      dash.setAttribute('x1', a.x); dash.setAttribute('y1', a.y);
+      dash.setAttribute('x2', b.x); dash.setAttribute('y2', b.y);
+      dash.setAttribute('class', 'mapEdgeDash');
+      dash.style.animationDelay = (Math.random() * 1.5) + 's';
+      svg.appendChild(dash);
+    } else {
+      line.setAttribute('class', 'mapEdge');
+      line.setAttribute('stroke', 'rgba(255,255,255,.16)');
+      line.setAttribute('stroke-width', '1.5');
+      line.style.animationDelay = (edgeIdx++ * 0.03) + 's';
+    }
     svg.appendChild(line);
   }
   box.appendChild(svg);
@@ -338,12 +366,14 @@ function showMap(){
       const n = map.rows[r][i];
       const { x, y } = mapXY(r, i);
       const el = document.createElement('button');
-      el.className = 'mapNode' + (n.visited ? ' visited' : (r === nextR && avail.includes(i) ? ' avail' : ''));
+      const isAvail = r === nextR && avail.includes(i);
+      el.className = 'mapNode t-' + n.type + (n.visited ? ' visited' : (isAvail ? ' avail' : ''));
       el.textContent = NODE_ICONS[n.type];
       el.title = n.def ? n.def.name : nodeNames()[n.type];
       el.style.left = `calc(${x}% - 20px)`;
       el.style.top = (y - 20) + 'px';
-      if(r === nextR && avail.includes(i)) el.addEventListener('click', () => clickNode(r, i));
+      el.style.animationDelay = (0.15 + nodeIdx++ * 0.04) + 's';
+      if(isAvail) el.addEventListener('click', () => clickNode(r, i));
       box.appendChild(el);
     }
   show('#map', true);
