@@ -212,7 +212,7 @@
   #helpBtn { font-size:14px; font-weight:900; color:#fff; line-height:1.2; padding:2px 8px; }
   h2 { font-size:26px; font-weight:900; color:#fff; letter-spacing:2px; }
   #merchTitle, #draftTitle {
-    font-size:30px; letter-spacing:5px; color:#ffd93b;
+    font-size:clamp(20px, 5vw, 30px); letter-spacing:3px; color:#ffd93b;
     filter:drop-shadow(0 0 14px rgba(255,217,59,.55));
   }
   #merchTitle::before { content:'🪙 '; }
