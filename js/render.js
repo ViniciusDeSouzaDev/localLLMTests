@@ -382,6 +382,7 @@ function bossAura(p, topH, botY){
       }
     } else if(q.kind === 'ember'){
       const a = 1 - age;
+      if(a <= 0) continue;
       const ex = q.x + Math.sin(age*6 + q.s*7)*6;
       ctx.fillStyle = `rgba(255,${Math.round(120+80*a)},40,${a*0.8})`;
       ctx.beginPath(); ctx.arc(ex, q.y - age*50*q.s, 2.5*q.s*a + 0.5, 0, TAU); ctx.fill();
@@ -391,7 +392,7 @@ function bossAura(p, topH, botY){
       ctx.lineWidth = 1.5;
       ctx.beginPath(); ctx.arc(q.x + Math.sin(age*4 + q.s*9)*5, q.y - age*35*q.s, 2 + 3*q.s, 0, TAU); ctx.stroke();
     } else {
-      const a = (1 - age/0.9) * (0.5 + 0.5*Math.sin(age*20 + q.s*10));
+      const a = Math.max(0, 1 - age/0.9) * (0.5 + 0.5*Math.sin(age*20 + q.s*10));
       ctx.fillStyle = `rgba(255,230,120,${a})`;
       ctx.fillRect(q.x-1, q.y - age*20*q.s - 1, 2, 2);
     }
