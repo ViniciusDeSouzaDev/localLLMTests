@@ -307,15 +307,17 @@ function genMap(path){
     const tight = r > 0 && b > 1 && Math.random() < 0.35;
     for(let i=0;i<a;i++){
       if(tight){
-        const keep = new Set();
-        while(keep.size < Math.max(1, Math.floor(Math.random()*(b-1)) + 1)) keep.add(Math.floor(Math.random()*b));
-        for(const j of keep) edges.push({ r, i, j });
+        const out = Array.from({ length:a }, () => new Set());
+        for(let j=0;j<b;j++) out[Math.floor(Math.random()*a)].add(j);
+        for(let i=0;i<a;i++)
+          while(out[i].size === 0) out[i].add(Math.floor(Math.random()*b));
+        for(let i=0;i<a;i++) for(const j of out[i]) edges.push({ r, i, j });
       } else {
         for(let j=0;j<b;j++) edges.push({ r, i, j });
       }
     }
   }
-  return { rows, edges, pos:{ row:-1, idx:0 }, cfg, path: path || 1 };
+  return { rows, edges, pos:{ row:-1, idx:0 }, cfg, path: path || 1, expanded:false };
 }
 
 function mapXY(r, i){
@@ -327,11 +329,15 @@ function mapXY(r, i){
 function showMap(){
   state = 'map';
   const intro = map.pos.row === -1;
-  const start = Math.max(0, map.pos.row);
-  const end = Math.min(map.cfg.rows - 1, start + 4);
+  const animate = intro && !map.expanded;
+  const start = map.expanded ? 0 : Math.max(0, map.pos.row);
+  const end = map.expanded ? map.cfg.rows - 1 : Math.min(map.cfg.rows - 1, Math.max(0, map.pos.row) + 4);
   map.view = { start, end };
   const box = $('#mapBox');
   box.innerHTML = '';
+  box.style.minHeight = map.expanded ? (map.cfg.rows * 62) + 'px' : '';
+  const tog = $('#mapToggle');
+  if(tog) tog.textContent = map.expanded ? T('closeMap') : T('fullMap');
   const nextR = map.pos.row + 1;
   const avail = map.pos.row === -1
     ? map.rows[0].map((_, j) => j)
@@ -343,8 +349,9 @@ function showMap(){
   const defs = document.createElementNS(svgNS, 'defs');
   const glow = document.createElementNS(svgNS, 'filter');
   glow.setAttribute('id', 'mapGlow');
-  glow.setAttribute('x', '-50%'); glow.setAttribute('y', '-50%');
-  glow.setAttribute('width', '200%'); glow.setAttribute('height', '200%');
+  glow.setAttribute('filterUnits', 'userSpaceOnUse');
+  glow.setAttribute('x', '0'); glow.setAttribute('y', '0');
+  glow.setAttribute('width', '100'); glow.setAttribute('height', '100');
   const gb = document.createElementNS(svgNS, 'feGaussianBlur');
   gb.setAttribute('stdDeviation', '1.2'); gb.setAttribute('result', 'b');
   const merge = document.createElementNS(svgNS, 'feMerge');
@@ -372,10 +379,10 @@ function showMap(){
       dash.style.animationDelay = (Math.random() * 1.5) + 's';
       svg.appendChild(dash);
     } else {
-      line.setAttribute('class', intro ? 'mapEdge' : 'mapEdge static');
+      line.setAttribute('class', animate ? 'mapEdge' : 'mapEdge static');
       line.setAttribute('stroke', 'rgba(255,255,255,.16)');
       line.setAttribute('stroke-width', '1.5');
-      if(intro) line.style.animationDelay = (edgeIdx++ * 0.03) + 's';
+      if(animate) line.style.animationDelay = (edgeIdx++ * 0.03) + 's';
     }
     svg.appendChild(line);
   }
@@ -394,16 +401,16 @@ function showMap(){
       const { x, y } = mapXY(r, i);
       const el = document.createElement('button');
       const isAvail = r === nextR && avail.includes(i);
-      el.className = 'mapNode t-' + n.type + (intro ? '' : ' noIntro') + (n.visited ? ' visited' : (isAvail ? ' avail' : ''));
+      el.className = 'mapNode t-' + n.type + (animate ? '' : ' noIntro') + (n.visited ? ' visited' : (isAvail ? ' avail' : ''));
       el.textContent = NODE_ICONS[n.type];
       el.title = n.def ? n.def.name : nodeNames()[n.type];
       el.style.left = `calc(${x}% - 24px)`;
       el.style.top = `calc(${y}% - 24px)`;
-      if(intro) el.style.animationDelay = (0.15 + nodeIdx++ * 0.04) + 's';
+      if(animate) el.style.animationDelay = (0.15 + nodeIdx++ * 0.04) + 's';
       if(isAvail) el.addEventListener('click', () => clickNode(r, i));
       box.appendChild(el);
     }
-  if(end < map.cfg.rows - 1){
+  if(!map.expanded && end < map.cfg.rows - 1){
     const fog = document.createElement('div');
     fog.className = 'mapFog';
     fog.textContent = '👑 ' + (map.cfg.rows - 1 - end);

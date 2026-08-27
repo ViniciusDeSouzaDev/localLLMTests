@@ -290,6 +290,12 @@ $('#playBtn').addEventListener('click', () => { AudioFX.init(); startGame(); });
     map = genMap(2);
     showMap();
   });
+  $('#mapToggle').addEventListener('click', () => {
+    if(!map) return;
+    AudioFX.click();
+    map.expanded = !map.expanded;
+    showMap();
+  });
   $('#chestBox').addEventListener('click', () => { if(!chestOpened) $('#chestOpen').click(); });
   $('#chestOpen').addEventListener('click', () => {
     if(!chestOpened){

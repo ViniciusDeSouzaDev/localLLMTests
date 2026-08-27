@@ -42,6 +42,7 @@
   #merchantOffers { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
   #map { overflow-y:auto; justify-content:flex-start; }
   #map .card { width:100%; max-width:520px; height:100%; padding:14px 18px; gap:8px; }
+  .mapToggle { align-self:center; padding:8px 18px; font-size:12px; }
   #mapBox {
     position:relative; width:100%; flex:1; min-height:320px;
     background:
@@ -67,6 +68,8 @@
     animation:mapNodeIn .45s cubic-bezier(.2,1.6,.4,1) backwards;
   }
   .mapNode.noIntro { animation:none; }
+  .mapNode.noIntro.visited { animation:none; }
+  .mapNode.noIntro.avail { animation:mapPulse 1.6s ease-in-out infinite; }
   @keyframes mapNodeIn { from { transform:scale(0); opacity:0; } to { transform:scale(1); opacity:1; } }
   .mapNode.t-stage { border-color:rgba(79,195,247,.55); }
   .mapNode.t-boss { border-color:rgba(255,80,96,.6); }
