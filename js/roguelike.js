@@ -281,6 +281,8 @@ function genMap(path){
     }
     if(cfg.bossRows.includes(r) && !row.some(n => n.type === 'boss'))
       row[Math.floor(Math.random()*row.length)].type = 'boss';
+    if(r >= cfg.bossRows[0] && !rows.some(row2 => row2.some(n => n.type === 'merchant')))
+      row[Math.floor(Math.random()*row.length)].type = 'merchant';
     for(const n of row){
       if(n.type === 'boss') n.def = pool[Math.floor(r/4)][Math.floor(Math.random()*2)];
       else if(n.type === 'final') n.def = pool[3][Math.floor(Math.random()*2)];
