@@ -293,7 +293,7 @@ $('#playBtn').addEventListener('click', () => { AudioFX.init(); startGame(); });
   $('#mapToggle').addEventListener('click', () => {
     if(!map) return;
     AudioFX.click();
-    map.expanded = !map.expanded;
+    map.mini = !map.mini;
     showMap();
   });
   $('#chestBox').addEventListener('click', () => { if(!chestOpened) $('#chestOpen').click(); });

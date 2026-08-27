@@ -317,7 +317,7 @@ function genMap(path){
       }
     }
   }
-  return { rows, edges, pos:{ row:-1, idx:0 }, cfg, path: path || 1, expanded:false };
+  return { rows, edges, pos:{ row:-1, idx:0 }, cfg, path: path || 1, mini:false };
 }
 
 function mapXY(r, i){
@@ -329,15 +329,12 @@ function mapXY(r, i){
 function showMap(){
   state = 'map';
   const intro = map.pos.row === -1;
-  const animate = intro && !map.expanded;
-  const start = map.expanded ? 0 : Math.max(0, map.pos.row);
-  const end = map.expanded ? map.cfg.rows - 1 : Math.min(map.cfg.rows - 1, Math.max(0, map.pos.row) + 4);
+  const animate = intro;
+  const start = Math.max(0, map.pos.row);
+  const end = Math.min(map.cfg.rows - 1, Math.max(0, map.pos.row) + 4);
   map.view = { start, end };
   const box = $('#mapBox');
   box.innerHTML = '';
-  box.style.minHeight = map.expanded ? (map.cfg.rows * 62) + 'px' : '';
-  const tog = $('#mapToggle');
-  if(tog) tog.textContent = map.expanded ? T('closeMap') : T('fullMap');
   const nextR = map.pos.row + 1;
   const avail = map.pos.row === -1
     ? map.rows[0].map((_, j) => j)
@@ -410,12 +407,39 @@ function showMap(){
       if(isAvail) el.addEventListener('click', () => clickNode(r, i));
       box.appendChild(el);
     }
-  if(!map.expanded && end < map.cfg.rows - 1){
+  if(end < map.cfg.rows - 1){
     const fog = document.createElement('div');
     fog.className = 'mapFog';
     fog.textContent = '👑 ' + (map.cfg.rows - 1 - end);
     box.appendChild(fog);
   }
+  const mini = $('#mapMini');
+  mini.innerHTML = '';
+  show('#mapMini', map.mini);
+  show('#map .card', !map.mini);
+  const xOf = (r, i) => (i + 0.5) / map.cfg.widths[r] * 100;
+  const yOf = r => 100 - (r + 0.5) / map.cfg.rows * 100;
+  const msvg = document.createElementNS(svgNS, 'svg');
+  msvg.setAttribute('viewBox', '0 0 100 100');
+  msvg.setAttribute('preserveAspectRatio', 'none');
+  for(const e of map.edges){
+    const line = document.createElementNS(svgNS, 'line');
+    line.setAttribute('x1', xOf(e.r, e.i)); line.setAttribute('y1', yOf(e.r));
+    line.setAttribute('x2', xOf(e.r+1, e.j)); line.setAttribute('y2', yOf(e.r+1));
+    line.setAttribute('stroke', 'rgba(255,255,255,.15)');
+    line.setAttribute('stroke-width', '1.5');
+    msvg.appendChild(line);
+  }
+  mini.appendChild(msvg);
+  for(let r=0;r<map.cfg.rows;r++)
+    for(let i=0;i<map.rows[r].length;i++){
+      const n = map.rows[r][i];
+      const d = document.createElement('span');
+      d.className = 'mapMiniDot t-' + n.type + (r === map.pos.row && i === map.pos.idx ? ' current' : '');
+      d.style.left = xOf(r, i) + '%';
+      d.style.top = yOf(r) + '%';
+      mini.appendChild(d);
+    }
   show('#map', true);
 }
 
