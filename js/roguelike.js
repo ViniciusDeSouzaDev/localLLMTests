@@ -306,6 +306,7 @@ function mapXY(r, i){
 
 function showMap(){
   state = 'map';
+  const intro = map.pos.row === -1;
   const box = $('#mapBox');
   box.innerHTML = '';
   const nextR = map.pos.row + 1;
@@ -347,10 +348,10 @@ function showMap(){
       dash.style.animationDelay = (Math.random() * 1.5) + 's';
       svg.appendChild(dash);
     } else {
-      line.setAttribute('class', 'mapEdge');
+      line.setAttribute('class', intro ? 'mapEdge' : 'mapEdge static');
       line.setAttribute('stroke', 'rgba(255,255,255,.16)');
       line.setAttribute('stroke-width', '1.5');
-      line.style.animationDelay = (edgeIdx++ * 0.03) + 's';
+      if(intro) line.style.animationDelay = (edgeIdx++ * 0.03) + 's';
     }
     svg.appendChild(line);
   }
@@ -367,12 +368,12 @@ function showMap(){
       const { x, y } = mapXY(r, i);
       const el = document.createElement('button');
       const isAvail = r === nextR && avail.includes(i);
-      el.className = 'mapNode t-' + n.type + (n.visited ? ' visited' : (isAvail ? ' avail' : ''));
+      el.className = 'mapNode t-' + n.type + (intro ? '' : ' noIntro') + (n.visited ? ' visited' : (isAvail ? ' avail' : ''));
       el.textContent = NODE_ICONS[n.type];
       el.title = n.def ? n.def.name : nodeNames()[n.type];
       el.style.left = `calc(${x}% - 20px)`;
       el.style.top = (y - 20) + 'px';
-      el.style.animationDelay = (0.15 + nodeIdx++ * 0.04) + 's';
+      if(intro) el.style.animationDelay = (0.15 + nodeIdx++ * 0.04) + 's';
       if(isAvail) el.addEventListener('click', () => clickNode(r, i));
       box.appendChild(el);
     }
