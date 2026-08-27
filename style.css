@@ -149,6 +149,7 @@
   }
   .flagBtn:hover { transform:scale(1.08); }
   .flagBtn.active { border-color:#ffd93b; box-shadow:0 0 12px rgba(255,217,59,.5); }
+  #helpBtn { font-size:14px; font-weight:900; color:#fff; line-height:1.2; padding:2px 8px; }
   h2 { font-size:26px; font-weight:900; color:#fff; letter-spacing:2px; }
 
   .btn {

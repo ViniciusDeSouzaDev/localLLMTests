@@ -50,9 +50,8 @@ function applyLang(){
   CARDS.forEach(c => { const t = d.cards[c.id]; if(t){ c.name=t.n; c.desc=t.d; } });
   [...RELICS, ...RELICS2].forEach(r => { const t = d.relics[r.id]; if(t){ r.name=t.n; r.desc=t.d; } });
   const set = (id, v) => { const el = $(id); if(el) el.textContent = v; };
-  set('#playBtn', T('play')); set('#helpBtnMenu', T('howToPlay'));
-  set('#menuHint', T('menuHint'));
-  set('#lblBest', T('best')); set('#lblTotal', T('total'));
+  set('#playBtn', T('play'));
+   set('#lblBest', T('best')); set('#lblTotal', T('total'));
   set('#goTitle', T('gameover')); set('#lblScore', T('score')); set('#lblBest2', T('best'));
   set('#newRecord', T('newRecord')); set('#retryBtn', T('playAgain')); set('#skinsBtnOver', T('skins'));
   set('#shopTitle', T('skins')); set('#lblTotal2', T('total')); set('#lblPts', T('pts')); set('#shopClose', T('close'));

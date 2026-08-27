@@ -203,7 +203,7 @@ function toMenu(){
 $('#pauseResume').addEventListener('click', () => { AudioFX.click(); togglePause(); });
 $('#pauseHelp').addEventListener('click', () => { AudioFX.click(); openHelp(); });
 $('#pauseMenu').addEventListener('click', () => { AudioFX.click(); toMenu(); });
-$('#helpBtnMenu').addEventListener('click', () => { AudioFX.init(); AudioFX.click(); openHelp(); });
+$('#helpBtn').addEventListener('click', () => { AudioFX.init(); AudioFX.click(); openHelp(); });
 $('#langBR').addEventListener('click', () => { AudioFX.init(); AudioFX.click(); if(lang !== 'pt'){ lang = 'pt'; save.lang = lang; persist(); applyLang(); buildShop(); } });
   $('#langUS').addEventListener('click', () => { AudioFX.init(); AudioFX.click(); if(lang !== 'en'){ lang = 'en'; save.lang = lang; persist(); applyLang(); buildShop(); } });
 $('#helpClose').addEventListener('click', closeHelp);
