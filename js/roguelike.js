@@ -54,8 +54,14 @@ function refreshRlHud(){
 }
 
 function renderRunItems(){
-  const el = $('#runItems');
-  el.innerHTML = '';
+  for(const el of [$('#runItems'), $('#merchRunItems'), $('#draftRunItems')]){
+    if(!el) continue;
+    el.innerHTML = '';
+    renderItemsInto(el);
+  }
+}
+
+function renderItemsInto(el){
   const add = (icon, name, desc, badge) => {
     const s = document.createElement('span');
     s.className = 'itemIcon';
