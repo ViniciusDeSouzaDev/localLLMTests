@@ -120,12 +120,13 @@
   }
 
   h1 {
-    font-size:18px; font-weight:900; letter-spacing:1px; line-height:1.35;
+    font-size:18px; font-weight:900; letter-spacing:1px; line-height:1.75;
     max-width:400px;
     background:linear-gradient(180deg,#fff 20%,#ffd93b 90%);
     -webkit-background-clip:text; background-clip:text; color:transparent;
     filter:drop-shadow(0 4px 0 rgba(0,0,0,.35));
   }
+  h1 .word { white-space:nowrap; }
   h1 .acro {
     display:inline-block; font-size:30px; letter-spacing:0; line-height:1;
     background:linear-gradient(180deg,#ff9a9a,#ff2e2e);
