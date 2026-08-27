@@ -304,21 +304,32 @@ function genMap(path){
   const edges = [];
   for(let r=0;r<cfg.rows-1;r++){
     const a = rows[r].length, b = rows[r+1].length;
-    for(let i=0;i<a;i++)
-      for(let j=0;j<b;j++) edges.push({ r, i, j });
+    const tight = r > 0 && b > 1 && Math.random() < 0.35;
+    for(let i=0;i<a;i++){
+      if(tight){
+        const keep = new Set();
+        while(keep.size < Math.max(1, Math.floor(Math.random()*(b-1)) + 1)) keep.add(Math.floor(Math.random()*b));
+        for(const j of keep) edges.push({ r, i, j });
+      } else {
+        for(let j=0;j<b;j++) edges.push({ r, i, j });
+      }
+    }
   }
   return { rows, edges, pos:{ row:-1, idx:0 }, cfg, path: path || 1 };
 }
 
 function mapXY(r, i){
-  const W = 100, H = 440, top = 30, bot = H - 30;
-  const cfg = map.cfg;
-  return { x:(i+0.5)/cfg.widths[r]*W, y:bot - r*(bot-top)/(cfg.rows-1) };
+  const v = map.view, cfg = map.cfg;
+  const span = Math.max(1, v.end - v.start);
+  return { x:(i+0.5)/cfg.widths[r]*100, y:90 - (r - v.start)*80/span };
 }
 
 function showMap(){
   state = 'map';
   const intro = map.pos.row === -1;
+  const start = Math.max(0, map.pos.row);
+  const end = Math.min(map.cfg.rows - 1, start + 4);
+  map.view = { start, end };
   const box = $('#mapBox');
   box.innerHTML = '';
   const nextR = map.pos.row + 1;
@@ -327,7 +338,7 @@ function showMap(){
     : map.edges.filter(e => e.r === map.pos.row && e.i === map.pos.idx).map(e => e.j);
   const svgNS = 'http://www.w3.org/2000/svg';
   const svg = document.createElementNS(svgNS, 'svg');
-  svg.setAttribute('viewBox', '0 0 100 440');
+  svg.setAttribute('viewBox', '0 0 100 100');
   svg.setAttribute('preserveAspectRatio', 'none');
   const defs = document.createElementNS(svgNS, 'defs');
   const glow = document.createElementNS(svgNS, 'filter');
@@ -343,11 +354,12 @@ function showMap(){
   defs.appendChild(glow); svg.appendChild(defs);
   let edgeIdx = 0, nodeIdx = 0;
   for(const e of map.edges){
+    if(e.r < start || e.r >= end) continue;
     const a = mapXY(e.r, e.i), b = mapXY(e.r+1, e.j);
     const line = document.createElementNS(svgNS, 'line');
     line.setAttribute('x1', a.x); line.setAttribute('y1', a.y);
     line.setAttribute('x2', b.x); line.setAttribute('y2', b.y);
-    const active = e.r === map.pos.row && (map.pos.row === -1 || e.i === map.pos.idx);
+    const active = map.pos.row >= 0 && e.r === map.pos.row && e.i === map.pos.idx;
     if(active){
       line.setAttribute('class', 'mapEdge active');
       line.setAttribute('stroke', '#ffd93b');
@@ -368,13 +380,15 @@ function showMap(){
     svg.appendChild(line);
   }
   box.appendChild(svg);
-  const start = document.createElement('div');
-  start.className = 'mapStart';
-  start.textContent = '🐦';
-  start.style.left = 'calc(50% - 20px)';
-  start.style.top = (440 - 30 - 20) + 'px';
-  box.appendChild(start);
-  for(let r=0;r<map.cfg.rows;r++)
+  if(intro){
+    const startEl = document.createElement('div');
+    startEl.className = 'mapStart';
+    startEl.textContent = '🐦';
+    startEl.style.left = 'calc(50% - 24px)';
+    startEl.style.bottom = '6px';
+    box.appendChild(startEl);
+  }
+  for(let r=start;r<=end;r++)
     for(let i=0;i<map.rows[r].length;i++){
       const n = map.rows[r][i];
       const { x, y } = mapXY(r, i);
@@ -383,12 +397,18 @@ function showMap(){
       el.className = 'mapNode t-' + n.type + (intro ? '' : ' noIntro') + (n.visited ? ' visited' : (isAvail ? ' avail' : ''));
       el.textContent = NODE_ICONS[n.type];
       el.title = n.def ? n.def.name : nodeNames()[n.type];
-      el.style.left = `calc(${x}% - 20px)`;
-      el.style.top = (y - 20) + 'px';
+      el.style.left = `calc(${x}% - 24px)`;
+      el.style.top = `calc(${y}% - 24px)`;
       if(intro) el.style.animationDelay = (0.15 + nodeIdx++ * 0.04) + 's';
       if(isAvail) el.addEventListener('click', () => clickNode(r, i));
       box.appendChild(el);
     }
+  if(end < map.cfg.rows - 1){
+    const fog = document.createElement('div');
+    fog.className = 'mapFog';
+    fog.textContent = '👑 ' + (map.cfg.rows - 1 - end);
+    box.appendChild(fog);
+  }
   show('#map', true);
 }
 

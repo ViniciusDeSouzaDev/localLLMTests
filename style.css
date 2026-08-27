@@ -41,9 +41,9 @@
   #runItems .itemBadge, #merchRunItems .itemBadge, #draftRunItems .itemBadge { font-size:8px; font-weight:bold; color:rgba(255,255,255,.7); line-height:1; }
   #merchantOffers { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
   #map { overflow-y:auto; justify-content:flex-start; }
-  #map .card { width:100%; max-width:440px; padding:14px 18px; gap:10px; }
+  #map .card { width:100%; max-width:520px; height:100%; padding:14px 18px; gap:8px; }
   #mapBox {
-    position:relative; width:100%; height:440px;
+    position:relative; width:100%; flex:1; min-height:320px;
     background:
       radial-gradient(ellipse at 50% 115%, rgba(79,195,247,.14), transparent 55%),
       radial-gradient(ellipse at 50% -15%, rgba(224,176,255,.12), transparent 55%),
@@ -60,8 +60,8 @@
   }
   @keyframes mapDash { to { stroke-dashoffset:-10.5; } }
   .mapNode {
-    position:absolute; width:40px; height:40px; border-radius:50%;
-    font-size:18px; line-height:1; padding:0;
+    position:absolute; width:48px; height:48px; border-radius:50%;
+    font-size:22px; line-height:1; padding:0;
     background:rgba(8,12,26,.75); border:2px solid rgba(255,255,255,.22);
     cursor:default; transition:transform .12s, box-shadow .2s;
     animation:mapNodeIn .45s cubic-bezier(.2,1.6,.4,1) backwards;
@@ -87,8 +87,8 @@
   .mapNode.visited { opacity:.35; filter:saturate(.4); animation:mapNodeInV .45s cubic-bezier(.2,1.6,.4,1) backwards; }
   @keyframes mapNodeInV { from { transform:scale(0); opacity:0; } to { transform:scale(1); opacity:.35; } }
   .mapStart {
-    position:absolute; width:40px; height:40px; border-radius:50%;
-    font-size:18px; line-height:1; background:rgba(8,12,26,.75);
+    position:absolute; width:48px; height:48px; border-radius:50%;
+    font-size:22px; line-height:1; background:rgba(8,12,26,.75);
     border:2px solid #4fc3f7;
     animation:mapStartBob 2s ease-in-out infinite, mapStartGlow 2s ease-in-out infinite;
   }
@@ -96,6 +96,15 @@
   @keyframes mapStartGlow {
     0%,100% { box-shadow:0 0 10px rgba(79,195,247,.4); }
     50% { box-shadow:0 0 24px rgba(79,195,247,.8); }
+  }
+  .mapFog {
+    position:absolute; top:0; left:0; right:0; height:34px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:13px; font-weight:800; letter-spacing:2px;
+    color:rgba(255,255,255,.6); text-shadow:0 2px 0 rgba(0,0,0,.4);
+    background:linear-gradient(180deg, rgba(5,8,16,.85), transparent);
+    border-radius:14px 14px 0 0;
+    pointer-events:none;
   }
   #merchantDraft { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
   #merchant { overflow-y:auto; justify-content:flex-start; }
