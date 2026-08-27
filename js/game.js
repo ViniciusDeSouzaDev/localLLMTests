@@ -405,7 +405,7 @@ function update(dt){
         const biv = ph2.spd || 1.2, bt = ph2.tele || 0.35;
         if(p.blinkT >= biv){ p.blinkT = 0; p.gapY = p.blinkTo != null ? p.blinkTo : rand(70, GROUND_Y-70); p.blinkTo = null; }
         p.blinking = p.blinkT > biv - bt;
-        if(p.blinking && p.blinkTo == null) p.blinkTo = rand(70, GROUND_Y-70);
+        if(p.blinkTo == null) p.blinkTo = rand(70, GROUND_Y-70);
         p.ghostY = p.blinkTo;
       } else if(ph2.pattern === 'drift'){
         if(p.driftDir == null) p.driftDir = Math.random() < 0.5 ? 1 : -1;

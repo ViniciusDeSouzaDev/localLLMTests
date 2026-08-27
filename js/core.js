@@ -50,7 +50,7 @@ function powers(){
 }
 
 /* ================= roguelike ================= */
-let mode = save.mode || 'rl';
+let mode = 'rl';
 let run = null;
 let stageClearT = 0;
 let pendingDraft = null;

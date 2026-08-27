@@ -100,8 +100,19 @@ function drawBirdPreview(c, s){
 
 function drawMenuBird(){
   const cv = $('#menuBird'), c2 = cv.getContext('2d');
-  c2.clearRect(0,0,140,140);
-  c2.save(); c2.translate(70,70); c2.scale(2.2,2.2);
+  c2.clearRect(0,0,100,100);
+  c2.save(); c2.translate(50,50); c2.scale(1.6,1.6);
+  const s = skinById(save.selected);
+  const wing = Math.sin(t*6)*0.5+0.5;
+  if(s.ghost) c2.globalAlpha = 0.75;
+  drawBirdBody(c2, s, wing, t, true);
+  c2.restore();
+}
+
+function drawSkinPrev(){
+  const cv = $('#skinPrev'), c2 = cv.getContext('2d');
+  c2.clearRect(0,0,56,56);
+  c2.save(); c2.translate(28,28); c2.scale(0.85,0.85);
   const s = skinById(save.selected);
   const wing = Math.sin(t*6)*0.5+0.5;
   if(s.ghost) c2.globalAlpha = 0.75;
@@ -193,14 +204,13 @@ $('#pauseResume').addEventListener('click', () => { AudioFX.click(); togglePause
 $('#pauseHelp').addEventListener('click', () => { AudioFX.click(); openHelp(); });
 $('#pauseMenu').addEventListener('click', () => { AudioFX.click(); toMenu(); });
 $('#helpBtnMenu').addEventListener('click', () => { AudioFX.init(); AudioFX.click(); openHelp(); });
-$('#langBtn').addEventListener('click', () => { AudioFX.init(); AudioFX.click(); lang = lang === 'en' ? 'pt' : 'en'; save.lang = lang; persist(); applyLang(); buildShop(); });
+$('#langBR').addEventListener('click', () => { AudioFX.init(); AudioFX.click(); if(lang !== 'pt'){ lang = 'pt'; save.lang = lang; persist(); applyLang(); buildShop(); } });
+  $('#langUS').addEventListener('click', () => { AudioFX.init(); AudioFX.click(); if(lang !== 'en'){ lang = 'en'; save.lang = lang; persist(); applyLang(); buildShop(); } });
 $('#helpClose').addEventListener('click', closeHelp);
  $('#revealBtn').addEventListener('click', () => { AudioFX.click(); closeReveal(); });
 $('#playBtn').addEventListener('click', () => { AudioFX.init(); startGame(); });
   $('#retryBtn').addEventListener('click', () => { AudioFX.init(); startGame(); });
-  $('#modeClassic').addEventListener('click', () => { AudioFX.init(); AudioFX.click(); mode = 'classic'; save.modeChosen = true; persist(); refreshMode(); });
-  $('#modeRl').addEventListener('click', () => { AudioFX.init(); AudioFX.click(); mode = 'rl'; save.modeChosen = true; persist(); refreshMode(); });
-  $('#merchHeal').addEventListener('click', () => {
+   $('#merchHeal').addEventListener('click', () => {
     const p = merchPrice('heal');
     if(run.gold < p || run.hp >= mods().maxHp) return;
     run.gold -= p; run.hp++;
@@ -314,7 +324,7 @@ function frame(now){
   dt = Math.min(dt, 0.05);
   if(!paused) update(dt);
   render();
-  if(!$('#menu').classList.contains('hidden')) drawMenuBird();
+  if(!$('#menu').classList.contains('hidden')){ drawMenuBird(); drawSkinPrev(); }
 }
 
 /* ================= boot ================= */

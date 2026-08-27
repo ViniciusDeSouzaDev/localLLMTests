@@ -50,8 +50,7 @@ function applyLang(){
   CARDS.forEach(c => { const t = d.cards[c.id]; if(t){ c.name=t.n; c.desc=t.d; } });
   [...RELICS, ...RELICS2].forEach(r => { const t = d.relics[r.id]; if(t){ r.name=t.n; r.desc=t.d; } });
   const set = (id, v) => { const el = $(id); if(el) el.textContent = v; };
-  set('#modeClassic', T('classic')); set('#modeRl', T('roguelike'));
-  set('#playBtn', T('play')); set('#skinsBtn', T('skins')); set('#helpBtnMenu', T('howToPlay'));
+  set('#playBtn', T('play')); set('#helpBtnMenu', T('howToPlay'));
   set('#menuHint', T('menuHint'));
   set('#lblBest', T('best')); set('#lblTotal', T('total'));
   set('#goTitle', T('gameover')); set('#lblScore', T('score')); set('#lblBest2', T('best'));
@@ -73,7 +72,9 @@ function applyLang(){
   set('#merchHint', T('nextDraft')); set('#merchLeave', T('leave'));
   set('#helpTitle', T('howToPlay')); set('#helpClose', T('close'));
   set('#pauseTitle', T('paused')); set('#pauseResume', T('resume')); set('#pauseHelp', T('help')); set('#pauseMenu', T('mainMenu'));
-  set('#langBtn', lang === 'en' ? 'PT-BR' : 'EN');
+  const br = $('#langBR'), us = $('#langUS');
+  if(br) br.classList.toggle('active', lang === 'pt');
+  if(us) us.classList.toggle('active', lang === 'en');
   refreshStats(); refreshPowerTag(); refreshComboTag();
   if(helpOpen) buildHelp();
 }

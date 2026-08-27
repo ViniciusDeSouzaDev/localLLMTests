@@ -92,10 +92,7 @@ function renderRunItems(){
 }
 
 function refreshMode(){
-  $('#modeClassic').classList.toggle('active', mode==='classic');
-  $('#modeRl').classList.toggle('active', mode==='rl');
   const rl = mode==='rl';
-  $('#skinsBtn').textContent = rl ? T('characters') : T('skins');
   $('#skinsBtnOver').textContent = rl ? T('characters') : T('skins');
   $('#shopTitle').textContent = rl ? T('characters') : T('skins');
   refreshStats();
