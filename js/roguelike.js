@@ -459,7 +459,12 @@ function openChest(){
     const missing = relicPool().filter(r => !run.relics.includes(r.id));
     chestReward = missing.length ? { relic: missing[Math.floor(Math.random()*missing.length)].id } : { gold: 25 };
   } else chestReward = { hp: 1 };
-  $('#chestReward').textContent = '???';
+  const box = $('#chestBox');
+  box.textContent = '📦';
+  box.classList.remove('opening', 'opened');
+  const rew = $('#chestReward');
+  rew.textContent = '???';
+  rew.classList.remove('revealed');
   $('#chestOpen').textContent = T('open');
   show('#chest', true);
 }
