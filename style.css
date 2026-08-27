@@ -131,7 +131,25 @@
     display:inline-block; font-size:30px; letter-spacing:0; line-height:1;
     background:linear-gradient(180deg,#ff9a9a,#ff2e2e);
     -webkit-background-clip:text; background-clip:text; color:transparent;
+    animation:acroPop .5s cubic-bezier(.2,1.4,.4,1) backwards,
+              acroSway 2.4s ease-in-out infinite;
   }
+  @keyframes acroPop {
+    0% { transform:scale(0) rotate(-25deg); opacity:0; }
+    70% { transform:scale(1.25) rotate(5deg); opacity:1; }
+    100% { transform:scale(1) rotate(0); opacity:1; }
+  }
+  @keyframes acroSway {
+    0%,100% { transform:rotate(0); }
+    25% { transform:rotate(4deg); }
+    75% { transform:rotate(-4deg); }
+  }
+  h1 .word:nth-child(1) .acro { animation-delay:.05s,.55s; }
+  h1 .word:nth-child(2) .acro { animation-delay:.15s,.65s; }
+  h1 .word:nth-child(3) .acro { animation-delay:.25s,.75s; }
+  h1 .word:nth-child(4) .acro { animation-delay:.35s,.85s; }
+  h1 .word:nth-child(5) .acro { animation-delay:.45s,.95s; }
+  h1 .word:nth-child(6) .acro { animation-delay:.55s,1.05s; }
   .menuRow { display:flex; gap:14px; align-items:center; }
   #menu .card { padding:18px 22px; gap:10px; }
   #menuBird { width:min(100px,16vh); height:min(100px,16vh); }
