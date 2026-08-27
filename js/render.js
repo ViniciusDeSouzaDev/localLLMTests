@@ -605,10 +605,20 @@ function drawBirdBody(c, s, wing, time, shieldOn){
   c.shadowBlur = 0;
   if(s.id === 'demon'){ c.shadowColor = 'rgba(255,40,40,0.9)'; c.shadowBlur = 8; }
   if(s.id === 'ninja'){ c.shadowColor = 'rgba(255,71,88,0.9)'; c.shadowBlur = 8; }
-  c.fillStyle = s.id === 'demon' ? '#ff5050' : '#fff';
-  c.beginPath(); c.arc(8, -5, 6, 0, TAU); c.fill();
-  c.fillStyle = s.id === 'phantom' ? 'rgba(40,60,80,0.9)' : (s.id === 'demon' ? '#2a0000' : '#222');
-  c.beginPath(); c.arc(10, -5, 2.8, 0, TAU); c.fill();
+  if(state === 'dead'){
+    c.fillStyle = '#fff';
+    c.beginPath(); c.arc(8, -5, 6, 0, TAU); c.fill();
+    c.strokeStyle = '#222'; c.lineWidth = 2; c.lineCap = 'round';
+    c.beginPath();
+    c.moveTo(5.5, -7.5); c.lineTo(10.5, -2.5);
+    c.moveTo(10.5, -7.5); c.lineTo(5.5, -2.5);
+    c.stroke();
+  } else {
+    c.fillStyle = s.id === 'demon' ? '#ff5050' : '#fff';
+    c.beginPath(); c.arc(8, -5, 6, 0, TAU); c.fill();
+    c.fillStyle = s.id === 'phantom' ? 'rgba(40,60,80,0.9)' : (s.id === 'demon' ? '#2a0000' : '#222');
+    c.beginPath(); c.arc(10, -5, 2.8, 0, TAU); c.fill();
+  }
   c.shadowBlur = 0;
   // beak
   c.fillStyle = '#ff9d3b';
