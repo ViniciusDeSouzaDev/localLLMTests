@@ -10,7 +10,7 @@ const TAU = Math.PI*2;
 const SAVE_KEY = 'flappyDeluxeSave';
 const defaultSave = { best:0, total:0, unlocked:['classic'], selected:'classic', muted:false, mode:'rl', modeChosen:false, lang:'en', rl:{ bestStage:0, bestPipes:0 } };
 let save;
-try { save = Object.assign(defaultSave, JSON.parse(localStorage.getItem(SAVE_KEY)||'{}')); }
+try { save = Object.assign({}, defaultSave, JSON.parse(localStorage.getItem(SAVE_KEY)||'{}')); }
 catch(e){ save = Object.assign({}, defaultSave); }
 if(!save.rl) save.rl = { bestStage:0, bestPipes:0 };
 if(!save.modeChosen) save.mode = 'rl';
@@ -123,6 +123,7 @@ const UI_STR = {
     mapNodes:'MAP NODES', merchantH:'MERCHANT', skinPowers:'SKIN POWERS',
     feverNote:'Fever: every 30 pipes, score x2 for 10s. Gold is earned per pipe and lost on death.',
     continue:'CONTINUE', plusGold:'+{n} GOLD', relicLabel:'RELIC: ',
+    reset:'RESET', resetWarn:'This will DELETE EVERYTHING: all points, unlocked characters, records and progress. Are you sure?', resetDone:'Progress reset',
   },
   pt: {
     play:'JOGAR', skins:'SKINS', characters:'PERSONAGENS', howToPlay:'COMO JOGAR', classic:'CLÁSSICO', roguelike:'ROGUELIKE',
@@ -156,5 +157,6 @@ const UI_STR = {
     mapNodes:'NÓS DO MAPA', merchantH:'COMERCIANTE', skinPowers:'PODERES DOS PERSONAGENS',
     feverNote:'Febre: a cada 30 canos, pontos x2 por 10s. O ouro é ganho por cano e perdido ao morrer.',
     continue:'CONTINUAR', plusGold:'+{n} OURO', relicLabel:'RELÍQUIA: ',
+    reset:'REINICIAR', resetWarn:'Isso vai APAGAR TUDO: todos os pontos, personagens desbloqueados, recordes e progresso. Tem certeza?', resetDone:'Progresso reiniciado',
   },
 };

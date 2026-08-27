@@ -69,7 +69,7 @@ function applyLang(){
   set('#merchAnchor .dcName', T('anchorOffer')); set('#merchAnchor .dcDesc', T('anchorDesc'));
   set('#merchReroll .dcName', T('rerollOffer')); set('#merchReroll .dcDesc', T('rerollDesc'));
   set('#merchHint', T('nextDraft')); set('#merchLeave', T('leave'));
-  set('#helpTitle', T('howToPlay')); set('#helpClose', T('close'));
+  set('#helpTitle', T('howToPlay')); set('#helpClose', T('close')); set('#resetBtn', T('reset'));
   set('#pauseTitle', T('paused')); set('#pauseResume', T('resume')); set('#pauseHelp', T('help')); set('#pauseMenu', T('mainMenu'));
   const br = $('#langBR'), us = $('#langUS');
   if(br) br.classList.toggle('active', lang === 'pt');

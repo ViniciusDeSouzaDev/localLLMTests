@@ -206,6 +206,15 @@ $('#helpBtn').addEventListener('click', () => { AudioFX.init(); AudioFX.click();
 $('#langBR').addEventListener('click', () => { AudioFX.init(); AudioFX.click(); if(lang !== 'pt'){ lang = 'pt'; save.lang = lang; persist(); applyLang(); buildShop(); } });
   $('#langUS').addEventListener('click', () => { AudioFX.init(); AudioFX.click(); if(lang !== 'en'){ lang = 'en'; save.lang = lang; persist(); applyLang(); buildShop(); } });
 $('#helpClose').addEventListener('click', closeHelp);
+$('#resetBtn').addEventListener('click', () => {
+  AudioFX.init(); AudioFX.click();
+  if(!confirm(T('resetWarn'))) return;
+  save = Object.assign({}, defaultSave, { muted: save.muted, lang, rl: { bestStage:0, bestPipes:0 } });
+  persist();
+  buildShop(); refreshStats(); refreshMode();
+  toMenu();
+  showToast(T('resetDone'));
+});
  $('#revealBtn').addEventListener('click', () => { AudioFX.click(); closeReveal(); });
 $('#playBtn').addEventListener('click', () => { AudioFX.init(); startGame(); });
   $('#retryBtn').addEventListener('click', () => { AudioFX.init(); startGame(); });
