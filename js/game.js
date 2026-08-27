@@ -557,6 +557,7 @@ function update(dt){
     }
     // collision (circle vs rects)
     if(rebornT <= 0 && invuln <= 0){
+      const rollChance = Math.max(pw.roll, hasLegend('headband') ? 0.35 : 0);
       for(const p of pipes){
         if(p.hit) continue;
         const topH = p.gapY - p.gap/2, botY = p.gapY + p.gap/2;
@@ -577,7 +578,7 @@ function update(dt){
              popups.push({ x:BIRD_X, y:bird.y-34, txt:T('rebornTxt'), life:1.1, max:1.1 });
              AudioFX.hit(); AudioFX.die();
              refreshPowerTag();
-           } else if(pw.roll > 0 && Math.random() < pw.roll){
+           } else if(rollChance > 0 && Math.random() < rollChance){
              rollT = 0.9; rollSpin = 0; invuln = 0.9;
              bird.vy = -250;
              flash = 0.4; shake = 5;

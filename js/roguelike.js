@@ -253,12 +253,14 @@ const NODE_NAMES = { stage:'Stage — pipes & gold', boss:'Boss — big gold or 
 const LEGENDS = [
   { id:'bloodpact',  icon:'🩸', name:'Blood Pact',     desc:'Near-miss: +2 HP, -5 gold (once per stage)' },
   { id:'phaseshift', icon:'🌀', name:'Phase Shift',    desc:'3s invulnerability every 20 pipes' },
-  { id:'favor',      icon:'🤝', name:"Merchant's Favor", desc:'Merchant items 50% off, free reroll' }
+  { id:'favor',      icon:'🤝', name:"Merchant's Favor", desc:'Merchant items 50% off, free reroll' },
+  { id:'headband',   icon:'🥷', name:'Ninja Headband',   desc:'35% chance to roll-dodge pipe hits' }
 ];
 const LEGENDS_PT = {
   bloodpact:  { name:'Pacto de Sangue',  desc:'Quase-toque: +2 PV, -5 ouro (1x por fase)' },
   phaseshift: { name:'Deslocamento',     desc:'Invulnerabilidade de 3s a cada 20 canos' },
-  favor:      { name:'Favor do Mercador', desc:'Itens do mercador 50% mais baratos, reroll grátis' }
+  favor:      { name:'Favor do Mercador', desc:'Itens do mercador 50% mais baratos, reroll grátis' },
+  headband:   { name:'Turbante Ninja', desc:'35% de chance de rolar e evitar o dano de canos' }
 };
 function legendInfo(id){
   const l = LEGENDS.find(x => x.id === id);

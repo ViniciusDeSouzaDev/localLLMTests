@@ -534,6 +534,15 @@ function drawBirdBody(c, s, wing, time, shieldOn){
     c.beginPath(); c.moveTo(15, 8); c.lineTo(17, 15); c.lineTo(19, 8); c.closePath(); c.fill();
     c.beginPath(); c.moveTo(20, 8); c.lineTo(22, 14); c.lineTo(24, 8); c.closePath(); c.fill();
   }
+  if(hasLegend('headband') && s.id !== 'ninja'){
+    c.fillStyle = '#ff4758';
+    c.beginPath();
+    c.moveTo(-13, -8);
+    c.quadraticCurveTo(0, -12, 13, -8);
+    c.lineTo(13, -13);
+    c.quadraticCurveTo(0, -17, -13, -13);
+    c.closePath(); c.fill();
+  }
   if(s.id === 'ninja'){
     c.fillStyle = '#ff4758';
     c.beginPath();
