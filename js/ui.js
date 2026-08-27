@@ -1,0 +1,327 @@
+'use strict';
+/* ================= UI ================= */
+function show(sel, on){ $(sel).classList.toggle('hidden', !on); }
+
+function showToast(msg){
+  const el = $('#toast');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+  el.style.animation = 'none'; void el.offsetWidth; el.style.animation = '';
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(()=>el.classList.add('hidden'), 2600);
+}
+
+function refreshStats(){
+  $('#menuBest').textContent = mode==='rl' ? ('S'+save.rl.bestStage+' • '+save.rl.bestPipes+'p') : save.best;
+  $('#menuTotal').textContent = save.total;
+  $('#shopTotal').textContent = save.total;
+  $('#muteBtn').textContent = save.muted ? 'OFF' : 'SND';
+  const s = skinById(save.selected);
+  $('#menuPower').textContent = T('power') + ': ' + (s.power ? s.powerName + ' — ' + s.powerDesc : T('none'));
+}
+
+function refreshPowerTag(){
+  const s = skinById(save.selected);
+  let txt = s.power ? s.powerName.toUpperCase() : T('noPower');
+  if(shield > 0) txt += ' • ' + T('shieldReady');
+  if(revive > 0) txt += ' • ' + T('rebornReady');
+  $('#powerTag').textContent = txt;
+}
+
+function refreshComboTag(){
+  const parts = [];
+  if(feverT > 0) parts.push(T('fever'));
+  if(combo >= 1) parts.push('x' + Math.min(combo+1,4) + ' ' + T('combo'));
+  $('#comboTag').textContent = parts.join('  ');
+}
+
+const canHover = matchMedia('(hover:hover)').matches;
+let tipCard = null, suppressClick = false;
+const tooltip = $('#tooltip');
+function showTip(card, name, desc){
+  tipCard = card;
+  tooltip.innerHTML = `<span class="ttName">${name.toUpperCase()}</span><br>${desc}`;
+  const r = card.getBoundingClientRect();
+  tooltip.style.left = clamp(r.left + r.width/2, 115, innerWidth-115) + 'px';
+  tooltip.style.top = (r.top > 120 ? r.top - 8 : r.bottom + 10) + 'px';
+  tooltip.classList.add('show');
+}
+function hideTip(){ tooltip.classList.remove('show'); tipCard = null; }
+
+function buildShop(){
+  hideTip();
+  const grid = $('#skinGrid');
+  grid.innerHTML = '';
+  for(const s of SKINS){
+    const unlocked = save.unlocked.includes(s.id);
+    const card = document.createElement('div');
+    card.className = 'skinCard' + (unlocked ? '' : ' locked') + (save.selected===s.id ? ' selected' : '');
+    const cv = document.createElement('canvas');
+    cv.width = 80; cv.height = 80;
+    const c2 = cv.getContext('2d');
+    c2.setTransform(1.45,0,0,1.45,40,40);
+    drawBirdPreview(c2, s);
+    const name = document.createElement('div'); name.className='skinName'; name.textContent = s.name;
+    const pow = document.createElement('div'); pow.className='skinPower';
+    pow.textContent = s.power ? s.powerName : T('noPowerDesc');
+    const req = document.createElement('div'); req.className='skinReq';
+    req.textContent = unlocked ? (save.selected===s.id ? T('selected') : T('tapToWear')) : T('unlockAt').replace('{n}', s.unlock);
+    card.append(cv, name, pow, req);
+    if(canHover){
+      card.addEventListener('mouseenter', () => showTip(card, s.name, s.power ? s.powerName + ' — ' + s.powerDesc : T('noPowerDesc')));
+      card.addEventListener('mouseleave', hideTip);
+    } else {
+      card.addEventListener('touchstart', () => {
+        if(tipCard === card) hideTip();
+        else { showTip(card, s); suppressClick = true; setTimeout(()=>suppressClick=false, 400); }
+      }, { passive:true });
+    }
+    card.addEventListener('click', () => {
+      if(suppressClick){ suppressClick = false; return; }
+      AudioFX.init(); AudioFX.click();
+      if(!unlocked){
+        if(save.total >= s.unlock){ save.unlocked.push(s.id); persist(); buildShop(); }
+        else { showToast(T('reachUnlock').replace('{n}', s.unlock).replace('{s}', s.name)); }
+        return;
+      }
+      save.selected = s.id; persist();
+      buildShop(); refreshStats();
+    });
+    grid.appendChild(card);
+  }
+}
+
+function drawBirdPreview(c, s){
+  c.save();
+  if(s.ghost) c.globalAlpha = 0.75;
+  drawBirdBody(c, s, 0.5, 0, true);
+  c.restore();
+}
+
+function drawMenuBird(){
+  const cv = $('#menuBird'), c2 = cv.getContext('2d');
+  c2.clearRect(0,0,140,140);
+  c2.save(); c2.translate(70,70); c2.scale(2.2,2.2);
+  const s = skinById(save.selected);
+  const wing = Math.sin(t*6)*0.5+0.5;
+  if(s.ghost) c2.globalAlpha = 0.75;
+  drawBirdBody(c2, s, wing, t, true);
+  c2.restore();
+}
+
+/* ================= input ================= */
+function primaryAction(){
+  AudioFX.init();
+  if(AudioFX.ctx && AudioFX.ctx.state === 'suspended') AudioFX.ctx.resume();
+  if(paused) return;
+  if(state === 'menu') startGame();
+  else if(state === 'ready' || state === 'play') flap();
+  else if(state === 'dead' && overShown) startGame();
+}
+document.addEventListener('pointerdown', () => AudioFX.init(), true);
+canvas.addEventListener('pointerdown', e => { e.preventDefault(); primaryAction(); });
+addEventListener('keydown', e => {
+  if(e.code === 'Space' || e.code === 'ArrowUp'){ e.preventDefault(); primaryAction(); }
+  else if(e.code === 'KeyP') togglePause();
+  else if(e.code === 'KeyM') toggleMute();
+  else if(e.code === 'KeyH') openHelp();
+  else if(e.code === 'Escape') closeHelp();
+});
+function togglePause(){
+  if(state !== 'play' && state !== 'ready') return;
+  paused = !paused;
+  show('#pauseOverlay', paused);
+  $('#pauseBtn').textContent = paused ? 'GO' : 'II';
+}
+function toggleMute(){
+  save.muted = !save.muted;
+  AudioFX.muted = save.muted;
+  AudioFX.applyMute();
+  persist(); refreshStats();
+}
+$('#muteBtn').addEventListener('click', () => { AudioFX.init(); toggleMute(); });
+$('#pauseBtn').addEventListener('click', () => { AudioFX.init(); togglePause(); });
+function buildHelp(){
+  const list = items => items.map(i=>`<p class="hint">${i.icon ? i.icon + ' ' : ''}<b>${i.name}</b> — ${i.desc}</p>`).join('');
+  $('#helpBody').innerHTML =
+    `<p class="hint">${T('menuHint')}</p>` +
+    `<h3>${T('upgrades')}</h3>` + list(CARDS) +
+    `<h3>${T('relics')}</h3>` + list(RELICS) +
+    `<h3>${T('pipesH')}</h3>` +
+    `<p class="hint"><b>${T('mover')}</b> — ${T('moverDesc')}</p>` +
+    `<p class="hint"><b>${T('spear')}</b> — ${T('spearDesc')}</p>` +
+    `<p class="hint"><b>${T('hammer')}</b> — ${T('hammerDesc')}</p>` +
+    `<h3>${T('mapNodes')}</h3>` + Object.values(nodeNames()).map(v=>`<p class="hint">${v}</p>`).join('') +
+    `<h3>${T('merchantH')}</h3>` +
+    `<p class="hint"><b>${T('heal')}</b> — ${T('healDesc')}</p><p class="hint"><b>${T('coinOffer')}</b> — ${T('coinDesc')}</p><p class="hint"><b>${T('rerollOffer')}</b> — ${T('rerollDesc')}</p>` +
+    `<h3>${T('skinPowers')}</h3>` + SKINS.filter(s=>s.power).map(s=>`<p class="hint"><b>${s.name}</b> — ${s.powerDesc}</p>`).join('') +
+    `<p class="hint">${T('feverNote')}</p>`;
+}
+let helpOpen = false, helpWasPaused = false;
+function openHelp(){
+  if(helpOpen) return;
+  helpOpen = true;
+  helpWasPaused = paused;
+  if(state==='play'||state==='ready'){ paused = true; show('#pauseOverlay', false); }
+  buildHelp();
+  show('#help', true);
+}
+function closeHelp(){
+  if(!helpOpen) return;
+  helpOpen = false;
+  show('#help', false);
+  if(state==='play'||state==='ready'){
+    paused = helpWasPaused;
+    show('#pauseOverlay', paused);
+    $('#pauseBtn').textContent = paused ? 'GO' : 'II';
+  }
+}
+function toMenu(){
+  closeHelp();
+  paused = false;
+  $('#pauseBtn').textContent = 'II';
+  show('#pauseOverlay', false);
+  show('#hud', false);
+  show('#draft', false); show('#map', false); show('#merchant', false); show('#chest', false); show('#victory', false); show('#gameover', false);
+  if(mode === 'rl') resetRun();
+  state = 'menu';
+  AudioFX.stopMusic();
+  refreshStats();
+  show('#menu', true);
+}
+$('#pauseResume').addEventListener('click', () => { AudioFX.click(); togglePause(); });
+$('#pauseHelp').addEventListener('click', () => { AudioFX.click(); openHelp(); });
+$('#pauseMenu').addEventListener('click', () => { AudioFX.click(); toMenu(); });
+$('#helpBtnMenu').addEventListener('click', () => { AudioFX.init(); AudioFX.click(); openHelp(); });
+$('#langBtn').addEventListener('click', () => { AudioFX.init(); AudioFX.click(); lang = lang === 'en' ? 'pt' : 'en'; save.lang = lang; persist(); applyLang(); buildShop(); });
+$('#helpClose').addEventListener('click', closeHelp);
+ $('#revealBtn').addEventListener('click', () => { AudioFX.click(); closeReveal(); });
+$('#playBtn').addEventListener('click', () => { AudioFX.init(); startGame(); });
+  $('#retryBtn').addEventListener('click', () => { AudioFX.init(); startGame(); });
+  $('#modeClassic').addEventListener('click', () => { AudioFX.init(); AudioFX.click(); mode = 'classic'; save.modeChosen = true; persist(); refreshMode(); });
+  $('#modeRl').addEventListener('click', () => { AudioFX.init(); AudioFX.click(); mode = 'rl'; save.modeChosen = true; persist(); refreshMode(); });
+  $('#merchHeal').addEventListener('click', () => {
+    const p = merchPrice('heal');
+    if(run.gold < p || run.hp >= mods().maxHp) return;
+    run.gold -= p; run.hp++;
+    AudioFX.score(); refreshMerchant(); refreshRlHud();
+  });
+  $('#merchShield').addEventListener('click', () => {
+    const p = merchPrice('shield');
+    if(run.gold < p) return;
+    run.gold -= p;
+    gainUpgrade('shield'); shield++;
+    AudioFX.score(); refreshMerchant(); refreshRlHud();
+  });
+  $('#merchTough').addEventListener('click', () => {
+    const p = merchPrice('tough');
+    if(run.gold < p) return;
+    run.gold -= p;
+    gainUpgrade('tough'); run.maxHp++;
+    AudioFX.score(); refreshMerchant(); refreshRlHud();
+  });
+  $('#merchChip').addEventListener('click', () => {
+    const p = merchPrice('chip');
+    if(run.gold < p) return;
+    run.gold -= p;
+    gainUpgrade('chip');
+    AudioFX.score(); refreshMerchant(); refreshRlHud();
+  });
+  $('#merchCoin').addEventListener('click', () => {
+    const p = merchPrice('coin');
+    if(run.gold < p || luckyUsed) return;
+    luckyUsed = true;
+    run.gold += 35 - p;
+    AudioFX.score(); refreshMerchant(); refreshRlHud();
+  });
+  $('#merchPhoenix').addEventListener('click', () => {
+    const p = merchPrice('phoenix');
+    if(run.gold < p || run.relics.includes('phoenix')) return;
+    run.gold -= p;
+    gainRelic('phoenix');
+    AudioFX.score(); refreshMerchant(); refreshRlHud();
+  });
+  $('#merchAnchor').addEventListener('click', () => {
+    const p = merchPrice('anchor');
+    if(run.gold < p || run.relics.includes('anchor')) return;
+    run.gold -= p;
+    gainRelic('anchor');
+    AudioFX.score(); refreshMerchant(); refreshRlHud();
+  });
+  $('#merchReroll').addEventListener('click', () => {
+    const p = merchPrice('reroll');
+    if(run.gold < p) return;
+    run.gold -= p;
+    pendingDraft = rollCards();
+    AudioFX.click(); refreshMerchant();
+  });
+  $('#merchLeave').addEventListener('click', () => {
+    AudioFX.click();
+    show('#merchant', false);
+    openDraft(pendingDraft);
+  });
+  $('#victoryBtn').addEventListener('click', () => {
+    AudioFX.click();
+    show('#victory', false);
+    startGame();
+  });
+  $('#continueBtn').addEventListener('click', () => {
+    AudioFX.click();
+    show('#victory', false);
+    run.path = 2;
+    map = genMap(2);
+    showMap();
+  });
+  $('#chestOpen').addEventListener('click', () => {
+    if(!chestOpened){
+      chestOpened = true;
+      const r = chestReward;
+      if(r.gold){ run.gold += r.gold; $('#chestReward').textContent = T('plusGold').replace('{n}', r.gold); }
+      else if(r.relic){ const rel = RELICS.find(x => x.id === r.relic); gainRelic(r.relic); $('#chestReward').textContent = T('relicLabel') + (rel.icon||'') + ' ' + rel.name; }
+      else { run.hp = Math.min(mods().maxHp, run.hp + 1); $('#chestReward').textContent = T('plusHp'); }
+      AudioFX.score();
+      refreshRlHud();
+      $('#chestOpen').textContent = T('continue');
+    } else {
+      AudioFX.click();
+      show('#chest', false);
+      openDraft(rollCards());
+    }
+  });
+ $('#skinsBtn').addEventListener('click', () => {
+    AudioFX.init();
+    AudioFX.click();
+    buildShop();
+    show('#shop', true);
+  });
+  $('#skinsBtnOver').addEventListener('click', () => {
+    AudioFX.init();
+    AudioFX.click();
+    buildShop();
+    show('#shop', true);
+  });
+$('#shopClose').addEventListener('click', () => { AudioFX.click(); hideTip(); show('#shop', false); });
+ $('#skinGrid').addEventListener('scroll', hideTip);
+document.addEventListener('visibilitychange', () => {
+  if(document.hidden && state === 'play' && !paused) togglePause();
+});
+
+/* ================= main loop ================= */
+let last = performance.now();
+function frame(now){
+  requestAnimationFrame(frame);
+  let dt = (now - last)/1000; last = now;
+  dt = Math.min(dt, 0.05);
+  if(!paused) update(dt);
+  render();
+  if(!$('#menu').classList.contains('hidden')) drawMenuBird();
+}
+
+/* ================= boot ================= */
+AudioFX.muted = save.muted;
+checkI18n();
+applyLang();
+buildShop();
+refreshStats();
+refreshMode();
+requestAnimationFrame(frame);
