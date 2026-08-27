@@ -59,7 +59,7 @@ function applyLang(){
   set('#mapTitle', T('thePath')); set('#mapHint', T('tapNode'));
   set('#continueBtn', T('continueP2')); set('#victoryBtn', T('playAgain'));
   set('#chestTitle', T('chest')); set('#chestOpen', T('open')); set('#revealBtn', T('incredible'));
-  set('#merchTitle', T('merchant'));
+  set('#merchTitle', T('merchant')); set('#merchSub', T('merchHint'));
   set('#merchHeal .dcName', T('heal')); set('#merchHeal .dcDesc', T('healDesc'));
   set('#merchShield .dcName', T('shieldOffer')); set('#merchShield .dcDesc', T('shieldDesc'));
   set('#merchTough .dcName', T('toughOffer')); set('#merchTough .dcDesc', T('toughDesc'));

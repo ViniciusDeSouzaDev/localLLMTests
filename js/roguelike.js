@@ -117,7 +117,9 @@ function renderCards(grid, cards, clickable){
   for(const c of cards){
     const el = document.createElement('button');
     el.className = 'draftCard';
-    el.innerHTML = `<span class="dcName">${c.icon ? c.icon + ' ' : ''}${c.name}</span><span class="dcDesc">${c.desc}</span>`;
+    const owned = (mode === 'rl' && run) ? run.upgrades.filter(u => u === c.id).length : 0;
+    el.innerHTML = `<span class="dcName">${c.icon ? c.icon + ' ' : ''}${c.name}</span><span class="dcDesc">${c.desc}</span>` +
+      (owned ? `<span class="dcOwned">${T('ownedBadge').replace('{n}', owned)}</span>` : '');
     if(clickable) el.addEventListener('click', () => {
       const now = performance.now();
       if(now - draftGuardT < 400){ draftGuardT = now; return; }
