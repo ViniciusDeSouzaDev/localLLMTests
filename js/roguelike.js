@@ -531,6 +531,11 @@ const AudioFX = {
     src.start(t);
   },
   flap(){ this.noise({d:0.07, v:0.35, f:2200, q:0.8}); this.tone({f:340, d:0.07, type:'triangle', v:0.2, slide:260}); },
+  roll(){
+    this.tone({f:260, d:0.35, type:'sawtooth', v:0.22, slide:540});
+    this.noise({d:0.3, v:0.3, f:1600, q:0.6});
+    this.tone({f:1568, d:0.14, type:'sine', v:0.3, at:0.3});
+  },
   score(){ this.tone({f:784, d:0.08, type:'sine', v:0.45}); this.tone({f:1174.7, d:0.16, type:'sine', v:0.4, at:0.07}); },
   hit(){ this.tone({f:150, d:0.22, type:'square', v:0.5, slide:-90}); this.noise({d:0.18, v:0.5, f:500, q:0.7}); },
   die(){ this.tone({f:500, d:0.6, type:'sawtooth', v:0.3, slide:-380, at:0.15}); },

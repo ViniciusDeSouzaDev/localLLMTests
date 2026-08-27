@@ -584,7 +584,7 @@ function update(dt){
              flash = 0.4; shake = 5;
              p.hit = true;
              popups.push({ x:BIRD_X, y:bird.y-34, txt:T('rollTxt'), life:0.9, max:0.9 });
-             AudioFX.flap(); AudioFX.score();
+             AudioFX.roll();
              refreshPowerTag();
              refreshRlHud();
            } else if(mode === 'rl' && run){
