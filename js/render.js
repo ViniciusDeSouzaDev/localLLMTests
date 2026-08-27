@@ -307,7 +307,13 @@ function drawBossFace(p, topH, botY){
   }
   ctx.restore();
 }
+const BOSS_FACE_KIND = {
+  'EMBERLORD':'demon','FINAL BOSS':'demon','THE ENDLESS':'demon','BRUISER':'demon',
+  'VOIDLORD':'cyclops','THE WARDEN':'cyclops','NULLKNIGHT':'cyclops','PHANTOM':'cyclops',
+  'PIPESNAKE':'snake','LABYRINTH':'snake','CRAWL':'snake','GALE':'snake','DART':'snake'
+};
 function bossFace(x, ey, mdir, col, m, b){
+  const kind = BOSS_FACE_KIND[b.def.name] || 'default';
   const bp = (t + x*0.017) % 3.4;
   const bl = bp < 0.14 ? Math.sin(bp/0.14*Math.PI) : 0;
   const eh = 5 * (1 - 0.9*bl);
@@ -318,26 +324,59 @@ function bossFace(x, ey, mdir, col, m, b){
   ctx.save();
   ctx.shadowColor = col; ctx.shadowBlur = 10;
   ctx.fillStyle = col;
-  for(const dx of [-8, 8]){
-    ctx.beginPath(); ctx.ellipse(x+35+dx, ey, 5, Math.max(0.8, eh), 0, 0, TAU); ctx.fill();
+  if(kind === 'cyclops'){
+    ctx.beginPath(); ctx.ellipse(x+35, ey, 7, Math.max(1, 6*(1-0.9*bl)), 0, 0, TAU); ctx.fill();
+  } else {
+    const rw = kind === 'demon' ? 2.6 : (kind === 'snake' ? 6 : 5);
+    const rh = kind === 'demon' ? 5.5*(1-0.9*bl) : (kind === 'snake' ? 2.4*(1-0.9*bl) : eh);
+    for(const dx of [-8, 8]){
+      ctx.beginPath(); ctx.ellipse(x+35+dx, ey, rw, Math.max(0.8, rh), 0, 0, TAU); ctx.fill();
+    }
+    if(kind === 'demon'){
+      ctx.beginPath();
+      ctx.moveTo(x+24, ey-4); ctx.lineTo(x+20, ey-16); ctx.lineTo(x+30, ey-8); ctx.closePath(); ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(x+46, ey-4); ctx.lineTo(x+50, ey-16); ctx.lineTo(x+40, ey-8); ctx.closePath(); ctx.fill();
+    }
   }
   ctx.restore();
-  if(b.elite){
+  if(b.elite && kind !== 'cyclops'){
     ctx.strokeStyle = col; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(x+29, ey-8); ctx.lineTo(x+32, ey-4); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(x+41, ey-8); ctx.lineTo(x+38, ey-4); ctx.stroke();
   }
   ctx.fillStyle = 'rgba(0,0,0,0.75)';
-  for(const dx of [-8, 8]){
+  for(const dx of kind === 'cyclops' ? [0] : [-8, 8]){
     const ex = x+35+dx;
     ctx.beginPath();
-    ctx.ellipse(ex + clamp((BIRD_X-ex)*0.03, -2.2, 2.2), ey + clamp((bird.y-ey)*0.03, -2.2, 2.2), 2.2, Math.max(0.6, eh*0.45), 0, 0, TAU);
+    ctx.ellipse(ex + clamp((BIRD_X-ex)*0.03, -2.2, 2.2), ey + clamp((bird.y-ey)*0.03, -2.2, 2.2),
+      kind === 'cyclops' ? 3 : 2.2, Math.max(0.6, eh*0.45), 0, 0, TAU);
     ctx.fill();
   }
   ctx.fillStyle = 'rgba(0,0,0,0.6)';
   ctx.beginPath();
-  ctx.ellipse(x+35, ey + mdir*8, 7, 1.5 + 5*m, 0, 0, TAU);
+  ctx.ellipse(x+35, ey + mdir*8, kind === 'cyclops' ? 9 : 7, 1.5 + 5*m, 0, 0, TAU);
   ctx.fill();
+  if(kind === 'demon' || kind === 'snake'){
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    for(const dx of [-4, 4]){
+      ctx.beginPath();
+      ctx.moveTo(x+35+dx-2, ey + mdir*8);
+      ctx.lineTo(x+35+dx+2, ey + mdir*8);
+      ctx.lineTo(x+35+dx, ey + mdir*14);
+      ctx.closePath(); ctx.fill();
+    }
+  }
+  if(kind === 'cyclops'){
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    for(let i=-1;i<=1;i++){
+      ctx.beginPath();
+      ctx.moveTo(x+35+i*5-1.5, ey + mdir*8);
+      ctx.lineTo(x+35+i*5+1.5, ey + mdir*8);
+      ctx.lineTo(x+35+i*5, ey + mdir*12);
+      ctx.closePath(); ctx.fill();
+    }
+  }
 }
 const BOSS_AURAS = {
   'EMBERLORD':'ember', 'GAPLORD III':'ember',
