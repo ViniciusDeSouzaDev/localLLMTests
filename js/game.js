@@ -91,7 +91,7 @@ let particles = [];
 let popups = [];
 let trail = [];
 let score = 0;
-let shield = 0, revive = 0, invuln = 0, rebornT = 0, nextMoverAt = 0;
+let shield = 0, revive = 0, invuln = 0, rebornT = 0, rollT = 0, rollSpin = 0, nextMoverAt = 0;
 let combo = 0, feverT = 0, feverNextAt = 30;
 let shake = 0, flash = 0;
 let groundX = 0;
@@ -110,7 +110,7 @@ function reset(){
   score = 0; shake = 0; flash = 0;
   combo = 0; feverT = 0;
   const pw = powers();
-  shield = pw.shield; revive = pw.revive + (hasRelic('phoenix') ? 1 : 0); invuln = 0; rebornT = 0;
+  shield = pw.shield; revive = pw.revive + (hasRelic('phoenix') ? 1 : 0); invuln = 0; rebornT = 0; rollT = 0; rollSpin = 0;
   nextMoverAt = t + rand(10,15);
   nextMusicSwitch = t + rand(20,35);
   deathTimer = 0; overShown = false;
@@ -258,6 +258,7 @@ function update(dt){
   shake = Math.max(0, shake - dt*30);
   flash = Math.max(0, flash - dt*2.5);
   invuln = Math.max(0, invuln - dt);
+  rollT = Math.max(0, rollT - dt);
   feverT = Math.max(0, feverT - dt);
   refreshComboTag();
   const pw = (mode==='rl' && run) ? mods() : powers();
@@ -287,6 +288,13 @@ function update(dt){
     }
     trail.push({ x:BIRD_X, y:bird.y, life:0.4, max:0.4 });
 
+    if(rollT > 0){
+      rollSpin += dt*24;
+      if(Math.random() < 0.6) particles.push({
+        x:BIRD_X+rand(-12,12), y:bird.y+rand(-12,12), vx:rand(-90,-30), vy:rand(-50,50),
+        life:rand(0.2,0.4), max:0.4, size:rand(2,4), color:'rgba(255,71,88,0.6)'
+      });
+    }
     if(rebornT > 0){
       rebornT -= dt;
       if(rebornT <= 0){
@@ -563,13 +571,22 @@ function update(dt){
             refreshPowerTag();
             refreshRlHud();
           } else if(revive > 0){
-            revive--; rebornT = 1.1;
-            bird.vy = -180;
-            flash = 1; shake = 8;
-            popups.push({ x:BIRD_X, y:bird.y-34, txt:T('rebornTxt'), life:1.1, max:1.1 });
-            AudioFX.hit(); AudioFX.die();
-            refreshPowerTag();
-          } else if(mode === 'rl' && run){
+             revive--; rebornT = 1.1;
+             bird.vy = -180;
+             flash = 1; shake = 8;
+             popups.push({ x:BIRD_X, y:bird.y-34, txt:T('rebornTxt'), life:1.1, max:1.1 });
+             AudioFX.hit(); AudioFX.die();
+             refreshPowerTag();
+           } else if(pw.roll > 0 && Math.random() < pw.roll){
+             rollT = 0.9; rollSpin = 0; invuln = 0.9;
+             bird.vy = -250;
+             flash = 0.4; shake = 5;
+             p.hit = true;
+             popups.push({ x:BIRD_X, y:bird.y-34, txt:T('rollTxt'), life:0.9, max:0.9 });
+             AudioFX.flap(); AudioFX.score();
+             refreshPowerTag();
+             refreshRlHud();
+           } else if(mode === 'rl' && run){
             const dmg = p.spear ? 2 : 1;
             run.hp -= dmg;
             if(run.hp <= 0){

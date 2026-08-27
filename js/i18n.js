@@ -11,6 +11,7 @@ const DATA_PT = {
     violet:{n:'Violeta',p:'Tempo',d:'Canos 20% mais lentos'},    golden:{n:'Dourado',p:'Pontuador',d:'Pontos em dobro'},
     phantom:{n:'Fantasma',p:'Renascido',d:'5 PV + revive uma vez na corrida'},
     demon:{n:'Demoníaco',p:'Demoníaco',d:'1 PV + hitbox minúscula + começa com Vampiro x2'},
+    ninja:{n:'Ninja',p:'Rolagem',d:'1 PV + 35% de chance de rolar e evitar o dano de canos'},
     cat:{n:'Gato',p:'Sete Vidas',d:'Começa com 7 PV'},
     rainbow:{n:'Arcíris',p:'Prisma',d:'5 PV + escudo + canos lentos + x2 pts'},
     god:{n:'Deus',p:'Deus',d:'Nunca morre + canos mais rápidos + Ímã x5'},

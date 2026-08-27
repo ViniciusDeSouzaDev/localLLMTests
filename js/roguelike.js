@@ -15,7 +15,7 @@ function hasRelic(id){ return mode==='rl' && run && run.relics.includes(id); }
 
 function mods(){
   const pw = powers();
-  const m = { grav:pw.grav, speed:pw.speed, mult:pw.mult, bonus:0, shield:pw.shield, feverEvery:30, maxHp:pw.maxHp, radius:pw.radius, magnet:pw.magnet, god:pw.god };
+  const m = { grav:pw.grav, speed:pw.speed, mult:pw.mult, bonus:0, shield:pw.shield, feverEvery:30, maxHp:pw.maxHp, radius:pw.radius, magnet:pw.magnet, god:pw.god, roll:pw.roll };
   if(mode === 'rl' && run){
     for(const u of run.upgrades){
       if(u==='feather') m.grav *= 0.9;

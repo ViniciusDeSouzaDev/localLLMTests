@@ -427,6 +427,27 @@ function drawBirdBody(c, s, wing, time, shieldOn){
     c.stroke();
     c.restore();
   }
+  if(s.id === 'ninja'){
+    c.save();
+    c.strokeStyle = '#ff4758'; c.lineWidth = 4; c.lineCap = 'round';
+    c.beginPath();
+    c.moveTo(-14, -2);
+    c.quadraticCurveTo(-24, -5 + Math.sin(time*6)*3, -31, -11 + Math.sin(time*5)*4);
+    c.stroke();
+    c.restore();
+    c.save();
+    const na = time*2.4;
+    c.translate(Math.cos(na)*23, Math.sin(na)*15);
+    c.rotate(time*9);
+    c.fillStyle = 'rgba(215,224,255,0.9)';
+    c.beginPath();
+    c.moveTo(0,-8); c.quadraticCurveTo(2,-2, 8,0); c.quadraticCurveTo(2,2, 0,8);
+    c.quadraticCurveTo(-2,2, -8,0); c.quadraticCurveTo(-2,-2, 0,-8);
+    c.closePath(); c.fill();
+    c.fillStyle = 'rgba(40,44,64,0.9)';
+    c.beginPath(); c.arc(0,0,2,0,TAU); c.fill();
+    c.restore();
+  }
   if(s.id === 'jade' && shieldOn){
     const r = 25 + Math.sin(time*4)*1.5;
     c.strokeStyle = 'rgba(95,224,122,0.9)'; c.lineWidth = 2.5;
@@ -459,6 +480,7 @@ function drawBirdBody(c, s, wing, time, shieldOn){
   // eye
   c.shadowBlur = 0;
   if(s.id === 'demon'){ c.shadowColor = 'rgba(255,40,40,0.9)'; c.shadowBlur = 8; }
+  if(s.id === 'ninja'){ c.shadowColor = 'rgba(255,71,88,0.9)'; c.shadowBlur = 8; }
   c.fillStyle = s.id === 'demon' ? '#ff5050' : '#fff';
   c.beginPath(); c.arc(8, -5, 6, 0, TAU); c.fill();
   c.fillStyle = s.id === 'phantom' ? 'rgba(40,60,80,0.9)' : (s.id === 'demon' ? '#2a0000' : '#222');
@@ -512,6 +534,20 @@ function drawBirdBody(c, s, wing, time, shieldOn){
     c.beginPath(); c.moveTo(15, 8); c.lineTo(17, 15); c.lineTo(19, 8); c.closePath(); c.fill();
     c.beginPath(); c.moveTo(20, 8); c.lineTo(22, 14); c.lineTo(24, 8); c.closePath(); c.fill();
   }
+  if(s.id === 'ninja'){
+    c.fillStyle = '#ff4758';
+    c.beginPath();
+    c.moveTo(-13, -8);
+    c.quadraticCurveTo(0, -12, 13, -8);
+    c.lineTo(13, -13);
+    c.quadraticCurveTo(0, -17, -13, -13);
+    c.closePath(); c.fill();
+    c.strokeStyle = '#ff4758'; c.lineWidth = 3; c.lineCap = 'round';
+    c.beginPath();
+    c.moveTo(-12, -11);
+    c.quadraticCurveTo(-19, -14 + Math.sin(time*7)*2, -25, -8 + Math.sin(time*6)*3);
+    c.stroke();
+  }
   if(s.id === 'cat'){
     c.fillStyle = s.wing;
     c.beginPath(); c.moveTo(-13,-9); c.lineTo(-17,-25); c.lineTo(-3,-14); c.closePath(); c.fill();
@@ -533,11 +569,12 @@ function drawBirdBody(c, s, wing, time, shieldOn){
 
 function drawBird(x, y, rot, s, wing, scale=1){
   ctx.save();
-  ctx.translate(x, y); ctx.rotate(rot); ctx.scale(scale, scale);
+  ctx.translate(x, y); ctx.rotate(rot + (rollT > 0 ? rollSpin : 0)); ctx.scale(scale, scale);
   if(s.ghost) ctx.globalAlpha = 0.7;
   if(rebornT > 0) ctx.globalAlpha = 0.35 + 0.25*Math.sin(t*25);
   if(s.ghost){ ctx.shadowColor = 'rgba(255,255,255,0.9)'; ctx.shadowBlur = 14; }
   if(s.id === 'demon'){ ctx.shadowColor = 'rgba(255,40,40,0.7)'; ctx.shadowBlur = 12; }
+  if(s.id === 'ninja'){ ctx.shadowColor = 'rgba(255,71,88,0.55)'; ctx.shadowBlur = rollT > 0 ? 22 : 10; }
   if(s.id === 'god'){ ctx.shadowColor = 'rgba(255,215,0,0.8)'; ctx.shadowBlur = 16; }
   drawBirdBody(ctx, s, wing, t, shield > 0);
   ctx.restore();
