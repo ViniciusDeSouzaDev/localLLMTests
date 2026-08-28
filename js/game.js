@@ -35,6 +35,11 @@ const THEMES = {
   abyss:  { skyTop:[[10,40,55],[4,14,22]],      skyBot:[[22,72,92],[10,30,44]],     ground:[[32,52,62],[20,36,46]] },
   necropolis:{ skyTop:[[52,72,56],[12,20,16]],  skyBot:[[112,142,106],[30,44,34]],  ground:[[56,66,52],[36,46,36]] },
   ashes:  { skyTop:[[46,40,42],[14,12,14]],     skyBot:[[112,86,70],[42,30,28]],    ground:[[72,66,62],[46,42,38]] },
+  eclipse:{ skyTop:[[70,45,90],[12,8,20]],      skyBot:[[190,110,70],[40,22,35]],   ground:[[60,45,70],[30,22,40]] },
+  asteroid:{ skyTop:[[24,32,64],[6,8,18]],      skyBot:[[50,62,105],[14,18,38]],    ground:[[45,52,80],[24,28,48]] },
+  nebula: { skyTop:[[90,50,120],[20,12,40]],    skyBot:[[220,120,160],[60,30,70]],  ground:[[70,50,90],[40,28,60]] },
+  void:   { skyTop:[[30,20,50],[4,2,10]],       skyBot:[[55,35,85],[12,8,24]],      ground:[[35,28,52],[20,15,32]] },
+  singularity:{ skyTop:[[235,230,250],[8,6,16]],skyBot:[[120,110,150],[10,8,20]],   ground:[[50,45,60],[25,22,32]] },
 };
 const THEME_LIST = Object.keys(THEMES);
 let theme = 'city';
@@ -107,6 +112,22 @@ function setTheme(name){
       x += w + rand(30,90);
     }
     for(let i=0;i<34;i++) fxParts.push({ x:Math.random()*W, y:Math.random()*GROUND_Y, s:rand(1,2.5), spd:rand(15,35), drift:rand(-12,12) });
+  } else if(name === 'eclipse'){
+    while(x < W*2){
+      silhouettes.push({x, w:rand(140,300), h:rand(60,180), kind:'ridge'});
+      x += rand(100,220);
+    }
+    for(let i=0;i<20;i++) fxParts.push({ x:Math.random()*W, y:Math.random()*GROUND_Y*0.9, s:rand(1,2.5), spd:rand(6,16), p:rand(0,TAU) });
+  } else if(name === 'asteroid'){
+    for(let i=0;i<7;i++) silhouettes.push({x:Math.random()*W*2, y:rand(60,GROUND_Y-160), w:rand(24,70), h:rand(18,50), kind:'rock', r:rand(0,TAU)});
+    for(let i=0;i<18;i++) fxParts.push({ x:Math.random()*W, y:Math.random()*GROUND_Y, s:rand(1,2.5), spd:rand(10,25), drift:rand(-10,10) });
+  } else if(name === 'nebula'){
+    for(let i=0;i<4;i++) silhouettes.push({x:Math.random()*W*2, y:rand(80,GROUND_Y-200), w:rand(160,320), h:rand(90,180), kind:'blob', hue:rand(260,320)});
+    for(let i=0;i<26;i++) fxParts.push({ x:Math.random()*W, y:Math.random()*GROUND_Y, s:rand(1,2.5), p:rand(0,TAU), hue:rand(0,360) });
+  } else if(name === 'void'){
+    for(let i=0;i<14;i++) fxParts.push({ ang:rand(0,TAU), rad:rand(60,Math.max(W,H)*0.55), spd:rand(18,40), s:rand(2,4), p:rand(0,TAU) });
+  } else if(name === 'singularity'){
+    for(let i=0;i<22;i++) fxParts.push({ ang:rand(0,TAU), rad:rand(40,Math.max(W,H)*0.6), spd:rand(30,70), s:rand(1.5,3) });
   }
   silW = Math.max(W*2, ...silhouettes.map(s => s.x + s.w));
 }
@@ -235,6 +256,7 @@ function showGameover(){
 
 function checkUnlocks(){
   for(const s of SKINS){
+    if(s.id === 'alien') continue;
     if(save.total >= s.unlock && !save.unlocked.includes(s.id)){
       save.unlocked.push(s.id);
       persist();
@@ -248,13 +270,15 @@ function checkUnlocks(){
 /* ================= update ================= */
 function pipeSpeed(){
   const base = (140 + Math.min(score,40)*1.5) * (feverT > 0 ? 1.3 : 1);
-  if(mode==='rl' && run) return base + 12*(run.stage-1) + (run.path === 2 ? 14 : 0);
+  if(mode==='rl' && run) return base + 12*(run.stage-1) + (run.path === 2 ? 14 : run.path === 3 ? 18 : 0);
   return base;
 }
 function pipeGap(){
   if(mode==='rl' && run){
-    const p2 = run.path === 2;
-    return Math.max(p2 ? 95 : 105, 170 - (run.stage-1)*(p2 ? 9 : 7) - score*0.3);
+    const p = run.path;
+    const floor = p === 2 ? 95 : p === 3 ? 90 : 105;
+    const perStage = p === 2 ? 9 : p === 3 ? 10 : 7;
+    return Math.max(floor, 170 - (run.stage-1)*perStage - score*0.3);
   }
   return Math.max(115, 160 - score*1.5);
 }
@@ -304,6 +328,26 @@ function update(dt){
     for(const a of fxParts){
       a.y += a.spd*dt; a.x += a.drift*dt;
       if(a.y > GROUND_Y){ a.y = -5; a.x = Math.random()*W; }
+    }
+  } else if(theme === 'eclipse'){
+    for(const e of fxParts){
+      e.y += e.spd*dt*0.4; e.x += Math.sin(t + e.p)*12*dt;
+      if(e.y > GROUND_Y){ e.y = -5; e.x = Math.random()*W; }
+    }
+  } else if(theme === 'asteroid'){
+    for(const s of fxParts){
+      s.y += s.spd*dt; s.x += s.drift*dt;
+      if(s.y > GROUND_Y){ s.y = -5; s.x = Math.random()*W; }
+    }
+  } else if(theme === 'void'){
+    for(const v of fxParts){
+      v.rad -= v.spd*dt; v.ang += (90/Math.max(30,v.rad))*dt;
+      if(v.rad < 30){ v.rad = Math.max(W,H)*0.55; v.ang = rand(0,TAU); }
+    }
+  } else if(theme === 'singularity'){
+    for(const s of fxParts){
+      s.rad -= s.spd*dt*1.6; s.ang += (140/Math.max(30,s.rad))*dt;
+      if(s.rad < 25){ s.rad = Math.max(W,H)*0.6; s.ang = rand(0,TAU); }
     }
   }
 
@@ -383,10 +427,13 @@ function update(dt){
     if(mode==='rl' && run.boss){
       if(!pipes.some(p => p.boss)){
         const bg = pipeGap();
-        pipes.push({ x:W+40, gapY:345, baseY:345, gap:bg, baseGap:bg, passed:false, boss:true, spear:run.boss.final });
+        const isAxe = run.path === 3 && run.boss.final && run.stage >= 2 && Math.random() < 0.15;
+        pipes.push({ x:W+40, gapY:345, baseY:345, gap:bg, baseGap:bg, passed:false, boss:true, spear:run.boss.final, axe:isAxe });
       }
     } else if(stageClearT <= 0 && (!last || last.x < W - (mode==='rl' && run.path === 2 ? 193 : 240))){
-      if(mode==='rl' && run.stage >= 2 && Math.random() < Math.min(0.12 + run.stage*0.04, 0.35)){
+      if(mode==='rl' && run.path === 3 && run.stage >= 2 && Math.random() < 0.15){
+        pipes.push({ x:W+40, gapY:rand(150, GROUND_Y-150), gap:pipeGap(), passed:false, axe:true });
+      } else if(mode==='rl' && run.stage >= 2 && Math.random() < Math.min(0.12 + run.stage*0.04, 0.35)){
         pipes.push({ x:W+40, gapY:rand(150, GROUND_Y-150), gap:pipeGap()+40, passed:false, spear:true });
       } else if(mode==='rl' && run.stage >= 3 && Math.random() < Math.min(0.02 + run.stage*0.03, 0.35)){
         const hg = pipeGap()+40;
@@ -546,7 +593,7 @@ function update(dt){
                 } else if(isElite || isLaby){
                   const gold = isLaby ? 25 : 20;
                   run.gold += gold;
-                  const pool = isLaby ? RELICS2 : relicPool();
+                  const pool = isLaby ? (run.path === 3 ? RELICS3 : RELICS2) : relicPool();
                   const missing = pool.filter(x => !run.relics.includes(x.id));
                   const r = missing.length ? missing[Math.floor(Math.random()*missing.length)] : null;
                   if(r) gainRelic(r.id); else run.gold += 15;
@@ -596,7 +643,7 @@ function update(dt){
         popups.push({ x:p.x+35, y:p.gapY, txt: near ? T('closeCall') + ' +' + gained : '+'+gained, life:0.7, max:0.7 });
         if(mode==='rl'){
           run.pipesInStage++; run.totalPipes++;
-          run.gold += 1 + 2*run.upgrades.filter(u=>u==='greed').length + (near ? 2 : 0) + (hasRelic('coin') ? 1 : 0) + (near && hasRelic('echo') ? 3 : 0);
+          run.gold += 1 + 2*run.upgrades.filter(u=>u==='greed').length + (near ? 2 : 0) + (hasRelic('coin') ? 1 : 0) + (near && hasRelic('echo') ? 3 : 0) + (hasRelic('corona') ? 2 : 0);
           const vampMax = run.upgrades.filter(x => x === 'vampire').length;
           if(near && run.vampUsed < vampMax && run.hp < mods().maxHp){
             run.vampUsed++; run.hp++;
@@ -627,7 +674,8 @@ function update(dt){
       }
     }
     if(scored && score >= feverNextAt){
-      feverNextAt += hasRelic('void') ? Math.min(15, mods().feverEvery) : mods().feverEvery;
+      const feverEvery = hasRelic('void') ? Math.min(15, mods().feverEvery) : hasRelic('singularity') ? Math.min(12, mods().feverEvery) : mods().feverEvery;
+      feverNextAt += feverEvery;
       feverT = (hasRelic('golden') ? 15 : 10) * (hasUpgrade('storm') ? 2 : 1); flash = 0.5;
       AudioFX.startMusic(AudioFX.randomFever());
       popups.push({ x:BIRD_X, y:bird.y-50, txt:T('fever'), life:1.0, max:1.0 });
@@ -664,8 +712,12 @@ function update(dt){
              AudioFX.roll();
              refreshPowerTag();
              refreshRlHud();
-           } else if(mode === 'rl' && run){
-            const dmg = p.spear ? 2 : 1;
+           } else if(mode === 'rl' && run && hasRelic('comet') && Math.random() < 0.3){
+             invuln = 1; p.hit = true;
+             popups.push({ x:BIRD_X, y:bird.y-34, txt:'☄️ NEGATED!', life:0.8, max:0.8 });
+             AudioFX.score();
+            } else if(mode === 'rl' && run){
+              const dmg = p.axe ? 3 : (p.spear ? 2 : 1);
             run.hp -= dmg;
             if(run.hp <= 0){
               die();
@@ -701,7 +753,7 @@ function update(dt){
   // music varies during the run (faster switches during fever, from the fever pool)
   if((state==='ready'||state==='play') && t >= nextMusicSwitch){
     const pool = feverT > 0 ? AudioFX.FEVER_POOL
-      : (mode==='rl' && run ? (run.path === 2 ? AudioFX.PATH2_POOL : AudioFX.PATH1_POOL) : AudioFX.POOL);
+      : (mode==='rl' && run ? (run.path === 3 ? AudioFX.PATH3_POOL : run.path === 2 ? AudioFX.PATH2_POOL : AudioFX.PATH1_POOL) : AudioFX.POOL);
     nextMusicSwitch = t + (feverT > 0 ? rand(6,10) : rand(25,40));
     let next = pool[Math.floor(Math.random()*pool.length)];
     while(next === AudioFX.mode) next = pool[Math.floor(Math.random()*pool.length)];

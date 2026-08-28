@@ -52,7 +52,7 @@ function buildShop(){
   const grid = $('#skinGrid');
   grid.innerHTML = '';
   for(const s of SKINS){
-    const unlocked = save.unlocked.includes(s.id);
+    const unlocked = s.id === 'alien' ? !!save.punishmentCleared : save.unlocked.includes(s.id);
     const card = document.createElement('div');
     card.className = 'skinCard' + (unlocked ? '' : ' locked') + (save.selected===s.id ? ' selected' : '');
     const cv = document.createElement('canvas');
@@ -64,7 +64,7 @@ function buildShop(){
     const pow = document.createElement('div'); pow.className='skinPower';
     pow.textContent = s.power ? s.powerName : T('noPowerDesc');
     const req = document.createElement('div'); req.className='skinReq';
-    req.textContent = unlocked ? (save.selected===s.id ? T('selected') : T('tapToWear')) : T('unlockAt').replace('{n}', s.unlock);
+    req.textContent = unlocked ? (save.selected===s.id ? T('selected') : T('tapToWear')) : (s.id === 'alien' ? T('alienReq') : T('unlockAt').replace('{n}', s.unlock));
     card.append(cv, name, pow, req);
     if(canHover){
       card.addEventListener('mouseenter', () => showTip(card, s.name, s.power ? s.powerName + ' — ' + s.powerDesc : T('noPowerDesc')));
@@ -79,6 +79,7 @@ function buildShop(){
       if(suppressClick){ suppressClick = false; return; }
       AudioFX.init(); AudioFX.click();
       if(!unlocked){
+        if(s.id === 'alien'){ showToast(T('alienReq')); return; }
         if(save.total >= s.unlock){ save.unlocked.push(s.id); persist(); buildShop(); }
         else { showToast(T('reachUnlock').replace('{n}', s.unlock).replace('{s}', s.name)); }
         return;
@@ -161,6 +162,7 @@ function buildHelp(){
     `<p class="hint"><b>${T('mover')}</b> — ${T('moverDesc')}</p>` +
     `<p class="hint"><b>${T('spear')}</b> — ${T('spearDesc')}</p>` +
     `<p class="hint"><b>${T('hammer')}</b> — ${T('hammerDesc')}</p>` +
+    `<p class="hint"><b>${T('axe')}</b> — ${T('axeDesc')}</p>` +
     `<h3>${T('mapNodes')}</h3>` + Object.values(nodeNames()).map(v=>`<p class="hint">${v}</p>`).join('') +
     `<h3>${T('merchantH')}</h3>` +
     `<p class="hint"><b>${T('heal')}</b> — ${T('healDesc')}</p><p class="hint"><b>${T('coinOffer')}</b> — ${T('coinDesc')}</p><p class="hint"><b>${T('rerollOffer')}</b> — ${T('rerollDesc')}</p>` +
@@ -286,8 +288,8 @@ $('#playBtn').addEventListener('click', () => { AudioFX.init(); startGame(); });
   $('#continueBtn').addEventListener('click', () => {
     AudioFX.click();
     show('#victory', false);
-    run.path = 2;
-    map = genMap(2);
+    run.path = run.path + 1;
+    map = genMap(run.path);
     showMap();
   });
   $('#mapToggle').addEventListener('click', () => {

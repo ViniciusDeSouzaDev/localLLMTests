@@ -17,10 +17,18 @@ function render(){
   const th = THEMES[theme];
   const top = th.skyTop[0].map((c,i) => lerp(c, th.skyTop[1][i], nf));
   const bot = th.skyBot[0].map((c,i) => lerp(c, th.skyBot[1][i], nf));
-  const g = ctx.createLinearGradient(0,0,0,GROUND_Y);
-  g.addColorStop(0, `rgb(${top.map(Math.round)})`);
-  g.addColorStop(1, `rgb(${bot.map(Math.round)})`);
-  ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+  if(theme === 'singularity'){
+    const g = ctx.createRadialGradient(W/2, H*0.45, 0, W/2, H*0.45, Math.max(W,H)*0.75);
+    g.addColorStop(0, `rgb(${Math.round(lerp(255,140,nf))},${Math.round(lerp(248,130,nf))},${Math.round(lerp(235,160,nf))})`);
+    g.addColorStop(0.55, `rgb(${Math.round(lerp(90,20,nf))},${Math.round(lerp(80,16,nf))},${Math.round(lerp(110,30,nf))})`);
+    g.addColorStop(1, `rgb(${Math.round(lerp(10,4,nf))},${Math.round(lerp(8,2,nf))},${Math.round(lerp(16,8,nf))})`);
+    ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+  } else {
+    const g = ctx.createLinearGradient(0,0,0,GROUND_Y);
+    g.addColorStop(0, `rgb(${top.map(Math.round)})`);
+    g.addColorStop(1, `rgb(${bot.map(Math.round)})`);
+    ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+  }
 
   // dawn/dusk warm overlay
   if(warm > 0.05){
@@ -31,7 +39,7 @@ function render(){
   }
 
   // stars
-  if(nf > 0.15){
+  if(nf > 0.15 || theme === 'asteroid' || theme === 'nebula'){
     for(const s of stars){
       const a = clamp((nf-0.15)/0.5) * (0.5 + 0.5*Math.sin(t*2.5 + s.tw));
       ctx.fillStyle = `rgba(255,255,255,${a})`;
@@ -47,9 +55,17 @@ function render(){
   const sunA = clamp(1-nf*2, 0, 1), moonA = clamp(nf*2-1, 0, 1);
   if(sunA > 0){
     ctx.save(); ctx.globalAlpha = sunA;
-    ctx.shadowColor = 'rgba(255,220,90,0.9)'; ctx.shadowBlur = 40;
-    ctx.fillStyle = '#ffe27a';
-    ctx.beginPath(); ctx.arc(cx2, cy2, 34, 0, TAU); ctx.fill();
+    if(theme === 'eclipse'){
+      ctx.shadowColor = 'rgba(255,110,40,0.8)'; ctx.shadowBlur = 30;
+      ctx.fillStyle = 'rgba(255,110,40,0.55)';
+      ctx.beginPath(); ctx.arc(cx2, cy2, 30, 0, TAU); ctx.fill();
+      ctx.shadowBlur = 0; ctx.fillStyle = 'rgba(25,12,25,0.95)';
+      ctx.beginPath(); ctx.arc(cx2, cy2, 23, 0, TAU); ctx.fill();
+    } else {
+      ctx.shadowColor = 'rgba(255,220,90,0.9)'; ctx.shadowBlur = 40;
+      ctx.fillStyle = '#ffe27a';
+      ctx.beginPath(); ctx.arc(cx2, cy2, 34, 0, TAU); ctx.fill();
+    }
     ctx.restore();
   }
   if(moonA > 0){
@@ -159,6 +175,47 @@ function render(){
   } else if(theme === 'ashes'){
     ctx.fillStyle = 'rgba(180,170,165,0.5)';
     for(const a of fxParts) ctx.fillRect(a.x, a.y, a.s, a.s);
+  } else if(theme === 'eclipse'){
+    for(const e of fxParts){
+      const gl = 0.5 + 0.5*Math.sin(t*2 + e.p);
+      ctx.fillStyle = `rgba(255,150,60,${0.15+0.3*gl})`;
+      ctx.beginPath(); ctx.arc(e.x, e.y, e.s, 0, TAU); ctx.fill();
+    }
+  } else if(theme === 'asteroid'){
+    ctx.fillStyle = 'rgba(150,160,190,0.5)';
+    for(const s of fxParts) ctx.fillRect(s.x, s.y, s.s, s.s);
+  } else if(theme === 'nebula'){
+    for(const n of fxParts){
+      const gl = 0.5 + 0.5*Math.sin(t*2.5 + n.p);
+      ctx.fillStyle = `hsla(${n.hue},90%,75%,${0.25+0.55*gl})`;
+      ctx.beginPath(); ctx.arc(n.x, n.y, n.s, 0, TAU); ctx.fill();
+    }
+  } else if(theme === 'void'){
+    const vcx = W/2, vcy = H*0.45;
+    const vg = ctx.createRadialGradient(vcx, vcy, 0, vcx, vcy, 90);
+    vg.addColorStop(0, 'rgba(2,0,8,0.9)');
+    vg.addColorStop(0.7, 'rgba(60,30,110,0.35)');
+    vg.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = vg;
+    ctx.beginPath(); ctx.arc(vcx, vcy, 90, 0, TAU); ctx.fill();
+    for(const v of fxParts){
+      const px = vcx + Math.cos(v.ang)*v.rad, py = vcy + Math.sin(v.ang)*v.rad*0.8;
+      ctx.fillStyle = `rgba(170,120,255,${0.35+0.4*Math.sin(v.p+t*3)})`;
+      ctx.beginPath(); ctx.arc(px, py, v.s, 0, TAU); ctx.fill();
+    }
+  } else if(theme === 'singularity'){
+    const scx = W/2, scy = H*0.45;
+    ctx.strokeStyle = `rgba(220,210,255,${0.25+0.15*Math.sin(t*2)})`;
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.ellipse(scx, scy, 70+Math.sin(t*1.7)*8, 26+Math.sin(t*2.3)*5, Math.sin(t*0.9)*0.4, 0, TAU); ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 1.5;
+    for(const s of fxParts){
+      const r1 = s.rad, r2 = s.rad + 14;
+      ctx.beginPath();
+      ctx.moveTo(scx + Math.cos(s.ang)*r1, scy + Math.sin(s.ang)*r1*0.8);
+      ctx.lineTo(scx + Math.cos(s.ang)*r2, scy + Math.sin(s.ang)*r2*0.8);
+      ctx.stroke();
+    }
   }
 
   // trail
@@ -256,6 +313,10 @@ function drawPipe(p, nf){
     body = `rgb(${Math.round(150*f)},${Math.round(160*f)},${Math.round(175*f)})`;
     dark = `rgb(${Math.round(95*f)},${Math.round(105*f)},${Math.round(125*f)})`;
     light = `rgb(${Math.round(205*f)},${Math.round(215*f)},${Math.round(230*f)})`;
+  } else if(p.axe){
+    body = `rgb(${Math.round(70*f)},${Math.round(76*f)},${Math.round(90*f)})`;
+    dark = `rgb(${Math.round(40*f)},${Math.round(45*f)},${Math.round(58*f)})`;
+    light = `rgb(${Math.round(110*f)},${Math.round(118*f)},${Math.round(135*f)})`;
   } else {
     body = `rgb(${Math.round(80*f)},${Math.round(190*f)},${Math.round(90*f)})`;
     dark = `rgb(${Math.round(50*f)},${Math.round(140*f)},${Math.round(60*f)})`;
@@ -298,6 +359,13 @@ function drawPipe(p, nf){
       ctx.beginPath(); ctx.moveTo(sx, topH); ctx.lineTo(sx+7, topH+13); ctx.lineTo(sx+14, topH); ctx.closePath(); ctx.fill();
       ctx.beginPath(); ctx.moveTo(sx, botY); ctx.lineTo(sx+7, botY-13); ctx.lineTo(sx+14, botY); ctx.closePath(); ctx.fill();
     }
+  } else if(p.axe){
+    ctx.fillStyle = `rgb(${Math.round(200*f)},${Math.round(55*f)},${Math.round(55*f)})`;
+    ctx.fillRect(p.x, topH-12, 70, 12);
+    ctx.fillRect(p.x, botY, 70, 12);
+    ctx.fillStyle = `rgba(255,120,90,${0.4+0.3*Math.sin(t*6)})`;
+    ctx.fillRect(p.x, topH-12, 70, 2);
+    ctx.fillRect(p.x, botY+10, 70, 2);
   }
   if(p.ghostY != null){
     const gy = p.ghostY, gg = p.gap;
@@ -416,7 +484,8 @@ const BOSS_AURAS = {
   'STORMFEATHER':'bolt',
   'TIDEWRAITH':'bubble', 'GAPLORD IV':'bubble',
   'VOIDLORD':'ring', 'NULLKNIGHT':'ring', 'THE ENDLESS':'ring',
-  'OMEGA GAPLORD':'spark', 'GAPLORD':'spark'
+  'OMEGA GAPLORD':'spark', 'GAPLORD':'spark',
+  'ASTRAEL':'spark', 'NEBULAWN':'ring', 'THE ECLIPSE':'ring'
 };
 let bossParts = [];
 function bossAura(p, topH, botY){
@@ -585,6 +654,30 @@ function drawSilhouette(s, nf){
     ctx.lineTo(s.x + s.w, GROUND_Y - s.h*0.8);
     ctx.lineTo(s.x + s.w, GROUND_Y);
     ctx.closePath(); ctx.fill();
+  } else if(s.kind === 'ridge'){
+    ctx.fillStyle = `rgb(${Math.round(38*f)},${Math.round(28*f)},${Math.round(46*f)})`;
+    ctx.beginPath();
+    ctx.moveTo(s.x, GROUND_Y);
+    ctx.lineTo(s.x + s.w*0.3, GROUND_Y - s.h);
+    ctx.lineTo(s.x + s.w*0.55, GROUND_Y - s.h*0.6);
+    ctx.lineTo(s.x + s.w*0.8, GROUND_Y - s.h*0.85);
+    ctx.lineTo(s.x + s.w, GROUND_Y);
+    ctx.closePath(); ctx.fill();
+  } else if(s.kind === 'rock'){
+    ctx.fillStyle = `rgb(${Math.round(52*f)},${Math.round(58*f)},${Math.round(74*f)})`;
+    ctx.beginPath();
+    for(let i=0;i<6;i++){
+      const a = s.r + i/6*TAU, rr = s.w/2*(0.75 + 0.25*Math.sin(s.r*3 + i*2));
+      const px = s.x + s.w/2 + Math.cos(a)*rr, py = s.y + s.h/2 + Math.sin(a)*rr*0.8;
+      i ? ctx.lineTo(px,py) : ctx.moveTo(px,py);
+    }
+    ctx.closePath(); ctx.fill();
+  } else if(s.kind === 'blob'){
+    const bg = ctx.createRadialGradient(s.x+s.w/2, s.y+s.h/2, 0, s.x+s.w/2, s.y+s.h/2, s.w/2);
+    bg.addColorStop(0, `hsla(${s.hue},70%,55%,0.10)`);
+    bg.addColorStop(1, 'hsla(0,0%,0%,0)');
+    ctx.fillStyle = bg;
+    ctx.beginPath(); ctx.ellipse(s.x+s.w/2, s.y+s.h/2, s.w/2, s.h/2, 0, 0, TAU); ctx.fill();
   } else {
     ctx.fillStyle = `rgb(${Math.round(lerp(120,16,nf))},${Math.round(lerp(160,22,nf))},${Math.round(lerp(190,48,nf))})`;
     ctx.fillRect(s.x, GROUND_Y - s.h, s.w, s.h);
@@ -641,6 +734,84 @@ function drawGlint(c, x, y, r){
 function drawBirdBody(c, s, wing, time, shieldOn){
   const bodyC = s.rainbow ? `hsl(${(time*140)%360},85%,60%)` : s.body;
   const wingC = s.rainbow ? `hsl(${(time*140+40)%360},85%,45%)` : s.wing;
+
+  if(s.id === 'alien'){
+    // ---- UFO starship ----
+    // thruster flame behind
+    c.save();
+    const th = 0.5 + 0.5*Math.sin(time*14);
+    c.globalAlpha = 0.55;
+    c.fillStyle = s.trail;
+    c.beginPath(); c.ellipse(-23 - th*3, 0, 7 + th*3, 3.5, 0, 0, TAU); c.fill();
+    c.globalAlpha = 0.25;
+    c.beginPath(); c.ellipse(-31 - th*5, 0, 5, 2.5, 0, 0, TAU); c.fill();
+    c.restore();
+    // pulsing force rings
+    c.save();
+    c.strokeStyle = 'rgba(87,232,59,0.5)'; c.lineWidth = 1.5;
+    for(let i=0;i<2;i++){
+      c.globalAlpha = 0.25 + 0.2*Math.sin(time*5 + i);
+      c.beginPath(); c.arc(0, 0, 22 + i*3, 0, TAU); c.stroke();
+    }
+    c.restore();
+    // hull
+    c.fillStyle = '#9aa7c4';
+    c.beginPath(); c.ellipse(0, 2, 20, 8, 0, 0, TAU); c.fill();
+    c.fillStyle = '#5d6884';
+    c.beginPath(); c.ellipse(0, 5, 17, 5.5, 0, 0, TAU); c.fill();
+    c.fillStyle = 'rgba(255,255,255,0.35)';
+    c.beginPath(); c.ellipse(-4, -1, 13, 3.5, 0, 0, TAU); c.fill();
+    // rim lights
+    for(let i=0;i<6;i++){
+      const lx = -15 + i*6;
+      c.fillStyle = `rgba(157,255,122,${0.4 + 0.6*Math.abs(Math.sin(time*4 + i))})`;
+      c.beginPath(); c.arc(lx, 6.5, 1.8, 0, TAU); c.fill();
+    }
+    // bottom glow
+    c.save();
+    c.globalAlpha = 0.35 + 0.15*Math.sin(time*8);
+    c.fillStyle = s.trail;
+    c.beginPath(); c.ellipse(0, 9, 12, 3, 0, 0, TAU); c.fill();
+    c.restore();
+    // cockpit dome
+    c.fillStyle = 'rgba(170,225,255,0.35)';
+    c.beginPath(); c.arc(-2, -3, 10, Math.PI, 0); c.fill();
+    // bird pilot
+    c.save();
+    c.beginPath(); c.arc(-2, -3, 10, Math.PI, 0); c.closePath(); c.clip();
+    c.translate(-2, -5.5);
+    c.fillStyle = s.body;
+    c.beginPath(); c.ellipse(0, 0, 6, 5, 0, 0, TAU); c.fill();
+    c.fillStyle = s.belly;
+    c.beginPath(); c.ellipse(1, 2.2, 4, 2.8, 0, 0, TAU); c.fill();
+    c.save();
+    c.translate(-2.5, 0); c.rotate(-0.4 + wing*1.1);
+    c.fillStyle = wingC;
+    c.beginPath(); c.ellipse(0, -1.5, 3.5, 2.2, 0, 0, TAU); c.fill();
+    c.restore();
+    if(state === 'dead'){
+      c.fillStyle = '#fff';
+      c.beginPath(); c.arc(2.5, -2, 2.4, 0, TAU); c.fill();
+      c.strokeStyle = '#222'; c.lineWidth = 1.2; c.lineCap = 'round';
+      c.beginPath();
+      c.moveTo(1.2, -3.3); c.lineTo(3.8, -0.7);
+      c.moveTo(3.8, -3.3); c.lineTo(1.2, -0.7);
+      c.stroke();
+    } else {
+      c.fillStyle = '#fff';
+      c.beginPath(); c.arc(2.5, -2, 2.4, 0, TAU); c.fill();
+      c.fillStyle = '#222';
+      c.beginPath(); c.arc(3.2, -2, 1.1, 0, TAU); c.fill();
+    }
+    c.fillStyle = '#ff9d3b';
+    c.beginPath();
+    c.moveTo(4.5, -1); c.lineTo(8.5, 0); c.lineTo(4.5, 1);
+    c.closePath(); c.fill();
+    c.restore();
+    c.strokeStyle = 'rgba(255,255,255,0.8)'; c.lineWidth = 1.5;
+    c.beginPath(); c.arc(-2, -3, 10, Math.PI*1.15, Math.PI*1.7); c.stroke();
+    return;
+  }
 
   // ---- behind-body decor ----
   if(s.id === 'violet'){
@@ -806,7 +977,7 @@ function drawBirdBody(c, s, wing, time, shieldOn){
     c.beginPath(); c.moveTo(15, 8); c.lineTo(17, 15); c.lineTo(19, 8); c.closePath(); c.fill();
     c.beginPath(); c.moveTo(20, 8); c.lineTo(22, 14); c.lineTo(24, 8); c.closePath(); c.fill();
   }
-  if(hasLegend('headband') && s.id !== 'ninja'){
+  if(hasLegend('headband') && s.id !== 'ninja' && s.id !== 'alien'){
     c.fillStyle = '#ff4758';
     c.beginPath();
     c.moveTo(-13, -8);

@@ -3,6 +3,7 @@ function resetRun(){
   const baseHp = powers().maxHp;
   run = { hp:baseHp, maxHp:baseHp, gold:0, stage:0, pipesInStage:0, totalPipes:0, upgrades:[], relics:[], legends:[], vampUsed:0, bloodUsed:0, phaseCount:0, boss:null, path:1 };
   if(skinById(save.selected).id === 'demon') run.upgrades.push('vampire','vampire');
+  if(skinById(save.selected).id === 'alien') run.upgrades.push('midas','midas','midas');
   stageClearT = 0;
   pendingDraft = null;
 chestReward = null;
@@ -15,7 +16,7 @@ function hasRelic(id){ return mode==='rl' && run && run.relics.includes(id); }
 
 function mods(){
   const pw = powers();
-  const m = { grav:pw.grav, speed:pw.speed, mult:pw.mult, bonus:0, shield:pw.shield, feverEvery:30, maxHp:pw.maxHp, radius:pw.radius, magnet:pw.magnet, god:pw.god, roll:pw.roll };
+  const m = { grav:pw.grav, speed:pw.speed, mult:pw.mult, bonus:pw.bonus||0, shield:pw.shield, feverEvery:30, maxHp:pw.maxHp, radius:pw.radius, magnet:pw.magnet, god:pw.god, roll:pw.roll };
   if(mode === 'rl' && run){
     for(const u of run.upgrades){
       if(u==='feather') m.grav *= 0.9;
@@ -27,6 +28,7 @@ function mods(){
     }
     for(const r of run.relics){
       if(r==='prism') m.speed *= 0.85;
+      if(r==='star') m.maxHp += 1;
     }
     m.grav = Math.max(0.5, m.grav);
     m.speed = Math.max(0.6, m.speed);
@@ -193,7 +195,7 @@ function gainUpgrade(id){
 }
 
 function gainRelic(id){
-  const rel = RELICS.concat(RELICS2).find(x=>x.id===id);
+  const rel = RELICS.concat(RELICS2, RELICS3).find(x=>x.id===id);
   if(!rel || run.relics.includes(id)) return false;
   run.relics.push(id);
   showToast(rel.icon + ' ' + rel.name + ' — ' + rel.desc);
@@ -214,7 +216,8 @@ function pickCard(id){
 const PATHS = [
   null,
   { rows:16, widths:[2,2,3,2,3,2,3,2,3,2,3,2,3,2,2,1], bossRows:[3,7,11] },
-  { rows:14, widths:[2,2,3,2,3,2,3,2,3,2,3,2,2,1], bossRows:[3,7,11] }
+  { rows:14, widths:[2,2,3,2,3,2,3,2,3,2,3,2,2,1], bossRows:[3,7,11] },
+  { rows:16, widths:[2,2,3,2,3,2,3,2,3,2,3,2,3,2,2,1], bossRows:[3,7,11] }
 ];
 function pathCfg(){ return PATHS[run.path || 1]; }
 const BOSSES = [
@@ -241,7 +244,13 @@ const BOSSES2 = [
   [ { name:'THE WARDEN',   passes:12, relic:'void',    colors:[110,95,60, 70,60,40, 180,160,110], eye:'#ffe9a0', phases:[{pattern:'pulse', spd:3.8},{pattern:'labyrinth', amp:260, spd:2.6, bspd:1.7},{pattern:'mirror', rate:1.6}] },
     { name:'NULLKNIGHT',   passes:12, relic:'void',    colors:[70,70,85, 45,45,55, 130,130,150], eye:'#b0b0d0', phases:[{pattern:'hunt', rate:1.5, amp:100},{pattern:'labyrinth', amp:260, spd:2.8, bspd:1.9}] } ],
   [ { name:'VOIDLORD',     passes:17, relic:'prism',   colors:[60,30,90, 35,15,55, 130,70,190], eye:'#e0b0ff', phases:[{pattern:'sine', amp:160, spd:3.6},{pattern:'wind', g:1.2},{pattern:'labyrinth', amp:280, spd:3.0, bspd:2.0},{pattern:'chase', rate:1.8}] },
-    { name:'OMEGA GAPLORD',passes:19, relic:'prism',   colors:[200,190,160, 140,130,100, 250,240,210], eye:'#fff8d0', phases:[{pattern:'squeeze', spd:4.0},{pattern:'labyrinth', amp:280, spd:3.2, bspd:2.2},{pattern:'hunt', rate:1.8, amp:110},{pattern:'wind', g:0.8, fog:true}] } ],
+     { name:'OMEGA GAPLORD',passes:19, relic:'prism',   colors:[200,190,160, 140,130,100, 250,240,210], eye:'#fff8d0', phases:[{pattern:'squeeze', spd:4.0},{pattern:'labyrinth', amp:280, spd:3.2, bspd:2.2},{pattern:'hunt', rate:1.8, amp:110},{pattern:'wind', g:0.8, fog:true}] } ],
+ ];
+const BOSSES3 = [
+  [ { name:'LUNAR',       passes:12, relic:'corona',  colors:[170,175,195, 105,110,135, 225,228,245], eye:'#e8ecff', phases:[{pattern:'sine', amp:140, spd:2.8},{pattern:'pulse', spd:3.4}] } ],
+  [ { name:'ASTRAEL',     passes:13, relic:'star',    colors:[200,160,60, 130,95,35, 250,210,110], eye:'#ffe9a0', phases:[{pattern:'zigzag', amp:130, spd:3.4},{pattern:'hunt', rate:1.5, amp:100},{pattern:'mirror', rate:1.6}] } ],
+  [ { name:'NEBULAWN',    passes:14, relic:'comet',   colors:[140,60,160, 85,35,105, 200,120,230], eye:'#e0a0ff', phases:[{pattern:'drift', spd:90},{pattern:'labyrinth', amp:270, spd:2.8, bspd:1.9},{pattern:'blink', spd:1.2, tele:0.35}] } ],
+  [ { name:'THE ECLIPSE', passes:20, relic:'singularity', colors:[40,25,50, 20,10,30, 110,70,150], eye:'#ffb040', phases:[{pattern:'sine', amp:150, spd:3.2},{pattern:'mirror', rate:1.5},{pattern:'labyrinth', amp:280, spd:3.0, bspd:2.1},{pattern:'chase', rate:2.0, fog:true}] } ],
 ];
 const LABYRINTHS = [
   { name:'LABYRINTH', passes:7, colors:[70,90,70, 45,60,45, 140,170,140], eye:'#90ff90', phases:[{pattern:'labyrinth', amp:240, spd:2.6, bspd:1.7}] },
@@ -271,7 +280,7 @@ function hasLegend(id){ return !!(run && run.legends && run.legends.includes(id)
 
 function genMap(path){
   const cfg = PATHS[path || 1];
-  const pool = (path === 2 ? BOSSES2 : BOSSES);
+  const pool = (path === 2 ? BOSSES2 : (path === 3 ? BOSSES3 : BOSSES));
   const elitePool = [...ELITES].sort(() => Math.random() - 0.5);
   const labyPool = [...LABYRINTHS].sort(() => Math.random() - 0.5);
   let eI = 0, lI = 0;
@@ -284,7 +293,7 @@ function genMap(path){
       else if(cfg.bossRows.includes(r) && Math.random() < 0.5) type = 'boss';
       if(!type){
         const roll = Math.random();
-        if(cfg.widths[r] >= 2 && roll >= 0.85) type = (path === 2) ? 'labyrinth' : 'elite';
+        if(cfg.widths[r] >= 2 && roll >= 0.85) type = (path >= 2) ? 'labyrinth' : 'elite';
         else type = roll < 0.55 ? 'stage' : roll < 0.75 ? 'chest' : 'merchant';
       }
       row.push({ type, visited:false });
@@ -294,8 +303,8 @@ function genMap(path){
     if(r >= cfg.bossRows[0] && !rows.some(row2 => row2.some(n => n.type === 'merchant')))
       row[Math.floor(Math.random()*row.length)].type = 'merchant';
     for(const n of row){
-      if(n.type === 'boss') n.def = pool[Math.floor(r/4)][Math.floor(Math.random()*2)];
-      else if(n.type === 'final') n.def = pool[3][Math.floor(Math.random()*2)];
+      if(n.type === 'boss'){ const g = pool[Math.floor(r/4)]; n.def = g[Math.floor(Math.random()*g.length)]; }
+      else if(n.type === 'final'){ const g = pool[3]; n.def = g[Math.floor(Math.random()*g.length)]; }
       else if(n.type === 'elite') n.def = elitePool[eI++ % elitePool.length];
       else if(n.type === 'labyrinth') n.def = labyPool[lI++ % labyPool.length];
     }
@@ -527,15 +536,21 @@ function showVictory(){
   AudioFX.startMusic('victory');
   if(run.path === 2){
     save.rl.ascensions = (save.rl.ascensions || 0) + 1;
-    $('#victoryTitle').textContent = T('ascension');
+    $('#victoryTitle').textContent = T('punishment');
     $('#victoryStats').textContent = T('ascensionStats').replace('{n}', run.totalPipes).replace('{g}', run.gold).replace('{a}', save.rl.ascensions);
+  } else if(run.path === 3){
+    save.punishmentCleared = true;
+    save.rl.victories = (save.rl.victories || 0) + 1;
+    $('#victoryTitle').textContent = T('trueVictory');
+    $('#victoryStats').textContent = T('victoryStats').replace('{s}', run.stage).replace('{n}', run.totalPipes).replace('{g}', run.gold).replace('{v}', save.rl.victories);
   } else {
     save.rl.victories = (save.rl.victories || 0) + 1;
     $('#victoryTitle').textContent = T('victory');
     $('#victoryStats').textContent = T('victoryStats').replace('{s}', run.stage).replace('{n}', run.totalPipes).replace('{g}', run.gold).replace('{v}', save.rl.victories);
   }
   persist();
-  show('#continueBtn', run.path === 1);
+  show('#continueBtn', run.path < 3);
+  $('#continueBtn').textContent = T(run.path === 1 ? 'continueP2' : 'continueP3');
   show('#victory', true);
 }
 
@@ -558,8 +573,8 @@ function openChest(){
   show('#chest', true);
 }
 
-const PATH_THEMES = [null, ['forest','city','desert','snow','ocean'], ['inferno','storm','abyss','necropolis','ashes']];
-const THEME_TRACKS = { forest:'forest', city:'city', desert:'sunset', snow:'dream', ocean:'ocean', inferno:'inferno', storm:'storm', abyss:'abyss', necropolis:'necropolis', ashes:'ashes' };
+const PATH_THEMES = [null, ['forest','city','desert','snow','ocean'], ['inferno','storm','abyss','necropolis','ashes'], ['eclipse','asteroid','nebula','void','singularity']];
+const THEME_TRACKS = { forest:'forest', city:'city', desert:'sunset', snow:'dream', ocean:'ocean', inferno:'inferno', storm:'storm', abyss:'abyss', necropolis:'necropolis', ashes:'ashes', eclipse:'eclipse', asteroid:'asteroid', nebula:'nebula', void:'void', singularity:'singularity' };
 function startStage(){
   pipes = []; particles = []; popups = []; trail = [];
   bird.y = H*0.45; bird.vy = 0; bird.rot = 0;
@@ -713,13 +728,29 @@ const AudioFX = {
         mel:[62,0,63,0, 62,0,0,0, 61,0,62,0, 63,0,62,0],
         bas:[37,37,0,37, 36,36,0,36, 35,35,0,35, 37,37,0,37] },
      ashes:  { bpm:90,  melType:'square', melV:0.22, hat:4,
-        mel:[62,0,62,0, 61,0,62,0, 60,0,61,0, 62,0,60,0],
-        bas:[38,38,0,38, 37,37,0,37, 36,36,0,36, 38,38,0,38] },
+         mel:[62,0,62,0, 61,0,62,0, 60,0,61,0, 62,0,60,0],
+         bas:[38,38,0,38, 37,37,0,37, 36,36,0,36, 38,38,0,38] },
+     eclipse:{ bpm:80,  melType:'square', melV:0.18, hat:8,
+         mel:[60,0,0,0, 60,0,61,0, 60,0,0,0, 59,0,60,0],
+         bas:[36,36,0,36, 36,36,0,36, 35,35,0,35, 34,34,0,34] },
+    asteroid:{ bpm:84,  melType:'square', melV:0.18, hat:8,
+         mel:[62,0,0,0, 62,0,65,0, 63,0,0,0, 62,0,63,0],
+         bas:[37,37,0,37, 34,34,0,34, 36,36,0,36, 35,35,0,35] },
+      nebula:{ bpm:76,  melType:'square', melV:0.16, hat:16,
+         mel:[64,0,0,0, 67,0,0,0, 65,0,0,0, 64,0,67,0],
+         bas:[38,38,0,38, 41,41,0,41, 39,39,0,39, 38,38,0,38] },
+        void:{ bpm:72,  melType:'square', melV:0.16, hat:16,
+         mel:[59,0,0,0, 0,0,59,0, 58,0,0,0, 0,0,59,0],
+         bas:[34,34,0,34, 33,33,0,33, 34,34,0,34, 32,32,0,32] },
+  singularity:{ bpm:68,  melType:'square', melV:0.15, hat:16,
+         mel:[60,0,0,0, 59,0,0,0, 58,0,0,0, 57,0,0,0],
+         bas:[34,34,0,34, 33,33,0,33, 32,32,0,32, 31,31,0,31] },
     },
    POOL:['day','night','chill','hype','mystery','sunset','forest','city','storm','dream','ocean','candy','space','jungle','meadow'],
     FEVER_POOL:['hype','inferno','rush','candy','jungle'],
     PATH1_POOL:['forest','city','sunset','dream','ocean'],
     PATH2_POOL:['inferno','storm','abyss','necropolis','ashes'],
+     PATH3_POOL:['eclipse','asteroid','nebula','void','singularity'],
    randomTrack(){ return this.POOL[Math.floor(Math.random()*this.POOL.length)]; },
    randomFever(){ return this.FEVER_POOL[Math.floor(Math.random()*this.FEVER_POOL.length)]; },
   startMusic(mode){

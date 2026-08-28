@@ -3,7 +3,7 @@ function T(k){ return (UI_STR[lang] && UI_STR[lang][k]) || UI_STR.en[k] || k; }
 const DATA_ORIG = { skins:{}, cards:{}, relics:{} };
 SKINS.forEach(s => DATA_ORIG.skins[s.id] = { n:s.name, p:s.powerName||'', d:s.powerDesc||'' });
 CARDS.forEach(c => DATA_ORIG.cards[c.id] = { n:c.name, d:c.desc });
-[...RELICS, ...RELICS2].forEach(r => DATA_ORIG.relics[r.id] = { n:r.name, d:r.desc });
+[...RELICS, ...RELICS2, ...RELICS3].forEach(r => DATA_ORIG.relics[r.id] = { n:r.name, d:r.desc });
 const DATA_PT = {
   skins: {
     classic:{n:'Clássico',p:'',d:'Sem poder'}, crimson:{n:'Carmesim',p:'Penas',d:'Gravidade mais leve'},
@@ -15,6 +15,7 @@ const DATA_PT = {
     cat:{n:'Gato',p:'Sete Vidas',d:'Começa com 7 PV'},
     rainbow:{n:'Arcíris',p:'Prisma',d:'5 PV + escudo + canos lentos + x2 pts'},
     god:{n:'Deus',p:'Deus',d:'Nunca morre + canos mais rápidos + Ímã x5'},
+    alien:{n:'Alien',p:'Nova',d:'6 PV + escudo 2 + ímã 2 + começa com Pontuador x3'},
   },
   cards: {
     feather:{n:'Penas',d:'Gravidade -10%'}, midas:{n:'Pontuador',d:'+1 ponto por cano'},
@@ -29,6 +30,8 @@ const DATA_PT = {
     coin:{n:'Ímã de Moedas',d:'+1 ouro por cano'}, prism:{n:'Fragmento de Prisma',d:'Canos 15% mais lentos'},
     anchor:{n:'Âncora',d:'Ímã base 2'}, phoenix:{n:'Fênix',d:'+1 renascimento'},
     void:{n:'Núcleo do Vazio',d:'Febre a cada 15 canos'}, echo:{n:'Eco',d:'Pertinho +3 ouro'},
+    corona:{n:'Coroa Solar',d:'+2 ouro por cano'}, star:{n:'Fragmento Estelar',d:'+1 PV máx.'},
+    comet:{n:'Cometa',d:'30% de chance de anular o dano de canos'}, singularity:{n:'Singularidade',d:'Febre a cada 12 canos'},
   },
 };
 const NODE_NAMES_PT = { stage:'Etapa — canos e ouro', boss:'Chefe — muito ouro ou LEGENDÁRIO', merchant:'Comerciante — cura, escudo, PV, chip, moedas, re sortear', chest:'Baú — recompensa misteriosa', final:'CHEFE FINAL', elite:'Elite — mini-chefe, +20g + relíquia', labyrinth:'Labirinto — paredes móveis, +25g + relíquia' };
@@ -49,7 +52,7 @@ function applyLang(){
   const d = lang === 'pt' ? DATA_PT : DATA_ORIG;
   SKINS.forEach(s => { const t = d.skins[s.id]; if(t){ s.name=t.n; s.powerName=t.p; s.powerDesc=t.d; } });
   CARDS.forEach(c => { const t = d.cards[c.id]; if(t){ c.name=t.n; c.desc=t.d; } });
-  [...RELICS, ...RELICS2].forEach(r => { const t = d.relics[r.id]; if(t){ r.name=t.n; r.desc=t.d; } });
+  [...RELICS, ...RELICS2, ...RELICS3].forEach(r => { const t = d.relics[r.id]; if(t){ r.name=t.n; r.desc=t.d; } });
   const set = (id, v) => { const el = $(id); if(el) el.textContent = v; };
   set('#playBtn', T('play'));
    set('#lblBest', T('best')); set('#lblTotal', T('total'));
