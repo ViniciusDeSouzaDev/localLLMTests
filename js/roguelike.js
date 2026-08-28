@@ -558,12 +558,17 @@ function openChest(){
   show('#chest', true);
 }
 
+const PATH_THEMES = [null, ['forest','city','desert','snow','ocean'], ['inferno','storm','abyss','necropolis','ashes']];
+const THEME_TRACKS = { forest:'forest', city:'city', desert:'sunset', snow:'dream', ocean:'ocean', inferno:'inferno', storm:'storm', abyss:'abyss', necropolis:'necropolis', ashes:'ashes' };
 function startStage(){
   pipes = []; particles = []; popups = []; trail = [];
   bird.y = H*0.45; bird.vy = 0; bird.rot = 0;
   combo = 0;
-  setTheme(randomTheme());
+  const list = PATH_THEMES[run.path] || PATH_THEMES[1];
+  setTheme(list[Math.max(0, run.stage-1) % list.length]);
   popups.push({ x:BIRD_X, y:bird.y-80, txt:theme.toUpperCase()+'!', life:1.5, max:1.5 });
+  AudioFX.startMusic(THEME_TRACKS[theme]);
+  nextMusicSwitch = t + rand(25,40);
   run.pipesInStage = 0;
   run.vampUsed = 0;
   run.bloodUsed = 0;
@@ -701,9 +706,20 @@ const AudioFX = {
       victory:{ bpm:150, melType:'square', melV:0.3, hat:2,
          mel:[76,0,79,0, 81,0,83,0, 84,0,83,81, 79,81,83,84],
          bas:[48,0,48,0, 50,0,50,0, 52,0,52,0, 55,0,55,0] },
-   },
-  POOL:['day','night','chill','hype','mystery','sunset','forest','city','storm','dream','ocean','candy','space','jungle','meadow'],
-   FEVER_POOL:['hype','inferno','rush','candy','jungle'],
+   abyss:  { bpm:84,  melType:'square', melV:0.2, hat:8,
+        mel:[60,0,0,0, 61,0,0,0, 59,0,0,0, 60,0,0,0],
+        bas:[36,36,0,36, 35,35,0,35, 34,34,0,34, 36,36,0,36] },
+     necropolis:{ bpm:88,  melType:'square', melV:0.2, hat:8,
+        mel:[62,0,63,0, 62,0,0,0, 61,0,62,0, 63,0,62,0],
+        bas:[37,37,0,37, 36,36,0,36, 35,35,0,35, 37,37,0,37] },
+     ashes:  { bpm:90,  melType:'square', melV:0.22, hat:4,
+        mel:[62,0,62,0, 61,0,62,0, 60,0,61,0, 62,0,60,0],
+        bas:[38,38,0,38, 37,37,0,37, 36,36,0,36, 38,38,0,38] },
+    },
+   POOL:['day','night','chill','hype','mystery','sunset','forest','city','storm','dream','ocean','candy','space','jungle','meadow'],
+    FEVER_POOL:['hype','inferno','rush','candy','jungle'],
+    PATH1_POOL:['forest','city','sunset','dream','ocean'],
+    PATH2_POOL:['inferno','storm','abyss','necropolis','ashes'],
    randomTrack(){ return this.POOL[Math.floor(Math.random()*this.POOL.length)]; },
    randomFever(){ return this.FEVER_POOL[Math.floor(Math.random()*this.FEVER_POOL.length)]; },
   startMusic(mode){

@@ -30,6 +30,11 @@ const THEMES = {
   desert: { skyTop:[[255,185,115],[45,22,55]],  skyBot:[[255,228,165],[72,46,74]],   ground:[[232,202,132],[202,162,92]] },
   snow:   { skyTop:[[172,202,232],[16,22,42]],  skyBot:[[232,242,255],[42,52,82]],   ground:[[236,242,252],[202,216,236]] },
   ocean:  { skyTop:[[62,162,222],[10,22,52]],   skyBot:[[152,222,242],[32,52,92]],   ground:[[232,216,162],[192,172,122]] },
+  inferno:{ skyTop:[[120,40,20],[22,8,10]],     skyBot:[[255,120,60],[64,22,16]],   ground:[[72,42,36],[46,26,20]] },
+  storm:  { skyTop:[[70,80,100],[14,17,28]],    skyBot:[[140,150,170],[38,46,64]],   ground:[[70,80,72],[42,52,46]] },
+  abyss:  { skyTop:[[10,40,55],[4,14,22]],      skyBot:[[22,72,92],[10,30,44]],     ground:[[32,52,62],[20,36,46]] },
+  necropolis:{ skyTop:[[52,72,56],[12,20,16]],  skyBot:[[112,142,106],[30,44,34]],  ground:[[56,66,52],[36,46,36]] },
+  ashes:  { skyTop:[[46,40,42],[14,12,14]],     skyBot:[[112,86,70],[42,30,28]],    ground:[[72,66,62],[46,42,38]] },
 };
 const THEME_LIST = Object.keys(THEMES);
 let theme = 'city';
@@ -69,6 +74,39 @@ function setTheme(name){
     for(let i=0;i<40;i++) fxParts.push({ x:Math.random()*W, y:Math.random()*H, s:rand(1.5,3.5), spd:rand(25,55), drift:rand(-15,15) });
   } else if(name === 'ocean'){
     for(let i=0;i<5;i++) silhouettes.push({x:Math.random()*W*2, w:rand(60,140), h:rand(30,70), kind:'island'});
+  } else if(name === 'inferno'){
+    while(x < W*2){
+      const w = rand(50,130);
+      silhouettes.push({x, w, h:rand(90,280), kind:'spike'});
+      x += w + rand(10,40);
+    }
+    for(let i=0;i<26;i++) fxParts.push({ x:Math.random()*W, y:Math.random()*GROUND_Y, s:rand(1.5,3), spd:rand(20,50), p:rand(0,TAU) });
+  } else if(name === 'storm'){
+    while(x < W*2){
+      silhouettes.push({x, w:rand(30,70), h:rand(120,300), kind:'bare'});
+      x += rand(60,140);
+    }
+    for(let i=0;i<50;i++) fxParts.push({ x:Math.random()*W, y:Math.random()*GROUND_Y, s:rand(8,16), spd:rand(500,800) });
+  } else if(name === 'abyss'){
+    while(x < W*2){
+      silhouettes.push({x, w:rand(40,110), h:rand(80,220), kind:'wreck'});
+      x += rand(80,200);
+    }
+    for(let i=0;i<24;i++) fxParts.push({ x:Math.random()*W, y:Math.random()*GROUND_Y, s:rand(1.5,3), spd:rand(12,30), p:rand(0,TAU) });
+  } else if(name === 'necropolis'){
+    while(x < W*2){
+      silhouettes.push({x, w:rand(16,30), h:rand(50,110), kind:'tomb'});
+      x += rand(50,130);
+    }
+    for(let i=0;i<5;i++) silhouettes.push({x:Math.random()*W*2, w:rand(30,60), h:rand(120,240), kind:'deadtree'});
+    for(let i=0;i<16;i++) fxParts.push({ x:Math.random()*W, y:Math.random()*GROUND_Y, s:rand(2,4), spd:rand(8,20), p:rand(0,TAU) });
+  } else if(name === 'ashes'){
+    while(x < W*2){
+      const w = rand(50,110);
+      silhouettes.push({x, w, h:rand(140,340), kind:'ruin'});
+      x += w + rand(30,90);
+    }
+    for(let i=0;i<34;i++) fxParts.push({ x:Math.random()*W, y:Math.random()*GROUND_Y, s:rand(1,2.5), spd:rand(15,35), drift:rand(-12,12) });
   }
   silW = Math.max(W*2, ...silhouettes.map(s => s.x + s.w));
 }
@@ -240,6 +278,32 @@ function update(dt){
     for(const d of fxParts){
       d.x -= (40 + 20*Math.sin(t*3 + d.p))*dt;
       if(d.x < -5){ d.x = W+5; d.y = Math.random()*GROUND_Y*0.8; }
+    }
+  } else if(theme === 'inferno'){
+    for(const e of fxParts){
+      e.y -= e.spd*dt; e.x += Math.sin(t*2 + e.p)*20*dt;
+      if(e.y < 0){ e.y = GROUND_Y; e.x = Math.random()*W; }
+    }
+  } else if(theme === 'storm'){
+    for(const r of fxParts){
+      r.y += r.spd*dt; r.x -= 120*dt;
+      if(r.y > GROUND_Y){ r.y = -10; r.x = Math.random()*(W+80); }
+      if(r.x < -10) r.x = W+10;
+    }
+  } else if(theme === 'abyss'){
+    for(const b of fxParts){
+      b.y -= b.spd*dt; b.x += Math.sin(t + b.p)*10*dt;
+      if(b.y < 0){ b.y = GROUND_Y; b.x = Math.random()*W; }
+    }
+  } else if(theme === 'necropolis'){
+    for(const g of fxParts){
+      g.y -= g.spd*dt*0.4; g.x += Math.sin(t*0.7 + g.p)*14*dt;
+      if(g.y < 0){ g.y = GROUND_Y; g.x = Math.random()*W; }
+    }
+  } else if(theme === 'ashes'){
+    for(const a of fxParts){
+      a.y += a.spd*dt; a.x += a.drift*dt;
+      if(a.y > GROUND_Y){ a.y = -5; a.x = Math.random()*W; }
     }
   }
 
@@ -636,7 +700,8 @@ function update(dt){
 
   // music varies during the run (faster switches during fever, from the fever pool)
   if((state==='ready'||state==='play') && t >= nextMusicSwitch){
-    const pool = feverT > 0 ? AudioFX.FEVER_POOL : AudioFX.POOL;
+    const pool = feverT > 0 ? AudioFX.FEVER_POOL
+      : (mode==='rl' && run ? (run.path === 2 ? AudioFX.PATH2_POOL : AudioFX.PATH1_POOL) : AudioFX.POOL);
     nextMusicSwitch = t + (feverT > 0 ? rand(6,10) : rand(25,40));
     let next = pool[Math.floor(Math.random()*pool.length)];
     while(next === AudioFX.mode) next = pool[Math.floor(Math.random()*pool.length)];
