@@ -34,7 +34,7 @@ const DATA_PT = {
     comet:{n:'Cometa',d:'30% de chance de anular o dano de canos'}, singularity:{n:'Singularidade',d:'Febre a cada 12 canos'},
   },
 };
-const NODE_NAMES_PT = { stage:'Etapa — canos e ouro', boss:'Chefe — muito ouro ou LEGENDÁRIO', merchant:'Comerciante — cura, escudo, PV, chip, moedas, re sortear', chest:'Baú — recompensa misteriosa', final:'CHEFE FINAL', elite:'Elite — mini-chefe, +20g + relíquia', labyrinth:'Labirinto — paredes móveis, +25g + relíquia' };
+const NODE_NAMES_PT = { stage:'Etapa — canos e ouro', boss:'Chefe — muito ouro ou LEGENDÁRIO', merchant:'Comerciante — cura, escudo, PV, chip, moedas, re sortear', chest:'Baú — recompensa misteriosa', final:'CHEFE FINAL', elite:'Elite — mini-chefe, +20g + relíquia', labyrinth:'Labirinto — paredes móveis, +25g + relíquia', serpent:'Serpente — passagem de machado em zigue-zague, LEGENDÁRIO garantido' };
 function nodeNames(){ return lang === 'pt' ? NODE_NAMES_PT : NODE_NAMES; }
 function checkI18n(){
   const diff = (en, pt, label) => {

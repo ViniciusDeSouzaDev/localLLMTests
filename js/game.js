@@ -283,6 +283,40 @@ function pipeGap(){
   return Math.max(115, 160 - score*1.5);
 }
 
+function genSerpentPath(n, nearY){
+  const minY = 100, maxY = GROUND_Y - 100;
+  const cy = v => Math.max(minY, Math.min(maxY, v));
+  const pts = [];
+  let y = nearY != null
+    ? cy(Math.max(minY+60, Math.min(maxY-60, nearY + (Math.random()*2-1)*80)))
+    : minY + 60 + Math.random()*(maxY - minY - 120);
+  pts.push(y);
+  let dir = Math.random() < 0.5 ? 1 : -1;
+  while(pts.length < n){
+    const rem = n - pts.length;
+    if(rem === 1){
+      pts.push(cy(y + dir*(80 + Math.random()*40)));
+      break;
+    }
+    if(Math.random() < 0.25){
+      for(let j=0; j<2 && pts.length<n; j++)
+        pts.push(cy(pts[pts.length-1] + dir*(50 + Math.random()*30)));
+      y = pts[pts.length-1];
+    } else if(Math.random() < 0.6){
+      const k = Math.min(rem, Math.random() < 0.5 ? 2 : 3);
+      const yB = cy(y + dir*(70 + Math.random()*40));
+      for(let j=1; j<=k; j++)
+        pts.push(cy(y + (yB - y)*(0.5 - 0.5*Math.cos(j*Math.PI/k))));
+      y = pts[pts.length-1];
+    } else {
+      pts.push(cy(y + dir*(80 + Math.random()*40)));
+      y = pts[pts.length-1];
+    }
+    dir = -dir;
+  }
+  return pts;
+}
+
 function update(dt){
   t += dt;
   const nf = nightFactor();
@@ -384,7 +418,7 @@ function update(dt){
       bird.wing = Math.sin(t*8)*0.5+0.5;
     } else {
       let windG = 1;
-      if(run && run.boss){
+      if(run && run.boss && run.boss.def.phases && run.boss.def.phases.length){
         const wphs = run.boss.def.phases;
         const widx = Math.min(wphs.length-1, Math.floor(run.boss.passes * wphs.length / run.boss.max));
         if(wphs[widx].pattern === 'wind') windG = wphs[widx].g || 1.2;
@@ -409,6 +443,17 @@ function update(dt){
         bird.y = H*0.45; bird.vy = 0; bird.rot = 0;
         invuln = 2.5; flash = 0.5;
         pipes = pipes.filter(q => q.x < BIRD_X-260 || q.x > BIRD_X+260);
+        if(run && run.boss && run.boss.serpent){
+          const rem = run.boss.max - run.boss.passes;
+          if(rem > 0){
+            pipes = pipes.filter(q => !q.serpent);
+            run.boss.path = genSerpentPath(rem, H*0.45);
+            const bg = pipeGap() + 30;
+            for(let i=0;i<rem;i++){
+              pipes.push({ x:BIRD_X+300 + i*70, gapY:run.boss.path[i], baseY:run.boss.path[i], gap:bg, baseGap:bg, passed:false, boss:true, axe:true, serpent:true });
+            }
+          }
+        }
         popups.push({ x:BIRD_X, y:bird.y-34, txt:T('again'), life:0.9, max:0.9 });
         AudioFX.unlock();
       }
@@ -426,9 +471,16 @@ function update(dt){
     const last = pipes[pipes.length-1];
     if(mode==='rl' && run.boss){
       if(!pipes.some(p => p.boss)){
-        const bg = pipeGap();
-        const isAxe = run.path === 3 && run.boss.final && run.stage >= 2 && Math.random() < 0.15;
-        pipes.push({ x:W+40, gapY:345, baseY:345, gap:bg, baseGap:bg, passed:false, boss:true, spear:run.boss.final, axe:isAxe });
+        if(run.boss.serpent){
+          const bg = pipeGap() + 30;
+          run.boss.path.slice(run.boss.passes).forEach((wp, i) => {
+            pipes.push({ x:W+40 + i*70, gapY:wp, baseY:wp, gap:bg, baseGap:bg, passed:false, boss:true, axe:true, serpent:true });
+          });
+        } else {
+          const bg = pipeGap();
+          const isAxe = run.path === 3 && run.boss.final && run.stage >= 2 && Math.random() < 0.15;
+          pipes.push({ x:W+40, gapY:345, baseY:345, gap:bg, baseGap:bg, passed:false, boss:true, spear:run.boss.final, axe:isAxe });
+        }
       }
     } else if(stageClearT <= 0 && (!last || last.x < W - (mode==='rl' && run.path === 2 ? 193 : 240))){
       if(mode==='rl' && run.path === 3 && run.stage >= 2 && Math.random() < 0.15){
@@ -458,7 +510,7 @@ function update(dt){
       if(p.gap > p.baseGap*0.5) p.slammed = false;
     }
     labyFloorY = GROUND_Y; labyCeilY = -100;
-    if(run && run.boss){
+    if(run && run.boss && run.boss.def.phases && run.boss.def.phases.length){
       const phs = run.boss.def.phases;
       const pidx = Math.min(phs.length-1, Math.floor(run.boss.passes * phs.length / run.boss.max));
       const pph = phs[pidx];
@@ -471,7 +523,7 @@ function update(dt){
         labyCeilY = a*s;
       } else run.boss.labyOn = false;
     }
-    for(const p of pipes) if(p.boss && run.boss){
+    for(const p of pipes) if(p.boss && run.boss && run.boss.def.phases && run.boss.def.phases.length){
       const b = run.boss, ph = b.def.phases;
       const idx = Math.min(ph.length-1, Math.floor(b.passes * ph.length / b.max));
       if(idx !== b.phaseIdx){
@@ -541,7 +593,7 @@ function update(dt){
     }
     const mag = (mode==='rl' && run ? run.upgrades.filter(u=>u==='magnet').length : 0) + pw.magnet + (hasRelic('anchor') ? 2 : 0);
     if(mag) for(const p of pipes){
-      if(p.boss) continue;
+      if(p.boss || p.serpent) continue;
       const rate = Math.min(0.3*mag, 0.9);
       if(p.move) p.base += (bird.y - p.base)*rate*dt;
       else p.gapY += (bird.y - p.gapY)*rate*dt;
@@ -586,9 +638,10 @@ function update(dt){
              }
            }
            if(run.boss.passes >= run.boss.max){
-                const isFinal = run.boss.final;
-                const isElite = run.boss.elite;
-                const isLaby = run.boss.labyrinth;
+       const isFinal = run.boss.final;
+                 const isElite = run.boss.elite;
+                 const isLaby = run.boss.labyrinth;
+                 const isSerpent = run.boss.serpent;
                 run.boss = null;
                 flash = isFinal ? 1 : 0.5;
                 AudioFX.unlock();
@@ -605,9 +658,24 @@ function update(dt){
                     });
                   }
                 }
-               if(isFinal){
-                  showVictory();
-                } else if(isElite || isLaby){
+              if(isFinal){
+                   showVictory();
+                 } else if(isSerpent){
+                   const pool = LEGENDS.filter(l => !run.legends.includes(l.id));
+                   if(pool.length){
+                     const l = pool[Math.floor(Math.random()*pool.length)];
+                     run.legends.push(l.id);
+                     showReveal(l.icon, legendInfo(l.id).name, legendInfo(l.id).desc, true);
+                     AudioFX.legendary();
+                   } else {
+                     run.gold += 50;
+                     showReveal('🪙', '+50 GOLD', '', false);
+                     AudioFX.reveal();
+                   }
+                   stageClearT = 1.5; pipes = [];
+                   popups.push({ x:BIRD_X, y:bird.y-50, txt:def.name + ' DEFEATED!', life:1.5, max:1.5 });
+                   refreshRlHud();
+                 } else if(isElite || isLaby){
                   const gold = isLaby ? 25 : 20;
                   run.gold += gold;
                   const pool = isLaby ? (run.path === 3 ? RELICS3 : RELICS2) : relicPool();

@@ -84,6 +84,7 @@
   .mapNode.t-final { border-color:rgba(224,176,255,.65); }
   .mapNode.t-elite { border-color:rgba(64,255,144,.55); }
   .mapNode.t-labyrinth { border-color:rgba(144,176,255,.55); }
+  .mapNode.t-serpent { border-color:rgba(176,128,255,.6); }
   .mapNode.avail {
     border-color:#ffd93b; cursor:pointer;
     animation:mapNodeIn .45s cubic-bezier(.2,1.6,.4,1) backwards, mapPulse 1.6s ease-in-out infinite;

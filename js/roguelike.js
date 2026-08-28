@@ -257,8 +257,13 @@ const LABYRINTHS = [
   { name:'CRAWL',     passes:10, colors:[60,80,50, 40,55,35, 120,150,100], eye:'#a0d080', phases:[{pattern:'labyrinth', amp:200, spd:2.2, bspd:1.4}] },
   { name:'GALE',      passes:6, colors:[80,95,110, 50,60,75, 150,175,200], eye:'#a0d0ff', phases:[{pattern:'labyrinth', amp:260, spd:3.2, bspd:2.2}] },
 ];
-const NODE_ICONS = { stage:'🎯', boss:'💀', merchant:'🪙', chest:'📦', final:'👑', elite:'⚔️', labyrinth:'🌀' };
-const NODE_NAMES = { stage:'Stage — pipes & gold', boss:'Boss — big gold or LEGENDARY', merchant:'Merchant — heal, shield, HP, chip, coins, reroll', chest:'Chest — mystery reward', final:'FINAL BOSS', elite:'Elite — mini-boss, +20g + relic', labyrinth:'Labyrinth — shifting walls, +25g + relic' };
+const SERPENTS = [
+  { name:'SERPENT', passes:28, colors:[60,40,80, 40,25,55, 130,90,170], eye:'#b080ff' },
+  { name:'VIPER',   passes:36, colors:[40,70,60, 25,45,40, 100,160,140], eye:'#70ff90' },
+  { name:'MEDUSA',  passes:44, colors:[80,60,30, 55,40,20, 170,140,80], eye:'#ffd060' },
+];
+const NODE_ICONS = { stage:'🎯', boss:'💀', merchant:'🪙', chest:'📦', final:'👑', elite:'⚔️', labyrinth:'🌀', serpent:'🐍' };
+const NODE_NAMES = { stage:'Stage — pipes & gold', boss:'Boss — big gold or LEGENDARY', merchant:'Merchant — heal, shield, HP, chip, coins, reroll', chest:'Chest — mystery reward', final:'FINAL BOSS', elite:'Elite — mini-boss, +20g + relic', labyrinth:'Labyrinth — shifting walls, +25g + relic', serpent:'Serpent — zigzag axe passage, guaranteed LEGENDARY' };
 const LEGENDS = [
   { id:'bloodpact',  icon:'🩸', name:'Blood Pact',     desc:'Near-miss: +2 HP, -5 gold (once per stage)' },
   { id:'phaseshift', icon:'🌀', name:'Phase Shift',    desc:'3s invulnerability every 20 pipes' },
@@ -282,18 +287,22 @@ function genMap(path){
   const cfg = PATHS[path || 1];
   const pool = (path === 2 ? BOSSES2 : (path === 3 ? BOSSES3 : BOSSES));
   const elitePool = [...ELITES].sort(() => Math.random() - 0.5);
-  const labyPool = [...LABYRINTHS].sort(() => Math.random() - 0.5);
-  let eI = 0, lI = 0;
+   const labyPool = [...LABYRINTHS].sort(() => Math.random() - 0.5);
+    const serpentPool = [...SERPENTS].sort(() => Math.random() - 0.5);
+    let eI = 0, lI = 0, sI = 0;
   const rows = [];
   for(let r=0;r<cfg.rows;r++){
     const row = [];
     for(let i=0;i<cfg.widths[r];i++){
       let type;
-      if(r === cfg.rows-1) type = 'final';
-      else if(cfg.bossRows.includes(r) && Math.random() < 0.5) type = 'boss';
+    if(r === cfg.rows-1) type = 'final';
+    else if(cfg.bossRows.includes(r) && Math.random() < 0.5) type = 'boss';
       if(!type){
         const roll = Math.random();
-        if(cfg.widths[r] >= 2 && roll >= 0.85) type = (path >= 2) ? 'labyrinth' : 'elite';
+        if(cfg.widths[r] >= 2 && roll >= 0.85){
+          if(path === 1 || r <= cfg.bossRows[0]) type = 'elite';
+          else type = Math.random() < 0.5 ? 'labyrinth' : 'serpent';
+        }
         else type = roll < 0.55 ? 'stage' : roll < 0.75 ? 'chest' : 'merchant';
       }
       row.push({ type, visited:false });
@@ -307,6 +316,7 @@ function genMap(path){
       else if(n.type === 'final'){ const g = pool[3]; n.def = g[Math.floor(Math.random()*g.length)]; }
       else if(n.type === 'elite') n.def = elitePool[eI++ % elitePool.length];
       else if(n.type === 'labyrinth') n.def = labyPool[lI++ % labyPool.length];
+      else if(n.type === 'serpent') n.def = serpentPool[sI++ % serpentPool.length];
     }
     rows.push(row);
   }
@@ -498,7 +508,8 @@ function clickNode(r, i){
   if(type === 'stage') startStage();
   else if(type === 'boss'){ const d = map.rows[r][i].def; run.boss = { passes:0, max:d.passes, final:false, phaseIdx:0, def:d }; startStage(); }
   else if(type === 'elite'){ let d = map.rows[r][i].def; if(Math.random() < 0.5) d = { ...d, phases:[...d.phases, Math.random() < 0.5 ? {pattern:'chase', rate:1.0} : {pattern:'squeeze', spd:2.6}] }; run.boss = { passes:0, max:d.passes, final:false, elite:true, phaseIdx:0, def:d }; startStage(); }
-  else if(type === 'labyrinth'){ const d = map.rows[r][i].def; run.boss = { passes:0, max:d.passes, final:false, labyrinth:true, phaseIdx:0, def:d }; startStage(); }
+   else if(type === 'labyrinth'){ const d = map.rows[r][i].def; run.boss = { passes:0, max:d.passes, final:false, labyrinth:true, phaseIdx:0, def:d }; startStage(); }
+    else if(type === 'serpent'){ const d = map.rows[r][i].def; const n = d.passes + Math.floor(Math.random()*17); run.boss = { passes:0, max:n, final:false, serpent:true, phaseIdx:0, def:d, path:genSerpentPath(n) }; startStage(); }
   else if(type === 'final'){ const d = map.rows[r][i].def; run.boss = { passes:0, max:d.passes, final:true, phaseIdx:0, def:d }; startStage(); }
   else if(type === 'merchant') openMerchant();
   else openChest();

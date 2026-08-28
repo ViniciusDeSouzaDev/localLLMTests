@@ -116,11 +116,25 @@ function render(){
 
   // pipes
   let fogOn = false;
-  if(run && run.boss){
+  if(run && run.boss && run.boss.def.phases && run.boss.def.phases.length){
     const fphs = run.boss.def.phases;
     const fidx = Math.min(fphs.length-1, Math.floor(run.boss.passes * fphs.length / run.boss.max));
     fogOn = !!fphs[fidx].fog;
   } else { bossPrev = null; bossParts.length = 0; }
+  if(run && run.boss && run.boss.serpent){
+    const sp = pipes.filter(p => p.serpent);
+    if(sp.length > 1){
+      ctx.save();
+      ctx.globalAlpha = 0.25;
+      ctx.strokeStyle = run.boss.def.eye;
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6,6]);
+      ctx.beginPath();
+      sp.forEach((p,i) => i ? ctx.lineTo(p.x+35, p.gapY) : ctx.moveTo(p.x+35, p.gapY));
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
   for(const p of pipes){
     if(run && run.boss && p.blinking) ctx.globalAlpha = 0.4 + 0.6*Math.abs(Math.sin(t*25));
     else if(fogOn && p.x > BIRD_X + 300) ctx.globalAlpha = 0.25;
@@ -258,7 +272,7 @@ function render(){
     const bx = W/2 - 110, by = 14, bw = 220, bh = 14;
     ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(bx-8, by-22, bw+16, 40);
     ctx.fillStyle = '#fff'; ctx.font = 'bold 13px system-ui'; ctx.textAlign = 'center';
-    const b = run.boss, phN = b.def.phases.length;
+    const b = run.boss, phN = b.def.phases ? b.def.phases.length : 0;
     const phIdx = Math.min(phN-1, Math.floor(b.passes * phN / b.max));
     ctx.fillText(b.def.name + (phN > 1 ? '  ' + T('phase') + ' ' + (phIdx+1) + '/' + phN : ''), W/2, by-6);
     ctx.fillStyle = '#3a1020'; ctx.fillRect(bx, by, bw, bh);
@@ -296,7 +310,7 @@ function drawPipe(p, nf){
   const f = lerp(1, 0.45, nf);
   const topH = p.gapY - p.gap/2, botY = p.gapY + p.gap/2;
   let body, dark, light;
-  if(p.boss){
+  if(p.boss && !p.serpent){
     const c = (run.boss && run.boss.def.colors) ? run.boss.def.colors : [150,45,80, 90,20,50, 210,80,120];
     body = `rgb(${Math.round(c[0]*f)},${Math.round(c[1]*f)},${Math.round(c[2]*f)})`;
     dark = `rgb(${Math.round(c[3]*f)},${Math.round(c[4]*f)},${Math.round(c[5]*f)})`;
@@ -343,7 +357,7 @@ function drawPipe(p, nf){
       ctx.beginPath(); ctx.moveTo(sx, topH); ctx.lineTo(sx+6, topH+10); ctx.lineTo(sx+12, topH); ctx.closePath(); ctx.fill();
       ctx.beginPath(); ctx.moveTo(sx, botY); ctx.lineTo(sx+6, botY-10); ctx.lineTo(sx+12, botY); ctx.closePath(); ctx.fill();
     }
-  } else if(p.boss){
+  } else if(p.boss && !p.serpent){
     drawBossFace(p, topH, botY);
     bossAura(p, topH, botY);
     if(p.spear){

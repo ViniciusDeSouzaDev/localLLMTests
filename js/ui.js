@@ -163,6 +163,7 @@ function buildHelp(){
     `<p class="hint"><b>${T('spear')}</b> — ${T('spearDesc')}</p>` +
     `<p class="hint"><b>${T('hammer')}</b> — ${T('hammerDesc')}</p>` +
     `<p class="hint"><b>${T('axe')}</b> — ${T('axeDesc')}</p>` +
+    `<p class="hint"><b>${T('serpent')}</b> — ${T('serpentDesc')}</p>` +
     `<h3>${T('mapNodes')}</h3>` + Object.values(nodeNames()).map(v=>`<p class="hint">${v}</p>`).join('') +
     `<h3>${T('merchantH')}</h3>` +
     `<p class="hint"><b>${T('heal')}</b> — ${T('healDesc')}</p><p class="hint"><b>${T('coinOffer')}</b> — ${T('coinDesc')}</p><p class="hint"><b>${T('rerollOffer')}</b> — ${T('rerollDesc')}</p>` +
