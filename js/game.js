@@ -566,9 +566,26 @@ function update(dt){
       if(!p.passed && p.x + 70 < BIRD_X && rebornT <= 0){
         p.passed = true;
        if(p.boss){
-          run.boss.passes++;
-          const def = run.boss.def;
-          if(run.boss.passes >= run.boss.max){
+           run.boss.passes++;
+           const def = run.boss.def;
+           const bTop = p.gapY - p.gap/2, bBot = p.gapY + p.gap/2;
+           const bNear = Math.min(bird.y - bTop, bBot - bird.y) - pw.radius < 14;
+           combo = bNear ? combo + 1 : 0;
+           if(mode==='rl' && bNear){
+             run.gold += 2 + (hasRelic('echo') ? 3 : 0);
+             const vampMax = run.upgrades.filter(x => x === 'vampire').length;
+             if(run.vampUsed < vampMax && run.hp < mods().maxHp){
+               run.vampUsed++; run.hp++;
+               popups.push({ x:p.x+35, y:p.gapY-26, txt:T('plusHp'), life:0.7, max:0.7 });
+             }
+             if(hasLegend('bloodpact') && run.bloodUsed < 1 && run.hp < mods().maxHp){
+               run.bloodUsed++;
+               run.hp = Math.min(run.hp + 2, mods().maxHp);
+               run.gold = Math.max(0, run.gold - 5);
+               popups.push({ x:p.x+35, y:p.gapY-40, txt: lang === 'pt' ? '🩸 +2 PV -5g' : '🩸 +2 HP -5g', life:0.7, max:0.7 });
+             }
+           }
+           if(run.boss.passes >= run.boss.max){
                 const isFinal = run.boss.final;
                 const isElite = run.boss.elite;
                 const isLaby = run.boss.labyrinth;
@@ -621,7 +638,7 @@ function update(dt){
                   refreshRlHud();
                 }
              } else {
-            popups.push({ x:p.x+35, y:p.gapY, txt:T('pass') + ' ' + run.boss.passes + '/' + run.boss.max, life:0.8, max:0.8 });
+            popups.push({ x:p.x+35, y:p.gapY, txt:(bNear ? T('closeCall') + ' ' : '') + T('pass') + ' ' + run.boss.passes + '/' + run.boss.max, life:0.8, max:0.8 });
             AudioFX.score();
           }
           continue;
