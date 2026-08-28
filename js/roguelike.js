@@ -385,11 +385,17 @@ function showMap(){
   }
   box.appendChild(svg);
   if(intro){
-    const startEl = document.createElement('div');
+    const startEl = document.createElement('canvas');
+    startEl.width = 48; startEl.height = 48;
     startEl.className = 'mapStart';
-    startEl.textContent = '🐦';
     startEl.style.left = 'calc(50% - 24px)';
     startEl.style.bottom = '6px';
+    const sc = startEl.getContext('2d');
+    sc.save(); sc.translate(24,24);
+    const ss = skinById(save.selected);
+    if(ss.ghost) sc.globalAlpha = 0.75;
+    drawBirdBody(sc, ss, 0.5, 0, false);
+    sc.restore();
     box.appendChild(startEl);
   }
   for(let r=start;r<=end;r++)
@@ -413,6 +419,21 @@ function showMap(){
     fog.textContent = '👑 ' + (map.cfg.rows - 1 - end);
     box.appendChild(fog);
   }
+  if(map.pos.row >= 0){
+    const pc = document.createElement('canvas');
+    pc.width = 48; pc.height = 48;
+    pc.className = 'mapPlayer';
+    const { x, y } = mapXY(map.pos.row, map.pos.idx);
+    pc.style.left = `calc(${x}% - 24px)`;
+    pc.style.top = `calc(${y}% - 24px)`;
+    const pc2 = pc.getContext('2d');
+    pc2.save(); pc2.translate(24,24); pc2.scale(1,1);
+    const ps = skinById(save.selected);
+    if(ps.ghost) pc2.globalAlpha = 0.75;
+    drawBirdBody(pc2, ps, 0.5, 0, false);
+    pc2.restore();
+    box.appendChild(pc);
+  }
   const mini = $('#mapMini');
   mini.innerHTML = '';
   show('#mapMini', map.mini);
@@ -435,11 +456,26 @@ function showMap(){
     for(let i=0;i<map.rows[r].length;i++){
       const n = map.rows[r][i];
       const d = document.createElement('span');
+      d.textContent = NODE_ICONS[n.type];
       d.className = 'mapMiniDot t-' + n.type + (r === map.pos.row && i === map.pos.idx ? ' current' : '');
       d.style.left = xOf(r, i) + '%';
       d.style.top = yOf(r) + '%';
       mini.appendChild(d);
     }
+  if(map.pos.row >= 0){
+    const pc = document.createElement('canvas');
+    pc.width = 24; pc.height = 24;
+    pc.className = 'mapMiniPlayer';
+    pc.style.left = xOf(map.pos.row, map.pos.idx) + '%';
+    pc.style.top = yOf(map.pos.row) + '%';
+    const pc2 = pc.getContext('2d');
+    pc2.save(); pc2.translate(12,12); pc2.scale(0.5,0.5);
+    const ps = skinById(save.selected);
+    if(ps.ghost) pc2.globalAlpha = 0.75;
+    drawBirdBody(pc2, ps, 0.5, 0, false);
+    pc2.restore();
+    mini.appendChild(pc);
+  }
   show('#map', true);
 }
 
