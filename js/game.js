@@ -269,8 +269,8 @@ function checkUnlocks(){
 
 /* ================= update ================= */
 function pipeSpeed(){
-  const base = (140 + Math.min(score,40)*1.5) * (feverT > 0 ? 1.3 : 1);
-  if(mode==='rl' && run) return base + 12*(run.stage-1) + (run.path === 2 ? 14 : run.path === 3 ? 18 : 0);
+  const base = (140 + Math.min(score,40)*1.5) * (feverT > 0 ? 1.15 : 1);
+  if(mode==='rl' && run) return base + 12*(run.stage-1) + (run.path === 2 ? 14 : run.path === 3 ? 10 : 0);
   return base;
 }
 function pipeGap(){
