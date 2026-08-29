@@ -481,6 +481,9 @@ if(run.boss){
       } else if(run.stage >= 3 && Math.random() < Math.min(0.02 + run.stage*0.03, 0.35)){
         const hg = pipeGap()+40;
         pipes.push({ x:W+40, gapY:rand(150, GROUND_Y-150), gap:hg, baseGap:hg, passed:false, hammer:true, phase:rand(0,TAU), spd:rand(1.4,2.2) });
+      } else if(Math.random() < Math.min(0.1 + run.stage * 0.02, 0.25)){
+        const eg = pipeGap()+60;
+        pipes.push({ x:W+40, gapY:rand(eg/2+20, GROUND_Y-eg/2-20), gap:eg, passed:false, elevator:true, dir:Math.random()<0.5?1:-1, spd:rand(60,95) });
       } else if(t >= nextMoverAt){
         nextMoverAt = t + rand(10,15);
         const amp = rand(28,42), base = rand(150+amp, GROUND_Y-150-amp);
@@ -491,6 +494,11 @@ if(run.boss){
 
     for(const p of pipes) p.x -= pipeSpeed()*pw.speed*dt;
     for(const p of pipes) if(p.move) p.gapY = p.base + Math.sin(t*p.spd + p.phase)*p.amp;
+    for(const p of pipes) if(p.elevator){
+      p.gapY += p.dir * p.spd * dt;
+      while(p.gapY < 0) p.gapY += GROUND_Y;
+      while(p.gapY >= GROUND_Y) p.gapY -= GROUND_Y;
+    }
     for(const p of pipes) if(p.hammer){
       p.gap = Math.max(0, p.baseGap * (0.5 + 0.5*Math.cos(t*p.spd + p.phase)));
       if(p.gap < 10 && !p.slammed && p.x < W && p.x > -80){
@@ -708,7 +716,16 @@ if(run.boss){
         }
         scored = true;
         const topEdge = p.gapY - p.gap/2, botEdge = p.gapY + p.gap/2;
-        const clearance = Math.min(bird.y - topEdge, botEdge - bird.y) - pw.radius;
+        let clearance;
+        if(p.elevator){
+          const R = GROUND_Y;
+          const te = ((topEdge % R) + R) % R, be = ((botEdge % R) + R) % R;
+          const d = ((bird.y - te) % R + R) % R, g = ((be - te) % R + R) % R;
+          clearance = (d >= 0 && d <= g) ? Math.min(d, g - d) : -pw.radius;
+        } else {
+          clearance = Math.min(bird.y - topEdge, botEdge - bird.y);
+        }
+        clearance -= pw.radius;
         const near = !p.hit && clearance > 0 && clearance < 22;
         combo = near ? combo + 1 : 0;
         const mult = Math.min(combo + 1, 4);
@@ -761,10 +778,17 @@ if(run.boss){
       const rollChance = Math.max(pw.roll, hasLegend('headband') ? 0.35 : 0);
       for(const p of pipes){
         if(p.hit) continue;
-        const topH = p.gapY - p.gap/2, botY = p.gapY + p.gap/2;
+        let topH = p.gapY - p.gap/2, botY = p.gapY + p.gap/2;
+        if(p.elevator){
+          if(botY > GROUND_Y) botY -= GROUND_Y;
+          else if(topH < 0) topH += GROUND_Y;
+        }
         const cTop = Math.max(0, labyCeilY), cBot = Math.min(GROUND_Y, labyFloorY);
-        if(circleRect(BIRD_X, bird.y, pw.radius, p.x, cTop, 70, Math.max(0, topH - cTop)) ||
-           circleRect(BIRD_X, bird.y, pw.radius, p.x, botY, 70, Math.max(0, cBot - botY))){
+        const hitPipe = topH < botY
+          ? circleRect(BIRD_X, bird.y, pw.radius, p.x, cTop, 70, Math.max(0, topH - cTop)) ||
+            circleRect(BIRD_X, bird.y, pw.radius, p.x, botY, 70, Math.max(0, cBot - botY))
+          : circleRect(BIRD_X, bird.y, pw.radius, p.x, Math.max(cTop, botY), 70, Math.max(0, Math.min(cBot, topH) - Math.max(cTop, botY)));
+        if(hitPipe){
           if(shield > 0){
             shield--; invuln = 1.5; flash = 0.6;
             pipes.splice(pipes.indexOf(p), 1);

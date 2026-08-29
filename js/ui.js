@@ -175,6 +175,7 @@ function buildHelp(){
     `<h3>${T('relics')}</h3>` + list(RELICS) +
     `<h3>${T('pipesH')}</h3>` +
     `<p class="hint"><b>${T('mover')}</b> — ${T('moverDesc')}</p>` +
+    `<p class="hint"><b>${T('elevator')}</b> — ${T('elevatorDesc')}</p>` +
     `<p class="hint"><b>${T('spear')}</b> — ${T('spearDesc')}</p>` +
     `<p class="hint"><b>${T('hammer')}</b> — ${T('hammerDesc')}</p>` +
     `<p class="hint"><b>${T('axe')}</b> — ${T('axeDesc')}</p>` +

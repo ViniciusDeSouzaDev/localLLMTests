@@ -308,7 +308,11 @@ function render(){
 
 function drawPipe(p, nf){
   const f = lerp(1, 0.45, nf);
-  const topH = p.gapY - p.gap/2, botY = p.gapY + p.gap/2;
+  let topH = p.gapY - p.gap/2, botY = p.gapY + p.gap/2;
+  if(p.elevator){
+    if(botY > GROUND_Y) botY -= GROUND_Y;
+    else if(topH < 0) topH += GROUND_Y;
+  }
   let body, dark, light;
   if(p.boss && !p.serpent){
     const c = (run.boss && run.boss.def.colors) ? run.boss.def.colors : [150,45,80, 90,20,50, 210,80,120];
@@ -323,6 +327,10 @@ function drawPipe(p, nf){
     body = `rgb(${Math.round(190*f)},${Math.round(75*f)},${Math.round(75*f)})`;
     dark = `rgb(${Math.round(130*f)},${Math.round(45*f)},${Math.round(45*f)})`;
     light = `rgb(${Math.round(235*f)},${Math.round(130*f)},${Math.round(110*f)})`;
+  } else if(p.elevator){
+    body = `rgb(${Math.round(90*f)},${Math.round(190*f)},${Math.round(215*f)})`;
+    dark = `rgb(${Math.round(50*f)},${Math.round(130*f)},${Math.round(165*f)})`;
+    light = `rgb(${Math.round(160*f)},${Math.round(235*f)},${Math.round(250*f)})`;
   } else if(p.spear){
     body = `rgb(${Math.round(150*f)},${Math.round(160*f)},${Math.round(175*f)})`;
     dark = `rgb(${Math.round(95*f)},${Math.round(105*f)},${Math.round(125*f)})`;
@@ -337,10 +345,18 @@ function drawPipe(p, nf){
     light = `rgb(${Math.round(140*f)},${Math.round(225*f)},${Math.round(130*f)})`;
   }
   const cTop = Math.max(0, labyCeilY), cBot = Math.min(GROUND_Y, labyFloorY);
-  pipeRect(p.x, cTop, Math.max(0, topH - cTop), body, dark, light, true);
-  pipeRect(p.x, botY, Math.max(0, cBot - botY), body, dark, light, false);
+  if(topH < botY){
+    pipeRect(p.x, cTop, Math.max(0, topH - cTop), body, dark, light, true);
+    pipeRect(p.x, botY, Math.max(0, cBot - botY), body, dark, light, false);
+  } else {
+    pipeRect(p.x, Math.max(cTop, botY), Math.max(0, Math.min(cBot, topH) - Math.max(cTop, botY)), body, dark, light, true);
+  }
   if(p.move){
     const up = Math.cos(t*p.spd + p.phase) < 0;
+    chevron(p.x+35, topH-13, up);
+    chevron(p.x+35, botY+13, up);
+  } else if(p.elevator){
+    const up = p.dir < 0;
     chevron(p.x+35, topH-13, up);
     chevron(p.x+35, botY+13, up);
   } else if(p.hammer){
