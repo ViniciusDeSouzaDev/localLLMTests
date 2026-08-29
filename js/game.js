@@ -815,9 +815,10 @@ function update(dt){
               refreshRlHud();
             }
           } else {
-            die();
-          }
-          break;
+             die();
+           }
+           feverT = 0;
+           break;
         }
       }
     }
