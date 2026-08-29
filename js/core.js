@@ -8,12 +8,12 @@ const TAU = Math.PI*2;
 
 /* ================= save ================= */
 const SAVE_KEY = 'flappyDeluxeSave';
-const defaultSave = { best:0, total:0, unlocked:['classic'], selected:'classic', muted:false, mode:'rl', modeChosen:false, lang:'en', rl:{ bestStage:0, bestPipes:0 } };
+const defaultSave = { best:0, total:0, unlocked:['classic'], selected:'classic', muted:false, lang:'en', rl:{ bestStage:0, bestPipes:0 } };
 let save;
 try { save = Object.assign({}, defaultSave, JSON.parse(localStorage.getItem(SAVE_KEY)||'{}')); }
 catch(e){ save = Object.assign({}, defaultSave); }
 if(!save.rl) save.rl = { bestStage:0, bestPipes:0 };
-if(!save.modeChosen) save.mode = 'rl';
+
 function persist(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(save)); }catch(e){} }
 
 /* ================= skins ================= */
@@ -54,7 +54,6 @@ function powers(){
 }
 
 /* ================= roguelike ================= */
-let mode = 'rl';
 let run = null;
 let stageClearT = 0;
 let pendingDraft = null;
@@ -105,7 +104,7 @@ function relicPool(){
 let lang = save.lang || 'en';
 const UI_STR = {
   en: {
-    play:'PLAY', skins:'SKINS', characters:'CHARACTERS', howToPlay:'HOW TO PLAY', classic:'CLASSIC', roguelike:'ROGUELIKE',
+    play:'PLAY', characters:'CHARACTERS', howToPlay:'HOW TO PLAY',
     best:'BEST', total:'TOTAL', pts:'PTS', close:'CLOSE', closeCall:'CLOSE!', gameover:'GAME OVER', score:'SCORE',
     newRecord:'NEW RECORD!', playAgain:'PLAY AGAIN', upgrade:'CHOOSE UPGRADE', pickUpgrade:'Pick 1 of 3 — it stays with you for the rest of the run',
     thePath:'THE PATH', tapNode:'Tap a glowing node', victory:'VICTORY!', ascension:'ASCENSION!', punishment:'PUNISHMENT UNLOCKED', trueVictory:'TRUE VICTORY',
@@ -141,7 +140,7 @@ const UI_STR = {
     reset:'RESET', resetWarn:'This will DELETE EVERYTHING: all points, unlocked characters, records and progress. Are you sure?', resetDone:'Progress reset',
   },
   pt: {
-    play:'JOGAR', skins:'SKINS', characters:'PERSONAGENS', howToPlay:'COMO JOGAR', classic:'CLÁSSICO', roguelike:'ROGUELIKE',
+    play:'JOGAR', characters:'PERSONAGENS', howToPlay:'COMO JOGAR',
     best:'RECORDE', total:'TOTAL', pts:'PTS', close:'FECHAR', closeCall:'PERTINHO!', gameover:'FIM DE JOGO', score:'PONTOS',
     newRecord:'NOVO RECORDE!', playAgain:'JOGAR DE NOVO', upgrade:'ESCOLHA MELHORAMENTO', pickUpgrade:'Escolha 1 de 3 — fica com você pelo resto da corrida',
     thePath:'O CAMINHO', tapNode:'Toque em um nó brilhante', victory:'VITÓRIA!', ascension:'ASCENSÃO!', punishment:'PUNISHMENT DESBLOQUEADO', trueVictory:'VERDADEIRA VITÓRIA',

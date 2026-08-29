@@ -11,13 +11,13 @@ chestReward = null;
   map = null;
 }
 
-function hasUpgrade(id){ return mode==='rl' && run && run.upgrades.includes(id); }
-function hasRelic(id){ return mode==='rl' && run && run.relics.includes(id); }
+function hasUpgrade(id){ return run && run.upgrades.includes(id); }
+function hasRelic(id){ return run && run.relics.includes(id); }
 
 function mods(){
   const pw = powers();
   const m = { grav:pw.grav, speed:pw.speed, mult:pw.mult, bonus:pw.bonus||0, shield:pw.shield, feverEvery:30, maxHp:pw.maxHp, radius:pw.radius, magnet:pw.magnet, god:pw.god, roll:pw.roll };
-  if(mode === 'rl' && run){
+  if(run){
     for(const u of run.upgrades){
       if(u==='feather') m.grav *= 0.9;
       if(u==='midas') m.bonus += 1;
@@ -38,9 +38,9 @@ function mods(){
 }
 
 function refreshRlHud(){
-  show('#rlHud', mode==='rl' && !!run);
-  show('#runItems', mode==='rl' && !!run);
-  if(mode !== 'rl' || !run) return;
+  show('#rlHud', !!run);
+  show('#runItems', !!run);
+  if(!run) return;
   const maxHp = mods().maxHp;
   const heartsEl = $('#rlHearts');
   if(maxHp > 12){
@@ -99,13 +99,6 @@ function renderItemsInto(el){
   }
 }
 
-function refreshMode(){
-  const rl = mode==='rl';
-  $('#skinsBtnOver').textContent = rl ? T('characters') : T('skins');
-  $('#shopTitle').textContent = rl ? T('characters') : T('skins');
-  refreshStats();
-}
-
 function rollCards(){
   const pool = CARDS.filter(c => !c.p2 || (run && run.path === 2)).slice(), picks = [];
   while(picks.length < 3 && pool.length){
@@ -119,7 +112,7 @@ function renderCards(grid, cards, clickable){
   for(const c of cards){
     const el = document.createElement('button');
     el.className = 'draftCard';
-    const owned = (mode === 'rl' && run) ? run.upgrades.filter(u => u === c.id).length : 0;
+    const owned = run ? run.upgrades.filter(u => u === c.id).length : 0;
     el.innerHTML = `<span class="dcName">${c.icon ? c.icon + ' ' : ''}${c.name}</span><span class="dcDesc">${c.desc}</span>` +
       (owned ? `<span class="dcOwned">${T('ownedBadge').replace('{n}', owned)}</span>` : '');
     if(clickable) el.addEventListener('click', () => {

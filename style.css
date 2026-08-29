@@ -264,16 +264,6 @@
     background:rgba(255,255,255,.12); box-shadow:0 4px 0 rgba(0,0,0,.35);
     border:1px solid rgba(255,255,255,.25); font-size:14px; padding:11px 26px;
   }
-   .modeRow { display:flex; gap:10px; }
-  .modeBtn {
-    padding:10px 22px; font-size:14px;
-    background:rgba(255,255,255,.12); box-shadow:0 4px 0 rgba(0,0,0,.35);
-    border:1px solid rgba(255,255,255,.25); color:rgba(255,255,255,.6);
-  }
-  .modeBtn.active {
-    background:linear-gradient(180deg,#ffd93b,#f2a51e);
-    box-shadow:0 4px 0 #a86e00; border:none; color:#fff;
-  }
   .stat { color:#cfd8ff; font-size:15px; font-weight:600; letter-spacing:1px; }
   .stat b { color:#fff; }
   .hint { color:rgba(255,255,255,.55); font-size:13px; letter-spacing:1px; }

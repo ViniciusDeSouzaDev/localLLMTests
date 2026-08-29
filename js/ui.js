@@ -12,7 +12,7 @@ function showToast(msg){
 }
 
 function refreshStats(){
-  $('#menuBest').textContent = mode==='rl' ? ('S'+save.rl.bestStage+' • '+save.rl.bestPipes+'p') : save.best;
+  $('#menuBest').textContent = 'S'+save.rl.bestStage+' • '+save.rl.bestPipes+'p';
   $('#menuTotal').textContent = save.total;
    $('#muteBtn').textContent = save.muted ? 'OFF' : 'SND';
   const s = skinById(save.selected);
@@ -196,7 +196,7 @@ function toMenu(){
   show('#pauseOverlay', false);
   show('#hud', false);
   show('#draft', false); show('#map', false); show('#merchant', false); show('#chest', false); show('#victory', false); show('#gameover', false);
-  if(mode === 'rl') resetRun();
+  resetRun();
   state = 'menu';
   AudioFX.stopMusic();
   refreshStats();
@@ -214,7 +214,7 @@ $('#resetBtn').addEventListener('click', () => {
   if(!confirm(T('resetWarn'))) return;
   save = Object.assign({}, defaultSave, { muted: save.muted, lang, rl: { bestStage:0, bestPipes:0 } });
   persist();
-  buildShop(); refreshStats(); refreshMode();
+  buildShop(); refreshStats();
   toMenu();
   showToast(T('resetDone'));
 });
@@ -360,5 +360,4 @@ checkI18n();
 applyLang();
 buildShop();
 refreshStats();
-refreshMode();
 requestAnimationFrame(frame);

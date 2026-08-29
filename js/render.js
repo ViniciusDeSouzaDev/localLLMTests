@@ -268,7 +268,7 @@ function render(){
   ctx.globalAlpha = 1;
 
   // GAPLORD boss bar
-  if(mode==='rl' && run && run.boss && (state==='play' || state==='ready')){
+  if(run && run.boss && (state==='play' || state==='ready')){
     const bx = W/2 - 110, by = 14, bw = 220, bh = 14;
     ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(bx-8, by-22, bw+16, 40);
     ctx.fillStyle = '#fff'; ctx.font = 'bold 13px system-ui'; ctx.textAlign = 'center';
