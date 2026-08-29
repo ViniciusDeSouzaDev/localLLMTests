@@ -559,7 +559,8 @@ if(run.boss){
         if(p.blinkT == null) p.blinkT = 0;
         p.blinkT += dt;
         const biv = ph2.spd || 1.2, bt = ph2.tele || 0.35;
-        if(p.blinkT >= biv){ p.blinkT = 0; p.gapY = p.blinkTo != null ? p.blinkTo : rand(70, GROUND_Y-70); p.blinkTo = null; }
+        const near = Math.abs(p.x + 35 - BIRD_X) < 150;
+        if(p.blinkT >= biv && !near){ p.blinkT = 0; p.gapY = p.blinkTo != null ? p.blinkTo : rand(70, GROUND_Y-70); p.blinkTo = null; }
         p.blinking = p.blinkT > biv - bt;
         if(p.blinkTo == null) p.blinkTo = rand(70, GROUND_Y-70);
         p.ghostY = p.blinkTo;
