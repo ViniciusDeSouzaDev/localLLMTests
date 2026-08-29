@@ -55,7 +55,7 @@ function applyLang(){
   [...RELICS, ...RELICS2, ...RELICS3].forEach(r => { const t = d.relics[r.id]; if(t){ r.name=t.n; r.desc=t.d; } });
   const set = (id, v) => { const el = $(id); if(el) el.textContent = v; };
   set('#playBtn', T('play'));
-   set('#lblBest', T('best')); set('#lblTotal', T('total'));
+   set('#lblBest', T('best')); set('#lblTotal', T('total')); set('#lblTime', T('time'));
   set('#goTitle', T('gameover')); set('#lblScore', T('score')); set('#lblBest2', T('best'));
   set('#newRecord', T('newRecord')); set('#retryBtn', T('playAgain')); set('#skinsBtnOver', T('characters'));
   set('#shopTitle', T('characters')); set('#shopClose', T('close'));

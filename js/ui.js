@@ -11,9 +11,15 @@ function showToast(msg){
   showToast._t = setTimeout(()=>el.classList.add('hidden'), 2600);
 }
 
+function fmtTime(sec){
+  sec = Math.floor(sec);
+  const h = Math.floor(sec/3600), m = Math.floor(sec%3600/60), s = sec%60;
+  return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+}
 function refreshStats(){
   $('#menuBest').textContent = 'S'+save.rl.bestStage+' • '+save.rl.bestPipes+'p';
   $('#menuTotal').textContent = save.total;
+  $('#menuTime').textContent = fmtTime(save.playTime);
    $('#muteBtn').textContent = save.muted ? 'OFF' : 'SND';
   const s = skinById(save.selected);
   $('#menuPower').textContent = T('power') + ': ' + (s.power ? s.powerName + ' — ' + s.powerDesc : T('none'));
@@ -212,7 +218,7 @@ $('#helpClose').addEventListener('click', closeHelp);
 $('#resetBtn').addEventListener('click', () => {
   AudioFX.init(); AudioFX.click();
   if(!confirm(T('resetWarn'))) return;
-  save = Object.assign({}, defaultSave, { muted: save.muted, lang, rl: { bestStage:0, bestPipes:0 } });
+  save = Object.assign({}, defaultSave, { muted: save.muted, lang, playTime: save.playTime, rl: { bestStage:0, bestPipes:0 } });
   persist();
   buildShop(); refreshStats();
   toMenu();

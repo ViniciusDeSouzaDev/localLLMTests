@@ -8,11 +8,12 @@ const TAU = Math.PI*2;
 
 /* ================= save ================= */
 const SAVE_KEY = 'flappyDeluxeSave';
-const defaultSave = { best:0, total:0, unlocked:['classic'], selected:'classic', muted:false, lang:'en', rl:{ bestStage:0, bestPipes:0 } };
+const defaultSave = { best:0, total:0, unlocked:['classic'], selected:'classic', muted:false, lang:'en', playTime:0, rl:{ bestStage:0, bestPipes:0 } };
 let save;
 try { save = Object.assign({}, defaultSave, JSON.parse(localStorage.getItem(SAVE_KEY)||'{}')); }
 catch(e){ save = Object.assign({}, defaultSave); }
 if(!save.rl) save.rl = { bestStage:0, bestPipes:0 };
+if(typeof save.playTime !== 'number') save.playTime = 0;
 
 function persist(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(save)); }catch(e){} }
 
@@ -105,7 +106,7 @@ let lang = save.lang || 'en';
 const UI_STR = {
   en: {
     play:'PLAY', characters:'CHARACTERS', howToPlay:'HOW TO PLAY',
-    best:'BEST', total:'TOTAL', pts:'PTS', close:'CLOSE', closeCall:'CLOSE!', gameover:'GAME OVER', score:'SCORE',
+    best:'BEST', total:'TOTAL', time:'TIME', pts:'PTS', close:'CLOSE', closeCall:'CLOSE!', gameover:'GAME OVER', score:'SCORE',
     newRecord:'NEW RECORD!', playAgain:'PLAY AGAIN', upgrade:'CHOOSE UPGRADE', pickUpgrade:'Pick 1 of 3 — it stays with you for the rest of the run',
     thePath:'THE PATH', tapNode:'Tap a glowing node', victory:'VICTORY!', ascension:'ASCENSION!', punishment:'PUNISHMENT UNLOCKED', trueVictory:'TRUE VICTORY',
     continueP2:'CONTINUE → PATH 2', continueP3:'CONTINUE → PUNISHMENT', chest:'CHEST', open:'OPEN', merchant:'MERCHANT', leave:'LEAVE', incredible:'INCREDIBLE!',
@@ -137,11 +138,11 @@ const UI_STR = {
     mapNodes:'MAP NODES', merchantH:'MERCHANT', skinPowers:'SKIN POWERS',
     feverNote:'Fever: every 30 pipes, score x2 for 10s. Gold is earned per pipe and lost on death.',
     continue:'CONTINUE', plusGold:'+{n} GOLD', relicLabel:'RELIC: ',
-    reset:'RESET', resetWarn:'This will DELETE EVERYTHING: all points, unlocked characters, records and progress. Are you sure?', resetDone:'Progress reset',
+    reset:'RESET', resetWarn:'This will DELETE EVERYTHING: all points, unlocked characters, records and progress (playing time is kept). Are you sure?', resetDone:'Progress reset',
   },
   pt: {
     play:'JOGAR', characters:'PERSONAGENS', howToPlay:'COMO JOGAR',
-    best:'RECORDE', total:'TOTAL', pts:'PTS', close:'FECHAR', closeCall:'PERTINHO!', gameover:'FIM DE JOGO', score:'PONTOS',
+    best:'RECORDE', total:'TOTAL', time:'TEMPO', pts:'PTS', close:'FECHAR', closeCall:'PERTINHO!', gameover:'FIM DE JOGO', score:'PONTOS',
     newRecord:'NOVO RECORDE!', playAgain:'JOGAR DE NOVO', upgrade:'ESCOLHA MELHORAMENTO', pickUpgrade:'Escolha 1 de 3 — fica com você pelo resto da corrida',
     thePath:'O CAMINHO', tapNode:'Toque em um nó brilhante', victory:'VITÓRIA!', ascension:'ASCENSÃO!', punishment:'PUNISHMENT DESBLOQUEADO', trueVictory:'VERDADEIRA VITÓRIA',
     continueP2:'CONTINUAR → CAMINHO 2', continueP3:'CONTINUAR → PUNISHMENT', chest:'BAÚ', open:'ABRIR', merchant:'COMERCIANTE', leave:'SAIR', incredible:'INCRÍVEL!',
@@ -173,6 +174,6 @@ const UI_STR = {
     mapNodes:'NÓS DO MAPA', merchantH:'COMERCIANTE', skinPowers:'PODERES DOS PERSONAGENS',
     feverNote:'Febre: a cada 30 canos, pontos x2 por 10s. O ouro é ganho por cano e perdido ao morrer.',
     continue:'CONTINUAR', plusGold:'+{n} OURO', relicLabel:'RELÍQUIA: ',
-    reset:'REINICIAR', resetWarn:'Isso vai APAGAR TUDO: todos os pontos, personagens desbloqueados, recordes e progresso. Tem certeza?', resetDone:'Progresso reiniciado',
+    reset:'REINICIAR', resetWarn:'Isso vai APAGAR TUDO: todos os pontos, personagens desbloqueados, recordes e progresso (o tempo de jogo é mantido). Tem certeza?', resetDone:'Progresso reiniciado',
   },
 };

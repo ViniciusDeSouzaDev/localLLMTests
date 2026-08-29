@@ -302,9 +302,14 @@ function genSerpentPath(n, nearY){
   return pts;
 }
 
+let playTimeAcc = 0;
 function update(dt){
   t += dt;
   const nf = nightFactor();
+  if(state === 'play'){
+    save.playTime += dt; playTimeAcc += dt;
+    if(playTimeAcc >= 1){ playTimeAcc = 0; persist(); }
+  }
 
   // clouds / fireflies
   for(const c of clouds){ c.x -= c.spd*dt; if(c.x < -160) { c.x = W+160; c.y = rand(60,300); } }
