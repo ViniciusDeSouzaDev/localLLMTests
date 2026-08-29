@@ -239,7 +239,7 @@ $('#playBtn').addEventListener('click', () => { AudioFX.init(); startGame(); });
    $('#merchHeal').addEventListener('click', () => {
     const p = merchPrice('heal');
     if(run.gold < p || run.hp >= mods().maxHp) return;
-    run.gold -= p; run.hp++;
+    run.gold -= p; run.hp++; run.merchHeals = (run.merchHeals||0) + 1;
     AudioFX.score(); refreshMerchant(); refreshRlHud();
   });
   $('#merchShield').addEventListener('click', () => {
@@ -287,7 +287,7 @@ $('#playBtn').addEventListener('click', () => { AudioFX.init(); startGame(); });
   $('#merchReroll').addEventListener('click', () => {
     const p = merchPrice('reroll');
     if(run.gold < p) return;
-    run.gold -= p;
+    run.gold -= p; run.rerolls = (run.rerolls||0) + 1;
     pendingDraft = rollCards();
     AudioFX.click(); refreshMerchant();
   });

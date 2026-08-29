@@ -1,7 +1,7 @@
 'use strict';
 function resetRun(){
   const baseHp = powers().maxHp;
-  run = { hp:baseHp, maxHp:baseHp, gold:0, stage:0, pipesInStage:0, totalPipes:0, upgrades:[], relics:[], legends:[], vampUsed:0, bloodUsed:0, phaseCount:0, boss:null, path:1 };
+  run = { hp:baseHp, maxHp:baseHp, gold:0, stage:0, pipesInStage:0, totalPipes:0, upgrades:[], relics:[], legends:[], vampUsed:0, bloodUsed:0, phaseCount:0, merchHeals:0, rerolls:0, boss:null, path:1 };
   if(skinById(save.selected).id === 'demon') run.upgrades.push('vampire','vampire');
   if(skinById(save.selected).id === 'alien') run.upgrades.push('midas','midas','midas');
   stageClearT = 0;
@@ -145,9 +145,15 @@ function openMerchant(){
 }
 
 const MERCH_BASE = { heal:15, shield:25, tough:30, chip:25, coin:20, phoenix:40, anchor:35, reroll:10 };
+function merchOwned(key){
+  if(key === 'heal') return run.merchHeals;
+  if(key === 'reroll') return run.rerolls;
+  return run.upgrades.filter(u => u === key).length;
+}
 function merchPrice(key){
   const base = MERCH_BASE[key];
-  return hasLegend('favor') ? (key === 'reroll' ? 0 : Math.ceil(base/2)) : base;
+  const dyn = Math.ceil(base * (1 + 0.5 * Math.min(merchOwned(key), 4)));
+  return hasLegend('favor') ? (key === 'reroll' ? 0 : Math.ceil(dyn/2)) : dyn;
 }
 function refreshMerchant(){
   $('#merchantGold').textContent = '🪙 ' + run.gold;
@@ -167,7 +173,7 @@ function refreshMerchant(){
   $('#merchAnchor').disabled = run.gold < merchPrice('anchor') || run.relics.includes('anchor');
   show('#merchReroll', merchOffers.includes('reroll'));
   $('#merchReroll').disabled = run.gold < merchPrice('reroll');
-  if(hasLegend('favor')){
+  {
     const s = (sel, txt) => { $(sel).querySelector('.dcDesc').textContent = txt; };
     s('#merchHeal', merchPrice('heal') + 'g');
     s('#merchShield', T('shieldDesc').replace('25g', merchPrice('shield') + 'g'));
@@ -176,7 +182,7 @@ function refreshMerchant(){
     s('#merchCoin', T('coinDesc').replace('20g', merchPrice('coin') + 'g'));
     s('#merchPhoenix', T('phoenixDesc').replace('40g', merchPrice('phoenix') + 'g'));
     s('#merchAnchor', T('anchorDesc').replace('35g', merchPrice('anchor') + 'g'));
-    s('#merchReroll', lang === 'pt' ? 'Grátis!' : 'Free!');
+    s('#merchReroll', hasLegend('favor') ? (lang === 'pt' ? 'Grátis!' : 'Free!') : merchPrice('reroll') + 'g');
   }
   renderCards($('#merchantDraft'), pendingDraft, false);
 }
