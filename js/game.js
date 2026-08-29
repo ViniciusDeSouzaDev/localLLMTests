@@ -801,7 +801,9 @@ if(run.boss){
               refreshRlHud();
             }
           }
-            feverT = 0;
+           feverT = 0;
+            const fevEvery = hasRelic('void') ? Math.min(15, mods().feverEvery) : hasRelic('singularity') ? Math.min(12, mods().feverEvery) : mods().feverEvery;
+           feverNextAt = score + fevEvery;
            break;
         }
       }
