@@ -620,15 +620,17 @@ if(run.boss){
              run.gold += 2 + (hasRelic('echo') ? 3 : 0);
              const vampMax = run.upgrades.filter(x => x === 'vampire').length;
              if(run.vampUsed < vampMax && run.hp < mods().maxHp){
-               run.vampUsed++; run.hp++;
-               popups.push({ x:p.x+35, y:p.gapY-26, txt:T('plusHp'), life:0.7, max:0.7 });
-             }
-             if(hasLegend('bloodpact') && run.bloodUsed < 1 && run.hp < mods().maxHp){
-               run.bloodUsed++;
-               run.hp = Math.min(run.hp + 2, mods().maxHp);
-               run.gold = Math.max(0, run.gold - 5);
-               popups.push({ x:p.x+35, y:p.gapY-40, txt: lang === 'pt' ? '🩸 +2 PV -5g' : '🩸 +2 HP -5g', life:0.7, max:0.7 });
-             }
+                run.vampUsed++; run.hp++;
+                popups.push({ x:p.x+35, y:p.gapY-26, txt:T('plusHp'), life:0.7, max:0.7 });
+                refreshRlHud();
+              }
+            if(hasLegend('bloodpact') && run.bloodUsed < 1 && run.hp < mods().maxHp){
+                run.bloodUsed++;
+                run.hp = Math.min(run.hp + 2, mods().maxHp);
+                run.gold = Math.max(0, run.gold - 5);
+                popups.push({ x:p.x+35, y:p.gapY-40, txt: lang === 'pt' ? '🩸 +2 PV -5g' : '🩸 +2 HP -5g', life:0.7, max:0.7 });
+                refreshRlHud();
+              }
            }
            if(run.boss.passes >= run.boss.max){
        const isFinal = run.boss.final;
@@ -719,15 +721,17 @@ if(run.boss){
         run.gold += 1 + 2*run.upgrades.filter(u=>u==='greed').length + (near ? 2 : 0) + (hasRelic('coin') ? 1 : 0) + (near && hasRelic('echo') ? 3 : 0) + (hasRelic('corona') ? 2 : 0);
         const vampMax = run.upgrades.filter(x => x === 'vampire').length;
         if(near && run.vampUsed < vampMax && run.hp < mods().maxHp){
-          run.vampUsed++; run.hp++;
-          popups.push({ x:p.x+35, y:p.gapY-26, txt:T('plusHp'), life:0.7, max:0.7 });
-        }
+           run.vampUsed++; run.hp++;
+           popups.push({ x:p.x+35, y:p.gapY-26, txt:T('plusHp'), life:0.7, max:0.7 });
+           refreshRlHud();
+         }
         if(near && hasLegend('bloodpact') && run.bloodUsed < 1 && run.hp < mods().maxHp){
-          run.bloodUsed++;
-          run.hp = Math.min(run.hp + 2, mods().maxHp);
-          run.gold = Math.max(0, run.gold - 5);
-          popups.push({ x:p.x+35, y:p.gapY-40, txt: lang === 'pt' ? '🩸 +2 PV -5g' : '🩸 +2 HP -5g', life:0.7, max:0.7 });
-        }
+           run.bloodUsed++;
+           run.hp = Math.min(run.hp + 2, mods().maxHp);
+           run.gold = Math.max(0, run.gold - 5);
+           popups.push({ x:p.x+35, y:p.gapY-40, txt: lang === 'pt' ? '🩸 +2 PV -5g' : '🩸 +2 HP -5g', life:0.7, max:0.7 });
+           refreshRlHud();
+         }
         if(hasLegend('phaseshift')){
           run.phaseCount++;
           if(run.phaseCount >= 20){

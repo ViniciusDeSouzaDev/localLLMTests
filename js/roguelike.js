@@ -85,7 +85,7 @@ function renderItemsInto(el){
   for(const id in counts){
     const c = CARDS.find(x => x.id === id);
     if(c){
-      const n = id === 'shield' ? shield : counts[id];
+      const n = id === 'shield' ? shield : id === 'vampire' ? counts[id] - run.vampUsed : counts[id];
       add(c.icon, c.name + (counts[id] > 1 ? ' ×' + counts[id] : ''), c.desc, n);
     }
   }
