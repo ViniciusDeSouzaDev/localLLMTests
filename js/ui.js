@@ -144,8 +144,17 @@ addEventListener('keydown', e => {
   else if(e.code === 'KeyH') openHelp();
   else if(e.code === 'Escape') closeHelp();
 });
+function pauseable(){
+  return ['play','ready','draft','map','shop','victory','chest'].includes(state);
+}
+function syncPauseBtn(){
+  const on = pauseable();
+  const b = $('#pauseBtn');
+  const d = on ? '' : 'none';
+  if(b.style.display !== d) b.style.display = d;
+}
 function togglePause(){
-  if(state !== 'play' && state !== 'ready') return;
+  if(!pauseable()) return;
   paused = !paused;
   show('#pauseOverlay', paused);
   $('#pauseBtn').textContent = paused ? 'GO' : 'II';
@@ -181,7 +190,7 @@ function openHelp(){
   if(helpOpen) return;
   helpOpen = true;
   helpWasPaused = paused;
-  if(state==='play'||state==='ready'){ paused = true; show('#pauseOverlay', false); }
+  if(pauseable()){ paused = true; show('#pauseOverlay', false); }
   buildHelp();
   show('#help', true);
 }
@@ -189,7 +198,7 @@ function closeHelp(){
   if(!helpOpen) return;
   helpOpen = false;
   show('#help', false);
-  if(state==='play'||state==='ready'){
+  if(pauseable()){
     paused = helpWasPaused;
     show('#pauseOverlay', paused);
     $('#pauseBtn').textContent = paused ? 'GO' : 'II';
@@ -356,6 +365,7 @@ function frame(now){
   let dt = (now - last)/1000; last = now;
   dt = Math.min(dt, 0.05);
   if(!paused) update(dt);
+  syncPauseBtn();
   render();
   if(!$('#menu').classList.contains('hidden')){ drawMenuBird(); drawSkinPrev(); }
 }

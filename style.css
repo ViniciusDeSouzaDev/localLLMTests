@@ -13,7 +13,7 @@
   #hud {
     position:absolute; top:0; left:0; right:0;
     display:flex; justify-content:space-between; align-items:flex-start;
-    padding:14px 16px; pointer-events:none; z-index:5;
+    padding:14px 16px; pointer-events:none; z-index:12;
   }
   #score {
     font-size:46px; font-weight:900; color:#fff; letter-spacing:2px;
@@ -42,7 +42,7 @@
   #merchantOffers { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
   #map { overflow-y:auto; justify-content:flex-start; }
   #map .card { width:100%; max-width:520px; height:100%; padding:14px 18px; gap:8px; position:relative; }
-  .mapToggle { position:absolute; top:14px; right:14px; width:38px; height:38px; font-size:17px; z-index:5; }
+  .mapToggle { position:absolute; top:60px; right:14px; width:38px; height:38px; font-size:17px; z-index:5; }
   #mapBox {
     position:relative; width:100%; flex:1; min-height:320px;
     background:
