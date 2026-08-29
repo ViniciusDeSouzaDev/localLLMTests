@@ -100,6 +100,7 @@ function relicPool(){
   if(!run) return RELICS;
   return run.path === 3 ? RELICS3 : run.path === 2 ? RELICS2 : RELICS;
 }
+function findRelic(id){ return RELICS.concat(RELICS2, RELICS3).find(x => x.id === id); }
 
 /* ================= i18n ================= */
 let lang = save.lang || 'en';

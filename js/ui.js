@@ -253,7 +253,7 @@ $('#playBtn').addEventListener('click', () => { AudioFX.init(); startGame(); });
     const p = merchPrice('tough');
     if(run.gold < p) return;
     run.gold -= p;
-    gainUpgrade('tough'); run.maxHp++;
+    gainUpgrade('tough');
     AudioFX.score(); refreshMerchant(); refreshRlHud();
   });
   $('#merchChip').addEventListener('click', () => {
@@ -327,7 +327,7 @@ $('#playBtn').addEventListener('click', () => { AudioFX.init(); startGame(); });
         const r = chestReward;
         const rew = $('#chestReward');
         if(r.gold){ run.gold += r.gold; rew.textContent = T('plusGold').replace('{n}', r.gold); }
-        else if(r.relic){ const rel = RELICS.find(x => x.id === r.relic); gainRelic(r.relic); rew.textContent = T('relicLabel') + (rel.icon||'') + ' ' + rel.name; }
+        else if(r.relic){ const rel = findRelic(r.relic); gainRelic(r.relic); rew.textContent = T('relicLabel') + (rel.icon||'') + ' ' + rel.name; }
         else { run.hp = Math.min(mods().maxHp, run.hp + 1); rew.textContent = T('plusHp'); }
         rew.classList.add('revealed');
         AudioFX.score();

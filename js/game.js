@@ -822,7 +822,7 @@ if(run.boss){
     bird.vy = Math.min(700, bird.vy + 1400*pw.grav*dt);
     bird.y += bird.vy*dt;
     bird.rot += (1.4 - bird.rot)*Math.min(1, dt*6);
-    if(bird.y + BIRD_R >= GROUND_Y){ bird.y = GROUND_Y - BIRD_R; bird.vy = 0; }
+    if(bird.y + pw.radius >= GROUND_Y){ bird.y = GROUND_Y - pw.radius; bird.vy = 0; }
     deathTimer += dt;
     if(deathTimer > 0.7 && !overShown) showGameover();
   }

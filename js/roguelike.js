@@ -25,6 +25,7 @@ function mods(){
       if(u==='chip') m.feverEvery -= 10;
       if(u==='slow') m.speed *= 0.9;
       if(u==='tough') m.maxHp += 1;
+      if(u==='titan') m.maxHp += 1;
     }
     for(const r of run.relics){
       if(r==='prism') m.speed *= 0.85;
@@ -90,7 +91,7 @@ function renderItemsInto(el){
     }
   }
   for(const r of run.relics){
-    const rel = RELICS.find(x => x.id === r);
+    const rel = findRelic(r);
     if(rel) add(rel.icon, rel.name, rel.desc);
   }
   for(const l of (run.legends || [])){
@@ -204,8 +205,7 @@ function gainRelic(id){
 function pickCard(id){
   AudioFX.click();
   gainUpgrade(id);
-  if(id === 'tough'){ run.maxHp++; }
-  if(id === 'titan'){ run.maxHp++; run.hp = Math.min(run.maxHp, run.hp + 1); shield++; }
+  if(id === 'titan'){ run.hp = Math.min(mods().maxHp, run.hp + 1); shield++; }
   if(id === 'shield'){ shield++; }
   show('#draft', false);
   refreshRlHud();
@@ -308,8 +308,13 @@ function genMap(path){
     }
     if(cfg.bossRows.includes(r) && !row.some(n => n.type === 'boss'))
       row[Math.floor(Math.random()*row.length)].type = 'boss';
-    if(r >= cfg.bossRows[0] && !rows.some(row2 => row2.some(n => n.type === 'merchant')))
-      row[Math.floor(Math.random()*row.length)].type = 'merchant';
+    if(r >= cfg.bossRows[0]){
+      const hasMerchant = rows.some(row2 => row2.some(n => n.type === 'merchant')) || row.some(n => n.type === 'merchant');
+      if(!hasMerchant){
+        const cand = row.map((n, idx) => idx).filter(idx => row[idx].type === 'stage' || row[idx].type === 'chest');
+        if(cand.length) row[cand[Math.floor(Math.random()*cand.length)]].type = 'merchant';
+      }
+    }
     for(const n of row){
       if(n.type === 'boss'){ const g = pool[Math.floor(r/4)]; n.def = g[Math.floor(Math.random()*g.length)]; }
       else if(n.type === 'final'){ const g = pool[3]; n.def = g[Math.floor(Math.random()*g.length)]; }
