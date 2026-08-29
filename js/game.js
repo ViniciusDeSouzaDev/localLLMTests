@@ -613,7 +613,8 @@ if(run.boss){
            run.boss.passes++;
            const def = run.boss.def;
            const bTop = p.gapY - p.gap/2, bBot = p.gapY + p.gap/2;
-           const bNear = Math.min(bird.y - bTop, bBot - bird.y) - pw.radius < 14;
+           const bClr = Math.min(bird.y - bTop, bBot - bird.y) - pw.radius;
+            const bNear = !p.hit && bClr > 0 && bClr < 22;
            combo = bNear ? combo + 1 : 0;
             if(bNear){
              run.gold += 2 + (hasRelic('echo') ? 3 : 0);
@@ -706,7 +707,7 @@ if(run.boss){
         scored = true;
         const topEdge = p.gapY - p.gap/2, botEdge = p.gapY + p.gap/2;
         const clearance = Math.min(bird.y - topEdge, botEdge - bird.y) - pw.radius;
-        const near = clearance < 14;
+        const near = !p.hit && clearance > 0 && clearance < 22;
         combo = near ? combo + 1 : 0;
         const mult = Math.min(combo + 1, 4);
         const gained = (pw.mult + (pw.bonus||0)) * mult * (feverT > 0 ? 2 : 1);
@@ -767,9 +768,9 @@ if(run.boss){
             AudioFX.score();
             refreshPowerTag();
             refreshRlHud();
-          } else if(revive > 0){
-             revive--; rebornT = 1.1;
-             bird.vy = -180;
+           } else if(revive > 0){
+              revive--; rebornT = 1.1; p.hit = true;
+              bird.vy = -180;
              flash = 1; shake = 8;
              popups.push({ x:BIRD_X, y:bird.y-34, txt:T('rebornTxt'), life:1.1, max:1.1 });
              AudioFX.hit(); AudioFX.die();
