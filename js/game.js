@@ -527,7 +527,7 @@ if(run.boss){
       const idx = Math.min(ph.length-1, Math.floor(b.passes * ph.length / b.max));
       if(idx !== b.phaseIdx){
         b.phaseIdx = idx;
-        p.gap = p.baseGap; p.pulseT = 0; p.blinkTo = null;
+        p.gap = p.baseGap; p.pulseT = 0; p.blinkTo = null; p.blinkT = 0;
         flash = 0.5; shake = 12; AudioFX.scream();
         popups.push({ x:BIRD_X, y:bird.y-60, txt:T('phase') + ' ' + (idx+1) + '/' + ph.length, life:1.2, max:1.2 });
       }
@@ -571,13 +571,20 @@ if(run.boss){
         p.gapY = p.baseY + Math.sin(t*0.5)*20;
       } else if(ph2.pattern === 'blink'){
         if(p.blinkT == null) p.blinkT = 0;
-        p.blinkT += dt;
-        const biv = ph2.spd || 1.2, bt = ph2.tele || 0.35;
-        const near = Math.abs(p.x + 35 - BIRD_X) < 150;
-        if(p.blinkT >= biv && !near){ p.blinkT = 0; p.gapY = p.blinkTo != null ? p.blinkTo : rand(70, GROUND_Y-70); p.blinkTo = null; }
-        p.blinking = p.blinkT > biv - bt;
-        if(p.blinkTo == null) p.blinkTo = rand(70, GROUND_Y-70);
-        p.ghostY = p.blinkTo;
+        const ahead = p.x > BIRD_X + 180;
+        if(!ahead){ p.blinkT = 0; p.blinkTo = null; p.blinking = false; p.ghostY = null; }
+        else {
+          p.blinkT += dt;
+          const biv = ph2.spd || 1.2, bt = ph2.tele || 0.35;
+          const tArr = Math.max(0.4, (p.x - BIRD_X) / (pipeSpeed()*pw.speed));
+          const reach = Math.min(260, tArr * 300);
+          const lo = Math.max(70, bird.y - reach), hi = Math.min(GROUND_Y - 70, bird.y + reach);
+          const dest = () => (lo < hi ? rand(lo, hi) : bird.y);
+          if(p.blinkT >= biv){ p.blinkT = 0; p.gapY = p.blinkTo != null ? p.blinkTo : dest(); p.blinkTo = null; }
+          p.blinking = p.blinkT > biv - bt;
+          if(p.blinkTo == null) p.blinkTo = dest();
+          p.ghostY = p.blinkTo;
+        }
       } else if(ph2.pattern === 'drift'){
         if(p.driftDir == null) p.driftDir = Math.random() < 0.5 ? 1 : -1;
         p.gapY += p.driftDir * (ph2.spd || 60) * dt;
