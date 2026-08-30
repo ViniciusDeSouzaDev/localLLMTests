@@ -527,6 +527,7 @@ function showReveal(icon, title, desc, legendary){
   $('#revealTitle').textContent = title;
   $('#revealDesc').textContent = desc;
   show('#revealBtn', !!legendary);
+  show('#revealTag', !!legendary);
   card.style.animation = 'none';
   void card.offsetWidth;
   card.style.animation = legendary ? 'revealHold .6s cubic-bezier(.2,1.4,.4,1) forwards' : '';

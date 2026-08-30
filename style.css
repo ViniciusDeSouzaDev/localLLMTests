@@ -155,17 +155,60 @@
     display:flex; align-items:center; justify-content:center;
   }
   #revealCard {
+    position:relative;
     background:rgba(14,18,34,.9); backdrop-filter:blur(10px);
     border:1px solid rgba(255,255,255,.2); border-radius:20px;
     padding:26px 34px; display:flex; flex-direction:column; align-items:center; gap:10px;
     box-shadow:0 18px 50px rgba(0,0,0,.5);
     animation:revealPop 2.4s cubic-bezier(.2,1.4,.4,1) forwards;
   }
-  #revealCard.legendary { border-color:rgba(255,215,0,.55); box-shadow:0 0 40px rgba(255,215,0,.35), 0 18px 50px rgba(0,0,0,.5); }
+  #revealCard.legendary {
+    border-color:transparent;
+    background:
+      linear-gradient(160deg, rgba(28,22,6,.96), rgba(14,10,2,.96)) padding-box,
+      linear-gradient(120deg, #6b4d00, #ffd93b 25%, #fff3b0 50%, #ffd93b 75%, #6b4d00) border-box;
+    box-shadow:0 0 40px rgba(255,215,0,.35), 0 18px 50px rgba(0,0,0,.55);
+  }
+  #revealCard.legendary::before {
+    content:''; position:absolute; inset:-2px; border-radius:22px;
+    box-shadow:0 0 30px rgba(255,215,0,.55), 0 0 90px rgba(255,190,0,.3);
+    animation:legendPulse 1.4s ease-in-out infinite;
+    pointer-events:none;
+  }
+  #revealTag {
+    font-size:13px; font-weight:900; letter-spacing:6px; color:#ffd93b;
+    text-shadow:0 0 10px rgba(255,215,0,.9);
+    animation:tagPulse 1s ease-in-out infinite;
+  }
   #revealIcon { font-size:56px; }
+  #revealCard.legendary #revealIcon {
+    filter:drop-shadow(0 0 14px rgba(255,215,0,.85));
+    animation:legendIcon 1.2s ease-in-out infinite;
+  }
   #revealTitle { font-size:30px; font-weight:900; letter-spacing:2px; }
+  #revealCard.legendary #revealTitle {
+    background:linear-gradient(180deg,#fff 10%, #ffd93b 55%, #ff9d00);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    filter:drop-shadow(0 0 12px rgba(255,200,0,.55));
+  }
   #revealDesc { font-size:15px; opacity:.85; max-width:300px; }
   #revealBtn { pointer-events:auto; margin-top:6px; }
+  #revealCard.legendary #revealBtn {
+    background:linear-gradient(180deg,#ffd93b,#ff9d00);
+    color:#2a1c00; border-color:#ffd93b;
+    box-shadow:0 0 18px rgba(255,215,0,.5);
+  }
+  .spark { position:absolute; color:#ffd93b; font-size:14px; opacity:0; pointer-events:none; text-shadow:0 0 8px rgba(255,215,0,.9); }
+  #revealCard:not(.legendary) .spark { display:none; }
+  #revealCard.legendary .spark { animation:sparkTwinkle 1.6s ease-in-out infinite; }
+  .spark.s1 { top:12%; left:10%; }
+  .spark.s2 { top:18%; right:10%; animation-delay:.4s; }
+  .spark.s3 { bottom:14%; left:14%; animation-delay:.8s; }
+  .spark.s4 { bottom:10%; right:12%; animation-delay:1.2s; }
+  @keyframes legendPulse { 0%,100% { opacity:.5; } 50% { opacity:1; } }
+  @keyframes tagPulse { 0%,100% { opacity:.7; transform:scale(1); } 50% { opacity:1; transform:scale(1.06); } }
+  @keyframes legendIcon { 0%,100% { transform:scale(1); } 50% { transform:scale(1.12); } }
+  @keyframes sparkTwinkle { 0%,100% { opacity:0; transform:scale(.4) rotate(0deg); } 50% { opacity:1; transform:scale(1) rotate(90deg); } }
   @keyframes revealPop {
     0% { transform:scale(.3) rotate(-6deg); opacity:0; }
     18% { transform:scale(1.12) rotate(2deg); opacity:1; }
