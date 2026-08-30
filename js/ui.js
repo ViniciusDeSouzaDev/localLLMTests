@@ -238,6 +238,7 @@ $('#resetBtn').addEventListener('click', () => {
  $('#revealBtn').addEventListener('click', () => { AudioFX.click(); closeReveal(); });
 $('#playBtn').addEventListener('click', () => { AudioFX.init(); startGame(); });
   $('#retryBtn').addEventListener('click', () => { AudioFX.init(); startGame(); });
+  $('#menuBtnOver').addEventListener('click', () => { AudioFX.init(); AudioFX.click(); toMenu(); });
    $('#merchHeal').addEventListener('click', () => {
     const p = merchPrice('heal');
     if(run.gold < p || run.hp >= mods().maxHp) return;

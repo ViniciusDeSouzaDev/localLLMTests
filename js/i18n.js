@@ -56,7 +56,7 @@ function applyLang(){
   const set = (id, v) => { const el = $(id); if(el) el.textContent = v; };
   set('#playBtn', T('play'));
    set('#lblBest', T('best')); set('#lblTotal', T('total')); set('#lblTime', T('time'));
-  set('#goTitle', T('gameover')); set('#lblScore', T('score')); set('#lblBest2', T('best'));
+  set('#goTitle', T('gameover')); set('#lblScore', T('score')); set('#lblBest2', T('best')); set('#menuBtnOver', T('mainMenu'));
   set('#newRecord', T('newRecord')); set('#retryBtn', T('playAgain')); set('#skinsBtnOver', T('characters'));
   set('#shopTitle', T('characters')); set('#shopClose', T('close'));
   set('#draftTitle', T('upgrade')); set('#draftHint', T('pickUpgrade'));
