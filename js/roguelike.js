@@ -153,7 +153,7 @@ function merchOwned(key){
 }
 function merchPrice(key){
   const base = MERCH_BASE[key];
-  const dyn = key === 'heal' ? base : Math.ceil(base * (1 + 0.5 * Math.min(merchOwned(key), 4)));
+  const dyn = key === 'heal' ? base : Math.ceil(base * (1 + 0.5 * Math.max(0, merchOwned(key) - 4)));
   return hasLegend('favor') ? (key === 'reroll' ? 0 : Math.ceil(dyn/2)) : dyn;
 }
 function refreshMerchant(){

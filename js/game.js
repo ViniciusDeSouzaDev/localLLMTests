@@ -487,13 +487,13 @@ if(run.boss){
         } else {
           const bg = pipeGap();
           const isAxe = run.path === 3 && run.boss.final && run.stage >= 2 && rng() < 0.15;
-          pipes.push({ x:W+40, gapY:345, baseY:345, gap:bg, baseGap:bg, passed:false, boss:true, spear:run.boss.final, axe:isAxe });
+          pipes.push({ x:W+40, gapY:345, baseY:345, gap:bg, baseGap:bg, passed:false, boss:true, spear:run.boss.final && run.path >= 2, axe:isAxe });
         }
       }
     } else if(stageClearT <= 0 && (!last || last.x < W - (run.path === 2 ? 193 : 240))){
       if(run.path === 3 && run.stage >= 2 && rng() < 0.15){
         pipes.push({ x:W+40, gapY:rand(150, GROUND_Y-150), gap:pipeGap(), passed:false, axe:true });
-      } else if(run.stage >= 2 && rng() < Math.min(0.12 + run.stage*0.04, 0.35)){
+      } else if(run.path >= 2 && run.stage >= 2 && rng() < Math.min(0.12 + run.stage*0.04, 0.35)){
         pipes.push({ x:W+40, gapY:rand(150, GROUND_Y-150), gap:pipeGap()+40, passed:false, spear:true });
       } else if(run.stage >= 3 && rng() < Math.min(0.02 + run.stage*0.03, 0.35)){
         const hg = pipeGap()+40;
@@ -669,7 +669,8 @@ if(run.boss){
               }
            }
            if(run.boss.passes >= run.boss.max){
-       const isFinal = run.boss.final;
+        const minGold = run.path === 1 ? 100 : run.path === 2 ? 200 : 500;
+        const isFinal = run.boss.final;
                  const isElite = run.boss.elite;
                  const isLaby = run.boss.labyrinth;
                  const isSerpent = run.boss.serpent;
@@ -699,15 +700,15 @@ if(run.boss){
                      showReveal(l.icon, legendInfo(l.id).name, legendInfo(l.id).desc, true);
                      AudioFX.legendary();
                    } else {
-                     run.gold += 50;
-                     showReveal('🪙', '+50 GOLD', '', false);
-                     AudioFX.reveal();
-                   }
+                      run.gold += minGold;
+                      showReveal('🪙', '+' + minGold + ' GOLD', '', false);
+                      AudioFX.reveal();
+                    }
                    stageClearT = 1.5; pipes = [];
                    popups.push({ x:BIRD_X, y:bird.y-50, txt:def.name + ' DEFEATED!', life:1.5, max:1.5 });
                    refreshRlHud();
                  } else if(isElite || isLaby){
-                  const gold = isLaby ? 25 : 20;
+                  const gold = minGold;
                   run.gold += gold;
                   const pool = isLaby ? (run.path === 3 ? RELICS3 : RELICS2) : relicPool();
                   const missing = pool.filter(x => !run.relics.includes(x.id));
@@ -726,7 +727,7 @@ if(run.boss){
                     showReveal(l.icon, legendInfo(l.id).name, legendInfo(l.id).desc, true);
                     AudioFX.legendary();
                   } else {
-                    const gold = 25 + Math.floor(rng()*21);
+                     const gold = minGold + Math.floor(rng()*21);
                     run.gold += gold;
                     showReveal('🪙', '+' + gold + ' GOLD', '', false);
                     AudioFX.reveal();
