@@ -566,6 +566,7 @@ function showVictory(){
   }
   persist();
   show('#continueBtn', run.path < 3);
+  show('#victoryBtn', run.path === 3);
   $('#continueBtn').textContent = T(run.path === 1 ? 'continueP2' : 'continueP3');
   show('#victory', true);
 }
