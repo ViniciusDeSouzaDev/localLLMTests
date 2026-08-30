@@ -456,7 +456,7 @@ function update(dt){
           if(rem > 0){
             pipes = pipes.filter(q => !q.serpent);
             run.boss.path = genSerpentPath(rem, H*0.45);
-            const bg = (pipeGap() + 30) * 3;
+            const bg = (pipeGap() + 30) * 2;
             for(let i=0;i<rem;i++){
               pipes.push({ x:BIRD_X+300 + i*70, gapY:run.boss.path[i], baseY:run.boss.path[i], gap:bg, baseGap:bg, passed:false, boss:true, axe:true, serpent:true });
             }
@@ -480,7 +480,7 @@ function update(dt){
 if(run.boss){
        if(!pipes.some(p => p.boss)){
         if(run.boss.serpent){
-          const bg = (pipeGap() + 30) * 3;
+          const bg = (pipeGap() + 30) * 2;
           run.boss.path.slice(run.boss.passes).forEach((wp, i) => {
             pipes.push({ x:W+40 + i*70, gapY:wp, baseY:wp, gap:bg, baseGap:bg, passed:false, boss:true, axe:true, serpent:true });
           });
