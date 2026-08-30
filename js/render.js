@@ -395,6 +395,25 @@ function drawPipe(p, nf){
       ctx.beginPath(); ctx.moveTo(sx, topH); ctx.lineTo(sx+6, topH+10); ctx.lineTo(sx+12, topH); ctx.closePath(); ctx.fill();
       ctx.beginPath(); ctx.moveTo(sx, botY); ctx.lineTo(sx+6, botY-10); ctx.lineTo(sx+12, botY); ctx.closePath(); ctx.fill();
     }
+    if(magnetPower()){
+      const cy = (topH + botY)/2;
+      ctx.save();
+      ctx.strokeStyle = 'rgba(90,220,255,0.85)';
+      ctx.shadowColor = 'rgba(90,220,255,0.9)';
+      ctx.shadowBlur = 10;
+      ctx.lineWidth = 2;
+      for(let k=0;k<3;k++){
+        const a0 = t*2.6 + k*TAU/3;
+        ctx.beginPath(); ctx.arc(p.x+35, cy, 26 + 4*Math.sin(t*3), a0, a0+1.1); ctx.stroke();
+      }
+      ctx.fillStyle = 'rgba(160,240,255,0.9)';
+      for(let sx = p.x+8; sx + 4 <= p.x+66; sx += 16){
+        const s = 2 + 1.5*Math.sin(t*6 + sx);
+        ctx.fillRect(sx, topH-2, s, s);
+        ctx.fillRect(sx, botY+2-s, s, s);
+      }
+      ctx.restore();
+    }
   } else if(p.boss && !p.serpent){
     drawBossFace(p, topH, botY);
     bossAura(p, topH, botY);

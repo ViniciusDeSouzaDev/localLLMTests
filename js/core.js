@@ -69,7 +69,7 @@ const CARDS = [
   { id:'midas',   icon:'✨', name:'Midas',      desc:'+1 point per pipe' },
   { id:'shield',  icon:'🛡️', name:'Shield',     desc:'+1 shield charge' },
   { id:'vampire', icon:'🧛', name:'Vampire',    desc:'Near-miss heals 1 HP (once per stage, stacks)' },
-  { id:'magnet',  icon:'🧲', name:'Magnet',     desc:'Pipes drift toward your height (stacks)' },
+  { id:'magnet',  icon:'🧲', name:'Magnet',     desc:'Pipes drift toward your height; hammer pipes can\'t fully close (stacks)' },
   { id:'greed',   icon:'🪙', name:'Greed',      desc:'+2 gold per pipe' },
   { id:'chip',    icon:'🔥', name:'Fever Chip', desc:'Fever triggers 10 pipes sooner' },
   { id:'tough',   icon:'💪', name:'Tough',      desc:'+1 max HP' },

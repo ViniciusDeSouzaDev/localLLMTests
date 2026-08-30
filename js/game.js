@@ -276,6 +276,9 @@ function pipeGap(){
   const perStage = p === 2 ? 9 : p === 3 ? 10 : 7;
   return Math.max(floor, 170 - (run.stage-1)*perStage - score*0.3);
 }
+function magnetPower(){
+  return run ? run.upgrades.filter(u=>u==='magnet').length + mods().magnet + (hasRelic('anchor') ? 2 : 0) : 0;
+}
 
 function genSerpentPath(n, nearY){
   const minY = 100, maxY = GROUND_Y - 100;
@@ -515,8 +518,10 @@ if(run.boss){
       while(p.gapY < 0) p.gapY += GROUND_Y;
       while(p.gapY >= GROUND_Y) p.gapY -= GROUND_Y;
     }
+    const hmag = magnetPower();
     for(const p of pipes) if(p.hammer){
-      p.gap = Math.max(0, p.baseGap * (0.5 + 0.5*Math.cos(t*p.spd + p.phase)));
+      const g = p.baseGap * (0.5 + 0.5*Math.cos(t*p.spd + p.phase));
+      p.gap = hmag ? Math.max(g, Math.min(p.baseGap*(0.45+0.05*hmag), pipeGap()+60)) : g;
       if(p.gap < 10 && !p.slammed && p.x < W && p.x > -80){
         p.slammed = true;
         shake = Math.max(shake, 8);
@@ -614,10 +619,10 @@ if(run.boss){
         p.gapY = p.baseY + (ph2.amp ? Math.sin(t*(ph2.spd || 2.2))*ph2.amp : 0);
       }
     }
-    const mag = run.upgrades.filter(u=>u==='magnet').length + pw.magnet + (hasRelic('anchor') ? 2 : 0);
+    const mag = magnetPower();
     if(mag) for(const p of pipes){
       if(p.boss || p.serpent || p.elevator) continue;
-      const rate = Math.min(0.3*mag, 0.9);
+      const rate = Math.min(0.15*mag, 0.5);
       if(p.move) p.base += (bird.y - p.base)*rate*dt;
       else p.gapY += (bird.y - p.gapY)*rate*dt;
     }

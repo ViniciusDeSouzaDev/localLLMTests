@@ -20,7 +20,7 @@ const DATA_PT = {
   cards: {
     feather:{n:'Penas',d:'Gravidade -10%'}, midas:{n:'Pontuador',d:'+1 ponto por cano'},
     shield:{n:'Escudo',d:'+1 carga de escudo'}, vampire:{n:'Vampiro',d:'Pertinho cura 1 PV (1x por etapa, acumulável)'},
-    magnet:{n:'Ímã',d:'Canos se aproximam da sua altura (acumulável)'}, greed:{n:'Ganância',d:'+2 ouro por cano'},
+    magnet:{n:'Ímã',d:'Canos se aproximam da sua altura; martelo não fecha totalmente (acumulável)'}, greed:{n:'Ganância',d:'+2 ouro por cano'},
     chip:{n:'Chip de Febre',d:'Febre vem 10 canos antes'}, tough:{n:'Resistência',d:'+1 PV máx.'},
     slow:{n:'Câmera Lenta',d:'Velocidade dos canos -10%'}, storm:{n:'Tempestade',d:'Duração da febre x2'},
     titan:{n:'Titã',d:'+1 PV máx. e +1 escudo'},
