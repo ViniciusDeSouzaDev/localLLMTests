@@ -266,13 +266,13 @@ function render(){
     const r = powers().radius;
     const dFloor = (labyFloorY - r) - bird.y;
     const dCeil = bird.y - (labyCeilY + r);
-    if(dFloor < 60 || (labyCeilY > 0 && dCeil < 60)){
+    if(dFloor < 120 || (labyCeilY > 0 && dCeil < 120)){
       ctx.globalAlpha = Math.sin(t*20) > 0 ? 1 : 0.3;
       ctx.font = '900 30px "Segoe UI", sans-serif';
       ctx.textAlign = 'center';
       ctx.fillStyle = '#ffd23b';
       ctx.strokeStyle = 'rgba(0,0,0,.5)'; ctx.lineWidth = 4;
-      const wy = dCeil < 60 ? bird.y - 44 : bird.y + 44;
+      const wy = dCeil < 120 ? bird.y - 44 : bird.y + 44;
       ctx.strokeText('!!', BIRD_X, wy);
       ctx.fillText('!!', BIRD_X, wy);
       ctx.globalAlpha = 1;
