@@ -600,7 +600,7 @@ if(run.boss){
     }
     const mag = run.upgrades.filter(u=>u==='magnet').length + pw.magnet + (hasRelic('anchor') ? 2 : 0);
     if(mag) for(const p of pipes){
-      if(p.boss || p.serpent) continue;
+      if(p.boss || p.serpent || p.elevator) continue;
       const rate = Math.min(0.3*mag, 0.9);
       if(p.move) p.base += (bird.y - p.base)*rate*dt;
       else p.gapY += (bird.y - p.gapY)*rate*dt;
