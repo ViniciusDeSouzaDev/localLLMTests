@@ -560,7 +560,7 @@ if(run.boss){
       } else if(ph2.pattern === 'squeeze'){
         p.pulseT = (p.pulseT || 0) + dt;
         const s = 0.5 - 0.5*Math.cos(p.pulseT * ph2.spd);
-        p.gap = Math.max(60, p.baseGap * (1 - 0.45*s));
+        p.gap = Math.max(75, p.baseGap * (1 - 0.45*s));
         p.gapY = p.baseY + Math.sin(t*0.7)*30;
       } else if(ph2.pattern === 'zigzag'){
         p.pulseT = (p.pulseT || 0) + dt;
