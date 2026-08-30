@@ -877,8 +877,34 @@ if(run.boss){
         }
       }
     }
-    if(bird.y + pw.radius >= labyFloorY){ bird.y = labyFloorY - pw.radius; if(pw.god){ invuln = 1.5; bird.vy = -300; } else if(rebornT <= 0) die(); }
-    if(bird.y - pw.radius < labyCeilY){ bird.y = labyCeilY + pw.radius; if(pw.god){ invuln = 1.5; bird.vy = 300; } else if(rebornT <= 0) die(); }
+    if(bird.y + pw.radius >= labyFloorY){
+      bird.y = labyFloorY - pw.radius;
+      if(pw.god){ invuln = 1.5; bird.vy = -300; }
+      else if(rebornT <= 0 && invuln <= 0){
+        run.hp -= 10;
+        if(run.hp <= 0){ die(); } else {
+          invuln = 2; bird.vy = -250;
+          flash = 0.6; shake = 8;
+          popups.push({ x:BIRD_X, y:bird.y-34, txt:T('minusHp').replace('{n}', 10), life:0.8, max:0.8 });
+          AudioFX.hit();
+          refreshRlHud();
+        }
+      }
+    }
+    if(bird.y - pw.radius < labyCeilY){
+      bird.y = labyCeilY + pw.radius;
+      if(pw.god){ invuln = 1.5; bird.vy = 300; }
+      else if(rebornT <= 0 && invuln <= 0){
+        run.hp -= 10;
+        if(run.hp <= 0){ die(); } else {
+          invuln = 2; bird.vy = 250;
+          flash = 0.6; shake = 8;
+          popups.push({ x:BIRD_X, y:bird.y-34, txt:T('minusHp').replace('{n}', 10), life:0.8, max:0.8 });
+          AudioFX.hit();
+          refreshRlHud();
+        }
+      }
+    }
     else if(bird.y - pw.radius < 0){ bird.y = pw.radius; bird.vy = 0; }
   }
   else if(state === 'dead'){

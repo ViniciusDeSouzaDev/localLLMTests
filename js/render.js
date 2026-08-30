@@ -261,6 +261,24 @@ function render(){
   drawBird(BIRD_X, bird.y, bird.rot, s, bird.wing, powers().radius/BIRD_R);
   ctx.globalAlpha = 1;
 
+  // proximity warning
+  if(state === 'play' && invuln <= 0){
+    const r = powers().radius;
+    const dFloor = (labyFloorY - r) - bird.y;
+    const dCeil = bird.y - (labyCeilY + r);
+    if(dFloor < 60 || (labyCeilY > 0 && dCeil < 60)){
+      ctx.globalAlpha = Math.sin(t*20) > 0 ? 1 : 0.3;
+      ctx.font = '900 30px "Segoe UI", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#ffd23b';
+      ctx.strokeStyle = 'rgba(0,0,0,.5)'; ctx.lineWidth = 4;
+      const wy = dCeil < 60 ? bird.y - 44 : bird.y + 44;
+      ctx.strokeText('!!', BIRD_X, wy);
+      ctx.fillText('!!', BIRD_X, wy);
+      ctx.globalAlpha = 1;
+    }
+  }
+
   // popups
   ctx.font = '900 26px "Segoe UI", sans-serif';
   ctx.textAlign = 'center';
