@@ -250,6 +250,12 @@ function render(){
   }
   ctx.globalAlpha = 1;
 
+  // heal hearts
+  for(const h of hearts){
+    const a = clamp(h.life/h.max, 0, 1);
+    drawHeart(h.x, h.y, h.size*(0.5+0.5*a), `rgba(255,70,120,${a})`);
+  }
+
   // bird
   if(invuln > 0) ctx.globalAlpha = Math.sin(t*30) > 0 ? 1 : 0.35;
   drawBird(BIRD_X, bird.y, bird.rot, s, bird.wing, powers().radius/BIRD_R);
@@ -306,6 +312,18 @@ function render(){
   ctx.restore();
 }
 
+function drawHeart(x, y, s, color){
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(x - s*0.3, y - s*0.2, s*0.35, 0, TAU);
+  ctx.arc(x + s*0.3, y - s*0.2, s*0.35, 0, TAU);
+  ctx.moveTo(x - s*0.62, y - s*0.02);
+  ctx.lineTo(x, y + s*0.75);
+  ctx.lineTo(x + s*0.62, y - s*0.02);
+  ctx.closePath();
+  ctx.fill();
+}
+
 function drawPipe(p, nf){
   const f = lerp(1, 0.45, nf);
   let topH = p.gapY - p.gap/2, botY = p.gapY + p.gap/2;
@@ -339,6 +357,10 @@ function drawPipe(p, nf){
     body = `rgb(${Math.round(70*f)},${Math.round(76*f)},${Math.round(90*f)})`;
     dark = `rgb(${Math.round(40*f)},${Math.round(45*f)},${Math.round(58*f)})`;
     light = `rgb(${Math.round(110*f)},${Math.round(118*f)},${Math.round(135*f)})`;
+  } else if(p.heal){
+    body = `rgb(${Math.round(240*f)},${Math.round(110*f)},${Math.round(150*f)})`;
+    dark = `rgb(${Math.round(190*f)},${Math.round(60*f)},${Math.round(100*f)})`;
+    light = `rgb(${Math.round(255*f)},${Math.round(170*f)},${Math.round(200*f)})`;
   } else {
     body = `rgb(${Math.round(80*f)},${Math.round(190*f)},${Math.round(90*f)})`;
     dark = `rgb(${Math.round(50*f)},${Math.round(140*f)},${Math.round(60*f)})`;
@@ -396,6 +418,11 @@ function drawPipe(p, nf){
     ctx.fillStyle = `rgba(255,120,90,${0.4+0.3*Math.sin(t*6)})`;
     ctx.fillRect(p.x, topH-12, 70, 2);
     ctx.fillRect(p.x, botY+10, 70, 2);
+  } else if(p.heal){
+    const s = 9 + Math.sin(t*5)*2.5;
+    drawHeart(p.x+35, topH-16, s, `rgba(120,10,40,${0.5+0.3*Math.sin(t*5)})`);
+    drawHeart(p.x+35, botY+16, s, `rgba(120,10,40,${0.5+0.3*Math.sin(t*5)})`);
+    drawHeart(p.x+35, p.gapY, s*1.4, `rgba(255,60,110,${0.75+0.25*Math.sin(t*5)})`);
   }
   if(p.ghostY != null){
     const gy = p.ghostY, gg = p.gap;
@@ -1058,7 +1085,20 @@ function drawBird(x, y, rot, s, wing, scale=1){
   if(s.id === 'demon'){ ctx.shadowColor = 'rgba(255,40,40,0.7)'; ctx.shadowBlur = 12; }
   if(s.id === 'ninja'){ ctx.shadowColor = 'rgba(255,71,88,0.55)'; ctx.shadowBlur = rollT > 0 ? 22 : 10; }
   if(s.id === 'god'){ ctx.shadowColor = 'rgba(255,215,0,0.8)'; ctx.shadowBlur = 16; }
+  if(healGlow > 0){ ctx.shadowColor = 'rgba(255,80,140,0.9)'; ctx.shadowBlur = 18 + 6*Math.sin(t*8); }
   drawBirdBody(ctx, s, wing, t, shield > 0);
+  if(healGlow > 0){
+    const a = clamp(healGlow/3, 0, 1);
+    ctx.globalAlpha = 0.3*a;
+    ctx.fillStyle = '#ff5f9e';
+    ctx.beginPath(); ctx.arc(0, 0, 17, 0, TAU); ctx.fill();
+    ctx.globalAlpha = a;
+    for(let i=0;i<3;i++){
+      const ang = t*3 + i*TAU/3;
+      drawHeart(Math.cos(ang)*24, Math.sin(ang)*13 - 4, 7, `rgba(255,90,140,${a})`);
+    }
+    ctx.globalAlpha = 1;
+  }
   ctx.restore();
 }
 

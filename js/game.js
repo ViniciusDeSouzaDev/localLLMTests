@@ -144,8 +144,9 @@ let pipes = [];
 let particles = [];
 let popups = [];
 let trail = [];
+let hearts = [];
 let score = 0;
-let shield = 0, revive = 0, invuln = 0, rebornT = 0, rollT = 0, rollSpin = 0, nextMoverAt = 0;
+let shield = 0, revive = 0, invuln = 0, rebornT = 0, rollT = 0, rollSpin = 0, nextMoverAt = 0, healGlow = 0;
 let combo = 0, feverT = 0, feverNextAt = 30;
 let shake = 0, flash = 0, bossIntroT0 = -99;
 let groundX = 0;
@@ -160,11 +161,11 @@ function nightFactor(){
 
 function reset(){
   bird = { y:H*0.45, vy:0, rot:0, wing:0 };
-  pipes = []; particles = []; popups = []; trail = [];
+  pipes = []; particles = []; popups = []; trail = []; hearts = [];
   score = 0; shake = 0; flash = 0;
   combo = 0; feverT = 0;
   const pw = powers();
-  shield = pw.shield; revive = pw.revive + (hasRelic('phoenix') ? 1 : 0); invuln = 0; rebornT = 0; rollT = 0; rollSpin = 0;
+  shield = pw.shield; revive = pw.revive + (hasRelic('phoenix') ? 1 : 0); invuln = 0; rebornT = 0; rollT = 0; rollSpin = 0; healGlow = 0;
   nextMoverAt = t + rand(10,15);
   nextMusicSwitch = t + rand(20,35);
   deathTimer = 0; overShown = false;
@@ -175,6 +176,13 @@ function reset(){
   refreshRlHud();
   $('#score').textContent = '0';
   refreshPowerTag();
+}
+
+function spawnHearts(){
+  for(let i=0;i<18;i++){
+    const a = Math.random()*TAU, sp = rand(50,170);
+    hearts.push({ x:BIRD_X+rand(-16,16), y:bird.y+rand(-16,16), vx:Math.cos(a)*sp, vy:Math.sin(a)*sp - 70, life:rand(0.7,1.5), max:1.5, size:rand(6,14) });
+  }
 }
 
 function startGame(){
@@ -387,11 +395,17 @@ function update(dt){
     if(p.life <= 0) popups.splice(i,1);
   }
   for(let i=trail.length-1;i>=0;i--){ trail[i].life -= dt; if(trail[i].life<=0) trail.splice(i,1); }
+  for(let i=hearts.length-1;i>=0;i--){
+    const h = hearts[i];
+    h.life -= dt; h.x += h.vx*dt; h.y += h.vy*dt; h.vy -= 160*dt; h.vx *= (1 - 0.8*dt);
+    if(h.life <= 0) hearts.splice(i,1);
+  }
 
   shake = Math.max(0, shake - dt*30);
   flash = Math.max(0, flash - dt*2.5);
   invuln = Math.max(0, invuln - dt);
   rollT = Math.max(0, rollT - dt);
+  healGlow = Math.max(0, healGlow - dt);
   feverT = Math.max(0, feverT - dt);
   refreshComboTag();
   const pw = mods();
@@ -481,6 +495,8 @@ if(run.boss){
       } else if(run.stage >= 3 && Math.random() < Math.min(0.02 + run.stage*0.03, 0.35)){
         const hg = pipeGap()+40;
         pipes.push({ x:W+40, gapY:rand(150, GROUND_Y-150), gap:hg, baseGap:hg, passed:false, hammer:true, phase:rand(0,TAU), spd:rand(1.4,2.2) });
+      } else if(run.hp < run.maxHp && Math.random() < 0.08){
+        pipes.push({ x:W+40, gapY:rand(150, GROUND_Y-150), gap:pipeGap(), passed:false, heal:true });
       } else if(Math.random() < Math.min(0.1 + run.stage * 0.02, 0.25)){
         const eg = pipeGap()+60;
         pipes.push({ x:W+40, gapY:rand(eg/2+20, GROUND_Y-eg/2-20), gap:eg, passed:false, elevator:true, dir:Math.random()<0.5?1:-1, spd:rand(60,95) });
@@ -796,7 +812,18 @@ if(run.boss){
             circleRect(BIRD_X, bird.y, pw.radius, p.x, botY, 70, Math.max(0, cBot - botY))
           : circleRect(BIRD_X, bird.y, pw.radius, p.x, Math.max(cTop, botY), 70, Math.max(0, Math.min(cBot, topH) - Math.max(cTop, botY)));
         if(hitPipe){
-          if(shield > 0){
+          if(p.heal){
+            const healed = Math.min(3, run.maxHp - run.hp);
+            run.hp += healed;
+            invuln = 1; p.hit = true;
+            bird.vy = -200;
+            flash = 0.25;
+            healGlow = 3;
+            spawnHearts();
+            popups.push({ x:BIRD_X, y:bird.y-34, txt: healed > 0 ? '❤️ +'+healed : 'MAX HP', life:1.0, max:1.0 });
+            AudioFX.reveal();
+            refreshRlHud();
+           } else if(shield > 0){
             shield--; invuln = 1.5; flash = 0.6;
             pipes.splice(pipes.indexOf(p), 1);
             popups.push({ x:BIRD_X, y:bird.y-34, txt:T('shieldTxt'), life:0.8, max:0.8 });
@@ -823,8 +850,8 @@ if(run.boss){
              invuln = 1; p.hit = true;
              popups.push({ x:BIRD_X, y:bird.y-34, txt:'☄️ NEGATED!', life:0.8, max:0.8 });
              AudioFX.score();
-            } else {
-              const dmg = p.axe ? 3 : (p.spear ? 2 : 1);
+           } else {
+               const dmg = p.axe ? 3 : (p.spear ? 2 : 1);
             run.hp -= dmg;
             if(run.hp <= 0){
               die();
