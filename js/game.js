@@ -456,7 +456,7 @@ function update(dt){
           if(rem > 0){
             pipes = pipes.filter(q => !q.serpent);
             run.boss.path = genSerpentPath(rem, H*0.45);
-            const bg = pipeGap() + 30;
+            const bg = (pipeGap() + 30) * 3;
             for(let i=0;i<rem;i++){
               pipes.push({ x:BIRD_X+300 + i*70, gapY:run.boss.path[i], baseY:run.boss.path[i], gap:bg, baseGap:bg, passed:false, boss:true, axe:true, serpent:true });
             }
@@ -480,7 +480,7 @@ function update(dt){
 if(run.boss){
        if(!pipes.some(p => p.boss)){
         if(run.boss.serpent){
-          const bg = pipeGap() + 30;
+          const bg = (pipeGap() + 30) * 3;
           run.boss.path.slice(run.boss.passes).forEach((wp, i) => {
             pipes.push({ x:W+40 + i*70, gapY:wp, baseY:wp, gap:bg, baseGap:bg, passed:false, boss:true, axe:true, serpent:true });
           });
@@ -498,7 +498,7 @@ if(run.boss){
       } else if(run.stage >= 3 && rng() < Math.min(0.02 + run.stage*0.03, 0.35)){
         const hg = pipeGap()+40;
         pipes.push({ x:W+40, gapY:rand(150, GROUND_Y-150), gap:hg, baseGap:hg, passed:false, hammer:true, phase:rand(0,TAU), spd:rand(1.4,2.2) });
-      } else if(run.hp < run.maxHp && rng() < 0.08){
+      } else if(run.hp < mods().maxHp && rng() < 0.08){
         pipes.push({ x:W+40, gapY:rand(150, GROUND_Y-150), gap:pipeGap(), passed:false, heal:true });
       } else if(rng() < Math.min(0.1 + run.stage * 0.02, 0.25)){
         const eg = pipeGap()+60;
@@ -818,7 +818,7 @@ if(run.boss){
           : circleRect(BIRD_X, bird.y, pw.radius, p.x, Math.max(cTop, botY), 70, Math.max(0, Math.min(cBot, topH) - Math.max(cTop, botY)));
         if(hitPipe){
           if(p.heal){
-            const healed = Math.min(3, run.maxHp - run.hp);
+            const healed = Math.min(3, mods().maxHp - run.hp);
             run.hp += healed;
             invuln = 1; p.hit = true;
             bird.vy = -200;
