@@ -3,7 +3,18 @@
 const $ = s => document.querySelector(s);
 const clamp = (v,a,b) => v<a?a:v>b?b:v;
 const lerp = (a,b,t) => a+(b-a)*t;
-const rand = (a,b) => a+Math.random()*(b-a);
+function mulberry32(seed){
+  return function(){
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+let _seed = Date.now() >>> 0;
+try { const c = new Uint32Array(2); crypto.getRandomValues(c); _seed = (c[0] ^ (c[1] * 0x9E3779B9)) >>> 0; } catch(e){}
+const rng = mulberry32(_seed);
+const rand = (a,b) => a+rng()*(b-a);
 const TAU = Math.PI*2;
 
 /* ================= save ================= */

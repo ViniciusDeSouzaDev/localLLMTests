@@ -19,10 +19,10 @@ const BIRD_X = 150, BIRD_R = 15;
 const DAY_LEN = 120; // seconds per full day/night cycle
 
 const stars = [];
-for(let i=0;i<90;i++) stars.push({ x:Math.random()*W, y:Math.random()*H*0.55, s:rand(0.6,1.8), tw:rand(0,TAU) });
+for(let i=0;i<90;i++) stars.push({ x:rng()*W, y:rng()*H*0.55, s:rand(0.6,1.8), tw:rand(0,TAU) });
 
 const clouds = [];
-for(let i=0;i<7;i++) clouds.push({ x:Math.random()*W, y:rand(60,300), s:rand(0.6,1.4), spd:rand(8,20) });
+for(let i=0;i<7;i++) clouds.push({ x:rng()*W, y:rand(60,300), s:rand(0.6,1.4), spd:rand(8,20) });
 
 const THEMES = {
   city:   { skyTop:[[70,150,215],[8,10,35]],   skyBot:[[140,215,255],[30,40,80]],   ground:[[224,192,132],[115,199,62]] },
@@ -54,7 +54,7 @@ function setTheme(name){
       const wins = [];
       for(let wy=14; wy<h-10; wy+=26)
         for(let wx=6; wx<w-10; wx+=18)
-          if(Math.random()<0.5) wins.push({x:wx, y:wy});
+          if(rng()<0.5) wins.push({x:wx, y:wy});
       silhouettes.push({x, w, h, wins});
       x += w + rand(4,14);
     }
@@ -68,61 +68,61 @@ function setTheme(name){
       silhouettes.push({x, w:rand(120,260), h:rand(40,110), kind:'dune'});
       x += rand(90,190);
     }
-    for(let i=0;i<6;i++) silhouettes.push({x:Math.random()*W*2, w:rand(14,22), h:rand(50,90), kind:'cactus'});
-    for(let i=0;i<10;i++) fxParts.push({ x:Math.random()*W, y:Math.random()*GROUND_Y*0.8, p:rand(0,TAU) });
+    for(let i=0;i<6;i++) silhouettes.push({x:rng()*W*2, w:rand(14,22), h:rand(50,90), kind:'cactus'});
+    for(let i=0;i<10;i++) fxParts.push({ x:rng()*W, y:rng()*GROUND_Y*0.8, p:rand(0,TAU) });
   } else if(name === 'snow'){
     while(x < W*2){
       silhouettes.push({x, w:rand(140,300), h:rand(50,140), kind:'hill'});
       x += rand(120,240);
     }
-    for(let i=0;i<40;i++) fxParts.push({ x:Math.random()*W, y:Math.random()*H, s:rand(1.5,3.5), spd:rand(25,55), drift:rand(-15,15) });
+    for(let i=0;i<40;i++) fxParts.push({ x:rng()*W, y:rng()*H, s:rand(1.5,3.5), spd:rand(25,55), drift:rand(-15,15) });
   } else if(name === 'ocean'){
-    for(let i=0;i<5;i++) silhouettes.push({x:Math.random()*W*2, w:rand(60,140), h:rand(30,70), kind:'island'});
+    for(let i=0;i<5;i++) silhouettes.push({x:rng()*W*2, w:rand(60,140), h:rand(30,70), kind:'island'});
   } else if(name === 'inferno'){
     while(x < W*2){
       const w = rand(50,130);
       silhouettes.push({x, w, h:rand(90,280), kind:'spike'});
       x += w + rand(10,40);
     }
-    for(let i=0;i<26;i++) fxParts.push({ x:Math.random()*W, y:Math.random()*GROUND_Y, s:rand(1.5,3), spd:rand(20,50), p:rand(0,TAU) });
+    for(let i=0;i<26;i++) fxParts.push({ x:rng()*W, y:rng()*GROUND_Y, s:rand(1.5,3), spd:rand(20,50), p:rand(0,TAU) });
   } else if(name === 'storm'){
     while(x < W*2){
       silhouettes.push({x, w:rand(30,70), h:rand(120,300), kind:'bare'});
       x += rand(60,140);
     }
-    for(let i=0;i<50;i++) fxParts.push({ x:Math.random()*W, y:Math.random()*GROUND_Y, s:rand(8,16), spd:rand(500,800) });
+    for(let i=0;i<50;i++) fxParts.push({ x:rng()*W, y:rng()*GROUND_Y, s:rand(8,16), spd:rand(500,800) });
   } else if(name === 'abyss'){
     while(x < W*2){
       silhouettes.push({x, w:rand(40,110), h:rand(80,220), kind:'wreck'});
       x += rand(80,200);
     }
-    for(let i=0;i<24;i++) fxParts.push({ x:Math.random()*W, y:Math.random()*GROUND_Y, s:rand(1.5,3), spd:rand(12,30), p:rand(0,TAU) });
+    for(let i=0;i<24;i++) fxParts.push({ x:rng()*W, y:rng()*GROUND_Y, s:rand(1.5,3), spd:rand(12,30), p:rand(0,TAU) });
   } else if(name === 'necropolis'){
     while(x < W*2){
       silhouettes.push({x, w:rand(16,30), h:rand(50,110), kind:'tomb'});
       x += rand(50,130);
     }
-    for(let i=0;i<5;i++) silhouettes.push({x:Math.random()*W*2, w:rand(30,60), h:rand(120,240), kind:'deadtree'});
-    for(let i=0;i<16;i++) fxParts.push({ x:Math.random()*W, y:Math.random()*GROUND_Y, s:rand(2,4), spd:rand(8,20), p:rand(0,TAU) });
+    for(let i=0;i<5;i++) silhouettes.push({x:rng()*W*2, w:rand(30,60), h:rand(120,240), kind:'deadtree'});
+    for(let i=0;i<16;i++) fxParts.push({ x:rng()*W, y:rng()*GROUND_Y, s:rand(2,4), spd:rand(8,20), p:rand(0,TAU) });
   } else if(name === 'ashes'){
     while(x < W*2){
       const w = rand(50,110);
       silhouettes.push({x, w, h:rand(140,340), kind:'ruin'});
       x += w + rand(30,90);
     }
-    for(let i=0;i<34;i++) fxParts.push({ x:Math.random()*W, y:Math.random()*GROUND_Y, s:rand(1,2.5), spd:rand(15,35), drift:rand(-12,12) });
+    for(let i=0;i<34;i++) fxParts.push({ x:rng()*W, y:rng()*GROUND_Y, s:rand(1,2.5), spd:rand(15,35), drift:rand(-12,12) });
   } else if(name === 'eclipse'){
     while(x < W*2){
       silhouettes.push({x, w:rand(140,300), h:rand(60,180), kind:'ridge'});
       x += rand(100,220);
     }
-    for(let i=0;i<20;i++) fxParts.push({ x:Math.random()*W, y:Math.random()*GROUND_Y*0.9, s:rand(1,2.5), spd:rand(6,16), p:rand(0,TAU) });
+    for(let i=0;i<20;i++) fxParts.push({ x:rng()*W, y:rng()*GROUND_Y*0.9, s:rand(1,2.5), spd:rand(6,16), p:rand(0,TAU) });
   } else if(name === 'asteroid'){
-    for(let i=0;i<7;i++) silhouettes.push({x:Math.random()*W*2, y:rand(60,GROUND_Y-160), w:rand(24,70), h:rand(18,50), kind:'rock', r:rand(0,TAU)});
-    for(let i=0;i<18;i++) fxParts.push({ x:Math.random()*W, y:Math.random()*GROUND_Y, s:rand(1,2.5), spd:rand(10,25), drift:rand(-10,10) });
+    for(let i=0;i<7;i++) silhouettes.push({x:rng()*W*2, y:rand(60,GROUND_Y-160), w:rand(24,70), h:rand(18,50), kind:'rock', r:rand(0,TAU)});
+    for(let i=0;i<18;i++) fxParts.push({ x:rng()*W, y:rng()*GROUND_Y, s:rand(1,2.5), spd:rand(10,25), drift:rand(-10,10) });
   } else if(name === 'nebula'){
-    for(let i=0;i<4;i++) silhouettes.push({x:Math.random()*W*2, y:rand(80,GROUND_Y-200), w:rand(160,320), h:rand(90,180), kind:'blob', hue:rand(260,320)});
-    for(let i=0;i<26;i++) fxParts.push({ x:Math.random()*W, y:Math.random()*GROUND_Y, s:rand(1,2.5), p:rand(0,TAU), hue:rand(0,360) });
+    for(let i=0;i<4;i++) silhouettes.push({x:rng()*W*2, y:rand(80,GROUND_Y-200), w:rand(160,320), h:rand(90,180), kind:'blob', hue:rand(260,320)});
+    for(let i=0;i<26;i++) fxParts.push({ x:rng()*W, y:rng()*GROUND_Y, s:rand(1,2.5), p:rand(0,TAU), hue:rand(0,360) });
   } else if(name === 'void'){
     for(let i=0;i<14;i++) fxParts.push({ ang:rand(0,TAU), rad:rand(60,Math.max(W,H)*0.55), spd:rand(18,40), s:rand(2,4), p:rand(0,TAU) });
   } else if(name === 'singularity'){
@@ -133,7 +133,7 @@ function setTheme(name){
 setTheme('city');
 
 const fireflies = [];
-for(let i=0;i<14;i++) fireflies.push({ x:Math.random()*W, y:rand(GROUND_Y-160, GROUND_Y-20), p:rand(0,TAU) });
+for(let i=0;i<14;i++) fireflies.push({ x:rng()*W, y:rand(GROUND_Y-160, GROUND_Y-20), p:rand(0,TAU) });
 
 /* ================= game state ================= */
 let state = 'menu';           // menu | ready | play | dead
@@ -180,7 +180,7 @@ function reset(){
 
 function spawnHearts(){
   for(let i=0;i<18;i++){
-    const a = Math.random()*TAU, sp = rand(50,170);
+    const a = rng()*TAU, sp = rand(50,170);
     hearts.push({ x:BIRD_X+rand(-16,16), y:bird.y+rand(-16,16), vx:Math.cos(a)*sp, vy:Math.sin(a)*sp - 70, life:rand(0.7,1.5), max:1.5, size:rand(6,14) });
   }
 }
@@ -285,28 +285,28 @@ function genSerpentPath(n, nearY){
   const cy = v => Math.max(minY, Math.min(maxY, v));
   const pts = [];
   let y = nearY != null
-    ? cy(Math.max(minY+60, Math.min(maxY-60, nearY + (Math.random()*2-1)*80)))
-    : minY + 60 + Math.random()*(maxY - minY - 120);
+    ? cy(Math.max(minY+60, Math.min(maxY-60, nearY + (rng()*2-1)*80)))
+    : minY + 60 + rng()*(maxY - minY - 120);
   pts.push(y);
-  let dir = Math.random() < 0.5 ? 1 : -1;
+  let dir = rng() < 0.5 ? 1 : -1;
   while(pts.length < n){
     const rem = n - pts.length;
     if(rem === 1){
-      pts.push(cy(y + dir*(80 + Math.random()*40)));
+      pts.push(cy(y + dir*(80 + rng()*40)));
       break;
     }
-    if(Math.random() < 0.25){
+    if(rng() < 0.25){
       for(let j=0; j<2 && pts.length<n; j++)
-        pts.push(cy(pts[pts.length-1] + dir*(50 + Math.random()*30)));
+        pts.push(cy(pts[pts.length-1] + dir*(50 + rng()*30)));
       y = pts[pts.length-1];
-    } else if(Math.random() < 0.6){
-      const k = Math.min(rem, Math.random() < 0.5 ? 2 : 3);
-      const yB = cy(y + dir*(70 + Math.random()*40));
+    } else if(rng() < 0.6){
+      const k = Math.min(rem, rng() < 0.5 ? 2 : 3);
+      const yB = cy(y + dir*(70 + rng()*40));
       for(let j=1; j<=k; j++)
         pts.push(cy(y + (yB - y)*(0.5 - 0.5*Math.cos(j*Math.PI/k))));
       y = pts[pts.length-1];
     } else {
-      pts.push(cy(y + dir*(80 + Math.random()*40)));
+      pts.push(cy(y + dir*(80 + rng()*40)));
       y = pts[pts.length-1];
     }
     dir = -dir;
@@ -331,49 +331,49 @@ function update(dt){
   if(theme === 'snow'){
     for(const s of fxParts){
       s.y += s.spd*dt; s.x += s.drift*dt;
-      if(s.y > GROUND_Y){ s.y = -5; s.x = Math.random()*W; }
+      if(s.y > GROUND_Y){ s.y = -5; s.x = rng()*W; }
       if(s.x < -5) s.x = W+5; else if(s.x > W+5) s.x = -5;
     }
   } else if(theme === 'desert'){
     for(const d of fxParts){
       d.x -= (40 + 20*Math.sin(t*3 + d.p))*dt;
-      if(d.x < -5){ d.x = W+5; d.y = Math.random()*GROUND_Y*0.8; }
+      if(d.x < -5){ d.x = W+5; d.y = rng()*GROUND_Y*0.8; }
     }
   } else if(theme === 'inferno'){
     for(const e of fxParts){
       e.y -= e.spd*dt; e.x += Math.sin(t*2 + e.p)*20*dt;
-      if(e.y < 0){ e.y = GROUND_Y; e.x = Math.random()*W; }
+      if(e.y < 0){ e.y = GROUND_Y; e.x = rng()*W; }
     }
   } else if(theme === 'storm'){
     for(const r of fxParts){
       r.y += r.spd*dt; r.x -= 120*dt;
-      if(r.y > GROUND_Y){ r.y = -10; r.x = Math.random()*(W+80); }
+      if(r.y > GROUND_Y){ r.y = -10; r.x = rng()*(W+80); }
       if(r.x < -10) r.x = W+10;
     }
   } else if(theme === 'abyss'){
     for(const b of fxParts){
       b.y -= b.spd*dt; b.x += Math.sin(t + b.p)*10*dt;
-      if(b.y < 0){ b.y = GROUND_Y; b.x = Math.random()*W; }
+      if(b.y < 0){ b.y = GROUND_Y; b.x = rng()*W; }
     }
   } else if(theme === 'necropolis'){
     for(const g of fxParts){
       g.y -= g.spd*dt*0.4; g.x += Math.sin(t*0.7 + g.p)*14*dt;
-      if(g.y < 0){ g.y = GROUND_Y; g.x = Math.random()*W; }
+      if(g.y < 0){ g.y = GROUND_Y; g.x = rng()*W; }
     }
   } else if(theme === 'ashes'){
     for(const a of fxParts){
       a.y += a.spd*dt; a.x += a.drift*dt;
-      if(a.y > GROUND_Y){ a.y = -5; a.x = Math.random()*W; }
+      if(a.y > GROUND_Y){ a.y = -5; a.x = rng()*W; }
     }
   } else if(theme === 'eclipse'){
     for(const e of fxParts){
       e.y += e.spd*dt*0.4; e.x += Math.sin(t + e.p)*12*dt;
-      if(e.y > GROUND_Y){ e.y = -5; e.x = Math.random()*W; }
+      if(e.y > GROUND_Y){ e.y = -5; e.x = rng()*W; }
     }
   } else if(theme === 'asteroid'){
     for(const s of fxParts){
       s.y += s.spd*dt; s.x += s.drift*dt;
-      if(s.y > GROUND_Y){ s.y = -5; s.x = Math.random()*W; }
+      if(s.y > GROUND_Y){ s.y = -5; s.x = rng()*W; }
     }
   } else if(theme === 'void'){
     for(const v of fxParts){
@@ -440,7 +440,7 @@ function update(dt){
 
     if(rollT > 0){
       rollSpin += dt*24;
-      if(Math.random() < 0.6) particles.push({
+      if(rng() < 0.6) particles.push({
         x:BIRD_X+rand(-12,12), y:bird.y+rand(-12,12), vx:rand(-90,-30), vy:rand(-50,50),
         life:rand(0.2,0.4), max:0.4, size:rand(2,4), color:'rgba(255,71,88,0.6)'
       });
@@ -486,23 +486,23 @@ if(run.boss){
           });
         } else {
           const bg = pipeGap();
-          const isAxe = run.path === 3 && run.boss.final && run.stage >= 2 && Math.random() < 0.15;
+          const isAxe = run.path === 3 && run.boss.final && run.stage >= 2 && rng() < 0.15;
           pipes.push({ x:W+40, gapY:345, baseY:345, gap:bg, baseGap:bg, passed:false, boss:true, spear:run.boss.final, axe:isAxe });
         }
       }
     } else if(stageClearT <= 0 && (!last || last.x < W - (run.path === 2 ? 193 : 240))){
-      if(run.path === 3 && run.stage >= 2 && Math.random() < 0.15){
+      if(run.path === 3 && run.stage >= 2 && rng() < 0.15){
         pipes.push({ x:W+40, gapY:rand(150, GROUND_Y-150), gap:pipeGap(), passed:false, axe:true });
-      } else if(run.stage >= 2 && Math.random() < Math.min(0.12 + run.stage*0.04, 0.35)){
+      } else if(run.stage >= 2 && rng() < Math.min(0.12 + run.stage*0.04, 0.35)){
         pipes.push({ x:W+40, gapY:rand(150, GROUND_Y-150), gap:pipeGap()+40, passed:false, spear:true });
-      } else if(run.stage >= 3 && Math.random() < Math.min(0.02 + run.stage*0.03, 0.35)){
+      } else if(run.stage >= 3 && rng() < Math.min(0.02 + run.stage*0.03, 0.35)){
         const hg = pipeGap()+40;
         pipes.push({ x:W+40, gapY:rand(150, GROUND_Y-150), gap:hg, baseGap:hg, passed:false, hammer:true, phase:rand(0,TAU), spd:rand(1.4,2.2) });
-      } else if(run.hp < run.maxHp && Math.random() < 0.08){
+      } else if(run.hp < run.maxHp && rng() < 0.08){
         pipes.push({ x:W+40, gapY:rand(150, GROUND_Y-150), gap:pipeGap(), passed:false, heal:true });
-      } else if(Math.random() < Math.min(0.1 + run.stage * 0.02, 0.25)){
+      } else if(rng() < Math.min(0.1 + run.stage * 0.02, 0.25)){
         const eg = pipeGap()+60;
-        pipes.push({ x:W+40, gapY:rand(eg/2+20, GROUND_Y-eg/2-20), gap:eg, passed:false, elevator:true, dir:Math.random()<0.5?1:-1, spd:rand(60,95) });
+        pipes.push({ x:W+40, gapY:rand(eg/2+20, GROUND_Y-eg/2-20), gap:eg, passed:false, elevator:true, dir:rng()<0.5?1:-1, spd:rand(60,95) });
       } else if(t >= nextMoverAt){
         nextMoverAt = t + rand(10,15);
         const amp = rand(28,42), base = rand(150+amp, GROUND_Y-150-amp);
@@ -607,7 +607,7 @@ if(run.boss){
           p.ghostY = p.blinkTo;
         }
       } else if(ph2.pattern === 'drift'){
-        if(p.driftDir == null) p.driftDir = Math.random() < 0.5 ? 1 : -1;
+        if(p.driftDir == null) p.driftDir = rng() < 0.5 ? 1 : -1;
         p.gapY += p.driftDir * (ph2.spd || 60) * dt;
         if(p.gapY < 70){ p.gapY = 70; p.driftDir = 1; }
         else if(p.gapY > GROUND_Y - 70){ p.gapY = GROUND_Y - 70; p.driftDir = -1; }
@@ -681,11 +681,11 @@ if(run.boss){
                   const cols = [`rgb(${sc[0]},${sc[1]},${sc[2]})`, `rgb(${sc[3]},${sc[4]},${sc[5]})`, `rgb(${sc[6]},${sc[7]},${sc[8]})`];
                   const tH = p.gapY - p.gap/2, bY = p.gapY + p.gap/2;
                   for(let i=0;i<(isFinal?40:24);i++){
-                    const top = Math.random() < 0.5;
+                    const top = rng() < 0.5;
                     particles.push({
                       x:rand(p.x, p.x+70), y: top ? rand(0, Math.max(1,tH)) : rand(bY, GROUND_Y),
                       vx:rand(-160,160), vy: top ? rand(-60,140) : rand(-220,0),
-                      life:rand(0.6,1.2), max:1.2, size:rand(2,5), color:cols[Math.floor(Math.random()*3)]
+                      life:rand(0.6,1.2), max:1.2, size:rand(2,5), color:cols[Math.floor(rng()*3)]
                     });
                   }
                 }
@@ -694,7 +694,7 @@ if(run.boss){
                  } else if(isSerpent){
                    const pool = LEGENDS.filter(l => !run.legends.includes(l.id));
                    if(pool.length){
-                     const l = pool[Math.floor(Math.random()*pool.length)];
+                     const l = pool[Math.floor(rng()*pool.length)];
                      run.legends.push(l.id);
                      showReveal(l.icon, legendInfo(l.id).name, legendInfo(l.id).desc, true);
                      AudioFX.legendary();
@@ -711,7 +711,7 @@ if(run.boss){
                   run.gold += gold;
                   const pool = isLaby ? (run.path === 3 ? RELICS3 : RELICS2) : relicPool();
                   const missing = pool.filter(x => !run.relics.includes(x.id));
-                  const r = missing.length ? missing[Math.floor(Math.random()*missing.length)] : null;
+                  const r = missing.length ? missing[Math.floor(rng()*missing.length)] : null;
                   if(r) gainRelic(r.id); else run.gold += 15;
                   stageClearT = 1.5;
                    pipes = [];
@@ -720,13 +720,13 @@ if(run.boss){
                   refreshRlHud();
                 } else {
                   const pool = LEGENDS.filter(l => !run.legends.includes(l.id));
-                  if(Math.random() < 0.2 && pool.length){
-                    const l = pool[Math.floor(Math.random()*pool.length)];
+                  if(rng() < 0.2 && pool.length){
+                    const l = pool[Math.floor(rng()*pool.length)];
                     run.legends.push(l.id);
                     showReveal(l.icon, legendInfo(l.id).name, legendInfo(l.id).desc, true);
                     AudioFX.legendary();
                   } else {
-                    const gold = 25 + Math.floor(Math.random()*21);
+                    const gold = 25 + Math.floor(rng()*21);
                     run.gold += gold;
                     showReveal('🪙', '+' + gold + ' GOLD', '', false);
                     AudioFX.reveal();
@@ -842,7 +842,7 @@ if(run.boss){
              popups.push({ x:BIRD_X, y:bird.y-34, txt:T('rebornTxt'), life:1.1, max:1.1 });
              AudioFX.hit(); AudioFX.die();
              refreshPowerTag();
-           } else if(rollChance > 0 && Math.random() < rollChance){
+           } else if(rollChance > 0 && rng() < rollChance){
              rollT = 0.9; rollSpin = 0; invuln = 0.9;
              bird.vy = -250;
              flash = 0.4; shake = 5;
@@ -851,7 +851,7 @@ if(run.boss){
              AudioFX.roll();
              refreshPowerTag();
              refreshRlHud();
-           } else if(hasRelic('comet') && Math.random() < 0.3){
+           } else if(hasRelic('comet') && rng() < 0.3){
              invuln = 1; p.hit = true;
              popups.push({ x:BIRD_X, y:bird.y-34, txt:'☄️ NEGATED!', life:0.8, max:0.8 });
              AudioFX.score();
@@ -895,8 +895,8 @@ if(run.boss){
     const pool = feverT > 0 ? AudioFX.FEVER_POOL
        : (run.path === 3 ? AudioFX.PATH3_POOL : run.path === 2 ? AudioFX.PATH2_POOL : AudioFX.PATH1_POOL);
     nextMusicSwitch = t + (feverT > 0 ? rand(6,10) : rand(25,40));
-    let next = pool[Math.floor(Math.random()*pool.length)];
-    while(next === AudioFX.mode) next = pool[Math.floor(Math.random()*pool.length)];
+    let next = pool[Math.floor(rng()*pool.length)];
+    while(next === AudioFX.mode) next = pool[Math.floor(rng()*pool.length)];
     AudioFX.startMusic(next);
   }
  }

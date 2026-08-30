@@ -103,7 +103,7 @@ function renderItemsInto(el){
 function rollCards(){
   const pool = CARDS.filter(c => !c.p2 || (run && run.path === 2)).slice(), picks = [];
   while(picks.length < 3 && pool.length){
-    picks.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]);
+    picks.push(pool.splice(Math.floor(rng()*pool.length),1)[0]);
   }
   return picks;
 }
@@ -140,7 +140,7 @@ function openMerchant(){
   luckyUsed = false;
   pendingDraft = rollCards();
   const pool = ['heal','shield','tough','chip','coin','reroll'].concat(run.path === 2 ? ['phoenix','anchor'] : []);
-  merchOffers = pool.sort(() => Math.random() - 0.5).slice(0, 3);
+  merchOffers = pool.sort(() => rng() - 0.5).slice(0, 3);
   refreshMerchant();
   show('#merchant', true);
 }
@@ -285,9 +285,9 @@ function hasLegend(id){ return !!(run && run.legends && run.legends.includes(id)
 function genMap(path){
   const cfg = PATHS[path || 1];
   const pool = (path === 2 ? BOSSES2 : (path === 3 ? BOSSES3 : BOSSES));
-  const elitePool = [...ELITES].sort(() => Math.random() - 0.5);
-   const labyPool = [...LABYRINTHS].sort(() => Math.random() - 0.5);
-    const serpentPool = [...SERPENTS].sort(() => Math.random() - 0.5);
+  const elitePool = [...ELITES].sort(() => rng() - 0.5);
+   const labyPool = [...LABYRINTHS].sort(() => rng() - 0.5);
+    const serpentPool = [...SERPENTS].sort(() => rng() - 0.5);
     let eI = 0, lI = 0, sI = 0;
   const rows = [];
   for(let r=0;r<cfg.rows;r++){
@@ -295,29 +295,29 @@ function genMap(path){
     for(let i=0;i<cfg.widths[r];i++){
       let type;
     if(r === cfg.rows-1) type = 'final';
-    else if(cfg.bossRows.includes(r) && Math.random() < 0.5) type = 'boss';
+    else if(cfg.bossRows.includes(r) && rng() < 0.5) type = 'boss';
       if(!type){
-        const roll = Math.random();
+        const roll = rng();
         if(cfg.widths[r] >= 2 && roll >= 0.85){
           if(path === 1 || r <= cfg.bossRows[0]) type = 'elite';
-          else type = Math.random() < 0.5 ? 'labyrinth' : 'serpent';
+          else type = rng() < 0.5 ? 'labyrinth' : 'serpent';
         }
         else type = roll < 0.55 ? 'stage' : roll < 0.75 ? 'chest' : 'merchant';
       }
       row.push({ type, visited:false });
     }
     if(cfg.bossRows.includes(r) && !row.some(n => n.type === 'boss'))
-      row[Math.floor(Math.random()*row.length)].type = 'boss';
+      row[Math.floor(rng()*row.length)].type = 'boss';
     if(r >= cfg.bossRows[0]){
       const hasMerchant = rows.some(row2 => row2.some(n => n.type === 'merchant')) || row.some(n => n.type === 'merchant');
       if(!hasMerchant){
         const cand = row.map((n, idx) => idx).filter(idx => row[idx].type === 'stage' || row[idx].type === 'chest');
-        if(cand.length) row[cand[Math.floor(Math.random()*cand.length)]].type = 'merchant';
+        if(cand.length) row[cand[Math.floor(rng()*cand.length)]].type = 'merchant';
       }
     }
     for(const n of row){
-      if(n.type === 'boss'){ const g = pool[Math.floor(r/4)]; n.def = g[Math.floor(Math.random()*g.length)]; }
-      else if(n.type === 'final'){ const g = pool[3]; n.def = g[Math.floor(Math.random()*g.length)]; }
+      if(n.type === 'boss'){ const g = pool[Math.floor(r/4)]; n.def = g[Math.floor(rng()*g.length)]; }
+      else if(n.type === 'final'){ const g = pool[3]; n.def = g[Math.floor(rng()*g.length)]; }
       else if(n.type === 'elite') n.def = elitePool[eI++ % elitePool.length];
       else if(n.type === 'labyrinth') n.def = labyPool[lI++ % labyPool.length];
       else if(n.type === 'serpent') n.def = serpentPool[sI++ % serpentPool.length];
@@ -327,13 +327,13 @@ function genMap(path){
   const edges = [];
   for(let r=0;r<cfg.rows-1;r++){
     const a = rows[r].length, b = rows[r+1].length;
-    const tight = r > 0 && b > 1 && Math.random() < 0.35;
+    const tight = r > 0 && b > 1 && rng() < 0.35;
     for(let i=0;i<a;i++){
       if(tight){
         const out = Array.from({ length:a }, () => new Set());
-        for(let j=0;j<b;j++) out[Math.floor(Math.random()*a)].add(j);
+        for(let j=0;j<b;j++) out[Math.floor(rng()*a)].add(j);
         for(let i=0;i<a;i++)
-          while(out[i].size === 0) out[i].add(Math.floor(Math.random()*b));
+          while(out[i].size === 0) out[i].add(Math.floor(rng()*b));
         for(let i=0;i<a;i++) for(const j of out[i]) edges.push({ r, i, j });
       } else {
         for(let j=0;j<b;j++) edges.push({ r, i, j });
@@ -396,7 +396,7 @@ function showMap(){
       dash.setAttribute('x1', a.x); dash.setAttribute('y1', a.y);
       dash.setAttribute('x2', b.x); dash.setAttribute('y2', b.y);
       dash.setAttribute('class', 'mapEdgeDash');
-      dash.style.animationDelay = (Math.random() * 1.5) + 's';
+      dash.style.animationDelay = (rng() * 1.5) + 's';
       svg.appendChild(dash);
     } else {
       line.setAttribute('class', animate ? 'mapEdge' : 'mapEdge static');
@@ -511,9 +511,9 @@ function clickNode(r, i){
   const type = map.rows[r][i].type;
   if(type === 'stage') startStage();
   else if(type === 'boss'){ const d = map.rows[r][i].def; run.boss = { passes:0, max:d.passes, final:false, phaseIdx:0, def:d }; startStage(); }
-  else if(type === 'elite'){ let d = map.rows[r][i].def; if(Math.random() < 0.5) d = { ...d, phases:[...d.phases, Math.random() < 0.5 ? {pattern:'chase', rate:1.0} : {pattern:'squeeze', spd:2.6}] }; run.boss = { passes:0, max:d.passes, final:false, elite:true, phaseIdx:0, def:d }; startStage(); }
+  else if(type === 'elite'){ let d = map.rows[r][i].def; if(rng() < 0.5) d = { ...d, phases:[...d.phases, rng() < 0.5 ? {pattern:'chase', rate:1.0} : {pattern:'squeeze', spd:2.6}] }; run.boss = { passes:0, max:d.passes, final:false, elite:true, phaseIdx:0, def:d }; startStage(); }
    else if(type === 'labyrinth'){ const d = map.rows[r][i].def; run.boss = { passes:0, max:d.passes, final:false, labyrinth:true, phaseIdx:0, def:d }; startStage(); }
-    else if(type === 'serpent'){ const d = map.rows[r][i].def; const n = d.passes + Math.floor(Math.random()*17); run.boss = { passes:0, max:n, final:false, serpent:true, phaseIdx:0, def:d, path:genSerpentPath(n) }; startStage(); }
+    else if(type === 'serpent'){ const d = map.rows[r][i].def; const n = d.passes + Math.floor(rng()*17); run.boss = { passes:0, max:n, final:false, serpent:true, phaseIdx:0, def:d, path:genSerpentPath(n) }; startStage(); }
   else if(type === 'final'){ const d = map.rows[r][i].def; run.boss = { passes:0, max:d.passes, final:true, phaseIdx:0, def:d }; startStage(); }
   else if(type === 'merchant') openMerchant();
   else openChest();
@@ -574,11 +574,11 @@ function showVictory(){
 function openChest(){
   state = 'chest';
   chestOpened = false;
-  const roll = Math.random();
-  if(roll < 0.4) chestReward = { gold: 15 + Math.floor(Math.random()*11) };
+  const roll = rng();
+  if(roll < 0.4) chestReward = { gold: 15 + Math.floor(rng()*11) };
   else if(roll < 0.75){
     const missing = relicPool().filter(r => !run.relics.includes(r.id));
-    chestReward = missing.length ? { relic: missing[Math.floor(Math.random()*missing.length)].id } : { gold: 25 };
+    chestReward = missing.length ? { relic: missing[Math.floor(rng()*missing.length)].id } : { gold: 25 };
   } else chestReward = { hp: 1 };
   const box = $('#chestBox');
   box.textContent = '📦';
@@ -648,7 +648,7 @@ const AudioFX = {
     const len = Math.max(1, Math.floor(this.ctx.sampleRate*d));
     const buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
     const data = buf.getChannelData(0);
-    for(let i=0;i<len;i++) data[i] = (Math.random()*2-1)*Math.pow(1-i/len,1.5);
+    for(let i=0;i<len;i++) data[i] = (rng()*2-1)*Math.pow(1-i/len,1.5);
     const src = this.ctx.createBufferSource(); src.buffer = buf;
     const flt = this.ctx.createBiquadFilter(); flt.type='bandpass'; flt.frequency.value=f; flt.Q.value=q;
     const g = this.ctx.createGain(); g.gain.value = v;
@@ -768,8 +768,8 @@ const AudioFX = {
     PATH1_POOL:['forest','city','sunset','dream','ocean'],
     PATH2_POOL:['inferno','storm','abyss','necropolis','ashes'],
      PATH3_POOL:['eclipse','asteroid','nebula','void','singularity'],
-   randomTrack(){ return this.POOL[Math.floor(Math.random()*this.POOL.length)]; },
-   randomFever(){ return this.FEVER_POOL[Math.floor(Math.random()*this.FEVER_POOL.length)]; },
+   randomTrack(){ return this.POOL[Math.floor(rng()*this.POOL.length)]; },
+   randomFever(){ return this.FEVER_POOL[Math.floor(rng()*this.FEVER_POOL.length)]; },
   startMusic(mode){
     this.stopMusic();
     if(!this.ctx) return;

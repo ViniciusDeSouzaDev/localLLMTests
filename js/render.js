@@ -567,8 +567,8 @@ let bossParts = [];
 function bossAura(p, topH, botY){
   const b = run.boss; if(!b) return;
   const kind = BOSS_AURAS[b.def.name] || 'glow';
-  if(kind !== 'glow' && bossParts.length < 40 && Math.random() < (kind === 'ring' ? 0.06 : 0.2)){
-    const top = Math.random() < 0.5;
+  if(kind !== 'glow' && bossParts.length < 40 && rng() < (kind === 'ring' ? 0.06 : 0.2)){
+    const top = rng() < 0.5;
     bossParts.push({ t0:t, x:rand(p.x+5, p.x+65), y:top ? topH : botY, d:top ? 1 : -1, kind, s:rand(0.6, 1.4) });
   }
   if(kind === 'glow'){
